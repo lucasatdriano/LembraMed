@@ -1,19 +1,19 @@
 import { Text, View } from '@/components/Themed';
 import Header from '@/components/header';
-import CardContact from '@/components/cardContact';
+import CardMedication from '@/components/cardMedication';
 import { dashboardScreenStyles } from '../styles/dashboardScreensStyles';
 
-export default function ContactScreen() {
+export default function MedicationScheduleScreen() {
     return (
         <View>
-            <Header placeholder="Pesquise um contato" />
+            <Header placeholder="Pesquise um remédio" />
             <View style={dashboardScreenStyles.titleContainer}>
                 <View style={dashboardScreenStyles.separator} />
                 <Text style={dashboardScreenStyles.title}>
-                    Lista de Contatos
+                    Lista de Remédios
                 </Text>
             </View>
-            <CardContact />
+            <CardMedication />
         </View>
     );
 }

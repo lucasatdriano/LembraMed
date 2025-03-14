@@ -10,12 +10,10 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/components/useColorScheme';
-
 export { ErrorBoundary } from 'expo-router';
 
 export const unstable_settings = {
-    initialRouteName: '(tabs)',
+    initialRouteName: 'login',
 };
 
 SplashScreen.preventAutoHideAsync();
@@ -44,17 +42,24 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-    const colorScheme = useColorScheme();
-
     return (
         <ThemeProvider
-            value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
+            // value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
+            value={DefaultTheme}
         >
             <Stack>
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen
                     name="modal"
-                    options={{ presentation: 'modal' }}
+                    options={{
+                        // headerShown: false,
+                        presentation: 'transparentModal',
+                    }}
+                />
+                <Stack.Screen name="login" options={{ headerShown: false }} />
+                <Stack.Screen
+                    name="registration"
+                    options={{ headerShown: false }}
                 />
             </Stack>
         </ThemeProvider>

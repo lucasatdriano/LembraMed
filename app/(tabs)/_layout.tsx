@@ -1,11 +1,9 @@
 import React from 'react';
-import { View, Pressable } from 'react-native';
-import { Phone, Calendar, Info } from 'lucide-react-native';
-import { Link, Tabs } from 'expo-router';
+import { View, Pressable, StyleSheet } from 'react-native';
+import { Phone, Calendar } from 'lucide-react-native';
+import { Tabs } from 'expo-router';
 
 import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 
 function TabBarIcon({
     Icon,
@@ -18,88 +16,35 @@ function TabBarIcon({
 }
 
 export default function TabLayout() {
-    const colorScheme = useColorScheme();
-
     return (
         <Tabs
             screenOptions={{
-                tabBarActiveTintColor:
-                    Colors[colorScheme ?? 'light'].tabIconSelected,
-                tabBarInactiveTintColor:
-                    Colors[colorScheme ?? 'light'].tabIconDefault,
-                tabBarStyle: {
-                    backgroundColor:
-                        colorScheme === 'dark' ? '#222' : '#E0E8EB',
-                    borderTopWidth: 1,
-                    borderTopColor:
-                        Colors[colorScheme ?? 'light'].tabIconDefault,
-                    borderTopLeftRadius: 15,
-                    borderTopRightRadius: 15,
-                    height: 55,
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 2, height: -2 },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 8,
-                    elevation: 8,
-                },
+                tabBarActiveTintColor: Colors.light.tabIconSelected,
+                tabBarInactiveTintColor: Colors.light.tabIconDefault,
+                tabBarStyle: styles.tabBar,
                 headerShown: false,
             }}
         >
             <Tabs.Screen
                 name="index"
                 options={{
-                    title: 'Lista Telefonica',
+                    title: 'Lista Telefônica',
                     tabBarIcon: ({ color }) => (
                         <TabBarIcon Icon={Phone} color={color} />
-                    ),
-                    headerRight: () => (
-                        <Link href="/modal" asChild>
-                            <Pressable>
-                                {({ pressed }) => (
-                                    <Info
-                                        size={25}
-                                        color={
-                                            Colors[colorScheme ?? 'light'].text
-                                        }
-                                        style={{
-                                            marginRight: 15,
-                                            opacity: pressed ? 0.5 : 1,
-                                        }}
-                                    />
-                                )}
-                            </Pressable>
-                        </Link>
                     ),
                 }}
             />
 
             <Tabs.Screen
-                name="two"
+                name="medicationSchedule"
                 options={{
                     title: 'Cronograma de Remédios',
                     tabBarIcon: ({ color }) => (
                         <TabBarIcon Icon={Calendar} color={color} />
                     ),
                     tabBarButton: (props) => (
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <View
-                                style={{
-                                    width: 1,
-                                    height: 35,
-                                    backgroundColor:
-                                        Colors[colorScheme ?? 'light']
-                                            .tabIconDefault,
-                                }}
-                            />
+                        <View style={styles.tabBarButtonContainer}>
+                            <View style={styles.divider} />
                             <Pressable {...props} />
                         </View>
                     ),
@@ -108,3 +53,32 @@ export default function TabLayout() {
         </Tabs>
     );
 }
+
+const styles = StyleSheet.create({
+    tabBar: {
+        backgroundColor: Colors.light.colorPrimary,
+        borderTopColor: Colors.light.tabIconDefault,
+        borderTopWidth: 1,
+        borderTopLeftRadius: 15,
+        borderTopRightRadius: 15,
+        height: 55,
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        shadowColor: Colors.light.shadow,
+        shadowOffset: { width: 2, height: -2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 8,
+        elevation: 8,
+    },
+    tabBarButtonContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    divider: {
+        width: 1,
+        height: 35,
+        backgroundColor: Colors.light.tabIconDefault,
+    },
+});
