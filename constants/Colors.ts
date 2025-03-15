@@ -12,6 +12,7 @@ export default {
         shadow: '#000',
         input: '#F5F5F5',
         button: '#C1E0EB',
+        error: '#DA8585',
     },
     dark: {
         text: '#1E1E1E',
@@ -23,5 +24,6 @@ export default {
         shadow: '#000',
         input: '#F5F5F5',
         button: '#C1E0EB',
+        error: '#DA8585',
     },
 };

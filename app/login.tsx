@@ -1,19 +1,19 @@
 import { useState } from 'react';
-import { StyleSheet, TextInput, Pressable, Alert } from 'react-native';
-import { Text, View } from '@/components/Themed';
-import { Eye, EyeClosed, LockKeyhole, User } from 'lucide-react-native';
-import Colors from '@/constants/Colors';
+import { Alert } from 'react-native';
+import { LockKeyhole, User } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
+import { Text, View } from '@/components/ui/Themed';
 import { authScreenStyles } from './styles/authScreensStyles';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types';
-import { RootStackParamList } from './types/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import CustomButton from '@/components/buttons/customButton';
+import CustomTextInput from '@/components/form/inputTextField';
 
 export default function LoginScreen() {
     const [showPassword, setShowPassword] = useState(false);
-    const navigation =
-        useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+    const router = useRouter();
 
     const validationSchema = Yup.object().shape({
         username: Yup.string().required('Nome de usuário obrigatório'),
@@ -22,18 +22,29 @@ export default function LoginScreen() {
             .required('Senha obrigatória'),
     });
 
-    function handleSubmit(
+    async function handleSubmit(
         values: { username: string; password: string },
         formikHelpers: FormikHelpers<{ username: string; password: string }>,
     ) {
-        Alert.alert(
-            'Login',
-            `Usuário: ${values.username}\nSenha: ${values.password}`,
-        );
+        try {
+            // Simulação de autenticação (trocar por API real)
+            if (
+                values.username === 'admin' &&
+                values.password === 'S0crates8'
+            ) {
+                const fakeToken = 'token123'; // Troque pelo token real da API
+                await AsyncStorage.setItem('token', fakeToken);
+                router.replace('/(tabs)');
+            } else {
+                Alert.alert('Erro', 'Usuário ou senha incorretos');
+            }
+        } catch (error) {
+            console.error('Erro ao salvar token', error);
+        }
     }
 
     function navigationToRegistration() {
-        navigation.navigate('registration');
+        router.replace('/registration');
     }
 
     return (
@@ -54,83 +65,47 @@ export default function LoginScreen() {
                     <View style={authScreenStyles.formContainer}>
                         <Text style={authScreenStyles.title}>Login</Text>
 
-                        <View
-                            style={authScreenStyles.inputWrapperErrorContainer}
-                        >
-                            <View style={authScreenStyles.inputContainer}>
-                                <User style={authScreenStyles.iconInput} />
-                                <TextInput
-                                    style={authScreenStyles.input}
-                                    placeholder="Nome de usuário"
-                                    value={values.username}
-                                    onChangeText={handleChange('username')}
-                                    onBlur={handleBlur('username')}
-                                    placeholderTextColor="#888"
-                                    autoCapitalize="none"
-                                />
-                            </View>
-                            {touched.username && errors.username && (
-                                <Text style={authScreenStyles.errorText}>
-                                    {errors.username}
-                                </Text>
-                            )}
-                        </View>
+                        <CustomTextInput
+                            placeholder="Nome de usuário"
+                            value={values.username}
+                            onChangeText={handleChange('username')}
+                            onBlur={handleBlur('username')}
+                            error={errors.username}
+                            touched={touched.username}
+                            icon={<User />}
+                            autoCapitalize="none"
+                        />
 
-                        <View
-                            style={authScreenStyles.inputWrapperErrorContainer}
-                        >
-                            <View style={authScreenStyles.inputContainer}>
-                                <LockKeyhole
-                                    style={authScreenStyles.iconInput}
-                                />
-                                <TextInput
-                                    style={authScreenStyles.input}
-                                    placeholder="Senha"
-                                    value={values.password}
-                                    onChangeText={handleChange('password')}
-                                    onBlur={handleBlur('password')}
-                                    placeholderTextColor="#888"
-                                    secureTextEntry={!showPassword}
-                                />
-                                <Pressable
-                                    onPress={() =>
-                                        setShowPassword(!showPassword)
-                                    }
-                                    style={authScreenStyles.iconEye}
-                                >
-                                    {showPassword ? <EyeClosed /> : <Eye />}
-                                </Pressable>
-                            </View>
-                            {touched.password && errors.password && (
-                                <Text style={authScreenStyles.errorText}>
-                                    {errors.password}
-                                </Text>
-                            )}
-                        </View>
+                        <CustomTextInput
+                            placeholder="Senha"
+                            value={values.password}
+                            onChangeText={handleChange('password')}
+                            onBlur={handleBlur('password')}
+                            error={errors.password}
+                            touched={touched.password}
+                            icon={<LockKeyhole />}
+                            isPasswordField={true}
+                            showPassword={showPassword}
+                            togglePasswordVisibility={() =>
+                                setShowPassword(!showPassword)
+                            }
+                        />
 
                         <View style={authScreenStyles.buttonsContainer}>
-                            <Pressable
-                                style={authScreenStyles.button}
+                            <CustomButton
+                                text="Entrar"
                                 onPress={() => handleSubmit()}
-                            >
-                                <Text style={authScreenStyles.buttonText}>
-                                    Entrar
-                                </Text>
-                            </Pressable>
+                            />
                             <View style={authScreenStyles.separatorContainer}>
                                 <View style={authScreenStyles.separator} />
                                 <Text style={authScreenStyles.separatorText}>
                                     ou
                                 </Text>
                             </View>
-                            <Pressable
-                                style={authScreenStyles.button}
+                            <CustomButton
+                                text="Cadastre-se"
                                 onPress={navigationToRegistration}
-                            >
-                                <Text style={authScreenStyles.buttonText}>
-                                    Cadastre-se
-                                </Text>
-                            </Pressable>
+                            />
                         </View>
                     </View>
                 )}

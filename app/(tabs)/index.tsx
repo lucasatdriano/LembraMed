@@ -1,7 +1,8 @@
-import { Text, View } from '@/components/Themed';
-import Header from '@/components/header';
-import CardContact from '@/components/cardContact';
-import { dashboardScreenStyles } from '../styles/dashboardScreensStyles';
+import { Text, View } from '@/components/ui/Themed';
+import Header from '@/components/layout/header';
+import CardContact from '@/components/cards/cardContact';
+import { dashboardScreenStyles } from '@/app/styles/dashboardScreensStyles';
+import FloatingActionButton from '@/components/buttons/floatingActionButton';
 
 export default function ContactScreen() {
     return (
@@ -14,6 +15,7 @@ export default function ContactScreen() {
                 </Text>
             </View>
             <CardContact />
+            <FloatingActionButton type={'contactScreen'} />
         </View>
     );
 }

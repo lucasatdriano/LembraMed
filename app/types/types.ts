@@ -1,7 +1,7 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 export type RootStackParamList = {
-    index: undefined;
+    '(tabs)': undefined;
     medicationSchedule: undefined;
     registration: undefined;
     login: undefined;

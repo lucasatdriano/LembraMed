@@ -1,20 +1,18 @@
 import { useState } from 'react';
-import { StyleSheet, TextInput, Pressable, Alert } from 'react-native';
-import { Text, View } from '@/components/Themed';
-import { Eye, EyeClosed, LockKeyhole, User } from 'lucide-react-native';
-import Colors from '@/constants/Colors';
+import { Alert } from 'react-native';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
+import { useRouter } from 'expo-router';
+import { LockKeyhole, User } from 'lucide-react-native';
+import CustomButton from '@/components/buttons/customButton';
 import { authScreenStyles } from './styles/authScreensStyles';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types';
-import { RootStackParamList } from './types/types';
+import { Text, View } from '@/components/ui/Themed';
+import CustomTextInput from '@/components/form/inputTextField';
 
 export default function RegistrationScreen() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const navigation =
-        useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+    const router = useRouter();
 
     const validationSchema = Yup.object().shape({
         username: Yup.string().required('Nome de usuário obrigatório'),
@@ -22,7 +20,7 @@ export default function RegistrationScreen() {
             .min(4, 'A senha deve ter no mínimo 4 caracteres')
             .required('Senha obrigatória'),
         confirmPassword: Yup.string()
-            .oneOf([Yup.ref('password')], 'As senhas devem coincidir')
+            .oneOf([Yup.ref('password')], 'As senhas devem ser iguais')
             .required('Confirmação de senha obrigatória'),
     });
 
@@ -41,7 +39,7 @@ export default function RegistrationScreen() {
     }
 
     function navigationToLogin() {
-        navigation.navigate('login');
+        router.replace('/login');
     }
 
     return (
@@ -66,124 +64,62 @@ export default function RegistrationScreen() {
                     <View style={authScreenStyles.formContainer}>
                         <Text style={authScreenStyles.title}>Cadastrar</Text>
 
-                        <View
-                            style={authScreenStyles.inputWrapperErrorContainer}
-                        >
-                            <View style={authScreenStyles.inputContainer}>
-                                <User style={authScreenStyles.iconInput} />
-                                <TextInput
-                                    style={authScreenStyles.input}
-                                    placeholder="Nome de usuário"
-                                    value={values.username}
-                                    onChangeText={handleChange('username')}
-                                    onBlur={handleBlur('username')}
-                                    placeholderTextColor="#888"
-                                    autoCapitalize="none"
-                                />
-                            </View>
-                            {touched.username && errors.username && (
-                                <Text style={authScreenStyles.errorText}>
-                                    {errors.username}
-                                </Text>
-                            )}
-                        </View>
+                        <CustomTextInput
+                            placeholder="Nome de usuário"
+                            value={values.username}
+                            onChangeText={handleChange('username')}
+                            onBlur={handleBlur('username')}
+                            error={errors.username}
+                            touched={touched.username}
+                            icon={<User />}
+                            autoCapitalize="none"
+                        />
 
-                        <View
-                            style={authScreenStyles.inputWrapperErrorContainer}
-                        >
-                            <View style={authScreenStyles.inputContainer}>
-                                <LockKeyhole
-                                    style={authScreenStyles.iconInput}
-                                />
-                                <TextInput
-                                    style={authScreenStyles.input}
-                                    placeholder="Senha"
-                                    value={values.password}
-                                    onChangeText={handleChange('password')}
-                                    onBlur={handleBlur('password')}
-                                    placeholderTextColor="#888"
-                                    secureTextEntry={!showPassword}
-                                />
-                                <Pressable
-                                    onPress={() =>
-                                        setShowPassword(!showPassword)
-                                    }
-                                    style={authScreenStyles.iconEye}
-                                >
-                                    {showPassword ? <EyeClosed /> : <Eye />}
-                                </Pressable>
-                            </View>
-                            {touched.password && errors.password && (
-                                <Text style={authScreenStyles.errorText}>
-                                    {errors.password}
-                                </Text>
-                            )}
-                        </View>
+                        <CustomTextInput
+                            placeholder="Senha"
+                            value={values.password}
+                            onChangeText={handleChange('password')}
+                            onBlur={handleBlur('password')}
+                            error={errors.password}
+                            touched={touched.password}
+                            icon={<LockKeyhole />}
+                            isPasswordField={true}
+                            showPassword={showPassword}
+                            togglePasswordVisibility={() =>
+                                setShowPassword(!showPassword)
+                            }
+                        />
 
-                        <View
-                            style={authScreenStyles.inputWrapperErrorContainer}
-                        >
-                            <View style={authScreenStyles.inputContainer}>
-                                <LockKeyhole
-                                    style={authScreenStyles.iconInput}
-                                />
-                                <TextInput
-                                    style={authScreenStyles.input}
-                                    placeholder="Confirme sua senha"
-                                    value={values.confirmPassword}
-                                    onChangeText={handleChange(
-                                        'confirmPassword',
-                                    )}
-                                    onBlur={handleBlur('confirmPassword')}
-                                    placeholderTextColor="#888"
-                                    secureTextEntry={!showConfirmPassword}
-                                />
-                                <Pressable
-                                    onPress={() =>
-                                        setShowConfirmPassword(
-                                            !showConfirmPassword,
-                                        )
-                                    }
-                                    style={authScreenStyles.iconEye}
-                                >
-                                    {showConfirmPassword ? (
-                                        <EyeClosed />
-                                    ) : (
-                                        <Eye />
-                                    )}
-                                </Pressable>
-                            </View>
-                            {touched.confirmPassword &&
-                                errors.confirmPassword && (
-                                    <Text style={authScreenStyles.errorText}>
-                                        {errors.confirmPassword}
-                                    </Text>
-                                )}
-                        </View>
+                        <CustomTextInput
+                            placeholder="Confirme sua senha"
+                            value={values.confirmPassword}
+                            onChangeText={handleChange('confirmPassword')}
+                            onBlur={handleBlur('confirmPassword')}
+                            error={errors.confirmPassword}
+                            touched={touched.confirmPassword}
+                            icon={<LockKeyhole />}
+                            isPasswordField={true}
+                            showPassword={showConfirmPassword}
+                            togglePasswordVisibility={() =>
+                                setShowConfirmPassword(!showConfirmPassword)
+                            }
+                        />
 
                         <View style={authScreenStyles.buttonsContainer}>
-                            <Pressable
-                                style={authScreenStyles.button}
-                                onPress={() => handleSubmit()}
-                            >
-                                <Text style={authScreenStyles.buttonText}>
-                                    Cadastrar
-                                </Text>
-                            </Pressable>
+                            <CustomButton
+                                text="Cadastrar"
+                                onPress={handleSubmit}
+                            />
                             <View style={authScreenStyles.separatorContainer}>
                                 <View style={authScreenStyles.separator} />
                                 <Text style={authScreenStyles.separatorText}>
                                     ou
                                 </Text>
                             </View>
-                            <Pressable
-                                style={authScreenStyles.button}
+                            <CustomButton
+                                text="Login"
                                 onPress={navigationToLogin}
-                            >
-                                <Text style={authScreenStyles.buttonText}>
-                                    Login
-                                </Text>
-                            </Pressable>
+                            />
                         </View>
                     </View>
                 )}

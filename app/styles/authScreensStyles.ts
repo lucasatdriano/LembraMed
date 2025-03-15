@@ -1,5 +1,5 @@
-import Colors from '@/constants/Colors';
 import { StyleSheet } from 'react-native';
+import Colors from '@/constants/Colors';
 
 export const authScreenStyles = StyleSheet.create({
     pageContainer: {
@@ -18,7 +18,7 @@ export const authScreenStyles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 5,
         elevation: 5,
-        gap: 30,
+        gap: 20,
         width: '80%',
     },
     title: {
@@ -28,69 +28,11 @@ export const authScreenStyles = StyleSheet.create({
         color: Colors.light.text,
         marginBottom: 10,
     },
-    inputWrapperErrorContainer: {
-        width: '100%',
-        gap: 5,
-        backgroundColor: Colors.light.colorPrimary,
-    },
-    inputContainer: {
-        position: 'relative',
-        height: 40,
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: Colors.light.colorPrimary,
-    },
-    iconInput: {
-        position: 'absolute',
-        left: 10,
-    },
-    input: {
-        flex: 1,
-        height: '100%',
-        backgroundColor: Colors.light.input,
-        color: Colors.light.text,
-        paddingHorizontal: 40,
-        fontSize: 16,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: Colors.light.text,
-        shadowColor: Colors.light.shadow,
-        shadowOffset: { width: 2, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 5,
-        elevation: 5,
-    },
-    iconEye: {
-        position: 'absolute',
-        right: 10,
-    },
-    errorText: {
-        color: 'red',
-        paddingLeft: 30,
-        fontSize: 12,
-        alignSelf: 'flex-start',
-    },
     buttonsContainer: {
         alignItems: 'center',
         backgroundColor: Colors.light.colorPrimary,
         gap: 10,
         width: '100%',
-    },
-    button: {
-        width: '50%',
-        alignItems: 'center',
-        backgroundColor: Colors.light.button,
-        paddingVertical: 12,
-        borderRadius: 15,
-        shadowColor: Colors.light.shadow,
-        shadowOffset: { width: 2, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 5,
-        elevation: 5,
-    },
-    buttonText: {
-        fontSize: 16,
-        color: Colors.light.text,
     },
     separatorContainer: {
         backgroundColor: Colors.light.colorPrimary,

@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, TextInput, useColorScheme } from 'react-native';
 
-import { Text, View } from './Themed';
+import { Text, View } from '@/components/ui/Themed';
 import Colors from '@/constants/Colors';
-import { Link } from 'expo-router';
-import { Phone, Pill, User } from 'lucide-react-native';
+import { Phone, User } from 'lucide-react-native';
 
 export default function CardContact() {
     const [text, setText] = useState('');
@@ -13,19 +12,14 @@ export default function CardContact() {
     return (
         <View style={styles.cardContainer}>
             <View style={styles.containerText}>
-                <Pill style={styles.icon} />
-                <Text style={styles.textName}>Ibuprofeno</Text>
-            </View>
-            <View style={styles.containerText}>
-                <Text style={styles.textInfo}>Intervalo: 8/8 horas</Text>
-            </View>
-            <View style={styles.containerText}>
-                <Text style={styles.textInfo}>
-                    Horário da próxima dose: 09:00
+                <User style={styles.icon} />
+                <Text style={styles.textName}>
+                    Lucas Adriano Tavares Gonçalves
                 </Text>
             </View>
             <View style={styles.containerText}>
-                <Text style={styles.textInfo}>Próxima dose: 03:32:12</Text>
+                <Phone style={styles.icon} />
+                <Text style={styles.textContact}>(11) 99999-9999</Text>
             </View>
         </View>
     );
@@ -57,9 +51,8 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
     },
-    textInfo: {
+    textContact: {
         fontSize: 18,
-        marginLeft: 25,
     },
     icon: {
         marginLeft: 15,

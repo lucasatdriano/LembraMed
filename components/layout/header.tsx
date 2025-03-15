@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, TextInput, useColorScheme } from 'react-native';
+import { StyleSheet, TextInput } from 'react-native';
 
-import { Text, View } from './Themed';
+import { Text, View } from '@/components/ui/Themed';
 import Colors from '@/constants/Colors';
-import { Link } from 'expo-router';
-import { EllipsisVertical, Search } from 'lucide-react-native';
+import { Search } from 'lucide-react-native';
+import MenuAccount from '@/components/layout/menuAccount';
 
 export default function Header({ placeholder }: { placeholder: string }) {
     const [text, setText] = useState('');
-    const colorScheme = useColorScheme();
 
     return (
         <View style={styles.headerContainer}>
@@ -22,17 +21,7 @@ export default function Header({ placeholder }: { placeholder: string }) {
                     placeholderTextColor="#888"
                 />
             </View>
-            <Link href="/modal" asChild>
-                <Pressable>
-                    {({ pressed }) => (
-                        <EllipsisVertical
-                            size={25}
-                            color={Colors[colorScheme ?? 'light'].text}
-                            style={styles.icon}
-                        />
-                    )}
-                </Pressable>
-            </Link>
+            <MenuAccount />
         </View>
     );
 }
@@ -76,8 +65,5 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.light.input,
         color: Colors.light.text,
         paddingHorizontal: 40,
-    },
-    icon: {
-        marginLeft: 15,
     },
 });

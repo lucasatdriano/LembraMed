@@ -1,7 +1,8 @@
-import { Text, View } from '@/components/Themed';
-import Header from '@/components/header';
-import CardMedication from '@/components/cardMedication';
-import { dashboardScreenStyles } from '../styles/dashboardScreensStyles';
+import { Text, View } from '@/components/ui/Themed';
+import Header from '@/components/layout/header';
+import CardMedication from '@/components/cards/cardMedication';
+import { dashboardScreenStyles } from '@/app/styles/dashboardScreensStyles';
+import FloatingActionButton from '@/components/buttons/floatingActionButton';
 
 export default function MedicationScheduleScreen() {
     return (
@@ -14,6 +15,7 @@ export default function MedicationScheduleScreen() {
                 </Text>
             </View>
             <CardMedication />
+            <FloatingActionButton type={'medicationScreen'} />
         </View>
     );
 }
