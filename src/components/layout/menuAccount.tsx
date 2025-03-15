@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { EllipsisVertical, LogOut, User2 } from 'lucide-react-native';
 import Modal from 'react-native-modal';
-import Colors from '@/constants/Colors';
+import Colors from '@/src/constants/Colors';
 
 const accounts = [
     { id: 1, name: 'Lucas Adriano' },

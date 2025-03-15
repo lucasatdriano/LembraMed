@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
-import { View, TextInput, Text, StyleSheet } from 'react-native';
-import { Calendar } from 'lucide-react-native';
-import Colors from '@/constants/Colors';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import moment from 'moment';
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { TextInputMask } from 'react-native-masked-text';
+import Colors from '@/src/constants/Colors';
 
-interface CustomDateInputProps {
+interface CustomHourInputProps {
     placeholder: string;
     value: string;
     onChangeText: (text: string) => void;
@@ -15,61 +13,28 @@ interface CustomDateInputProps {
     icon?: React.ReactNode;
 }
 
-export default function CustomDateInput({
+export default function CustomHourInput({
     placeholder,
     value,
     onChangeText,
     onBlur,
-    error,
     touched,
+    error,
     icon,
-}: CustomDateInputProps) {
-    const [showDatePicker, setShowDatePicker] = useState(false);
-    const [isStartDate, setIsStartDate] = useState(true);
-    const [selectedStartDate, setSelectedStartDate] = useState<string | null>(
-        null,
-    );
-    const [selectedEndDate, setSelectedEndDate] = useState<string | null>(null);
-
-    const handleDateChange = (date: Date) => {
-        const formattedDate = moment(date).format('DD/MM/YYYY');
-
-        if (isStartDate) {
-            setSelectedStartDate(formattedDate);
-            onChangeText(`${formattedDate} - ${selectedEndDate || ''}`);
-        } else {
-            setSelectedEndDate(formattedDate);
-            onChangeText(`${selectedStartDate || ''} - ${formattedDate}`);
-        }
-
-        setShowDatePicker(false);
-    };
-
-    const toggleDatePicker = () => {
-        setShowDatePicker(true);
-        setIsStartDate(!selectedStartDate);
-    };
-
+}: CustomHourInputProps) {
     return (
         <View style={styles.inputWrapperErrorContainer}>
             <View style={styles.inputContainer}>
                 {icon && <View style={styles.iconInput}>{icon}</View>}
-                <TextInput
-                    style={styles.input}
-                    placeholder={placeholder}
+                <TextInputMask
+                    type={'custom'}
+                    options={{ mask: '99:99' }}
                     value={value}
                     onChangeText={onChangeText}
                     onBlur={onBlur}
+                    placeholder={placeholder}
                     placeholderTextColor="#888"
-                    onFocus={toggleDatePicker}
-                    editable={false}
-                />
-
-                <DateTimePickerModal
-                    isVisible={showDatePicker}
-                    mode="date"
-                    onConfirm={handleDateChange}
-                    onCancel={() => setShowDatePicker(false)}
+                    style={styles.input}
                 />
             </View>
             {touched && error && <Text style={styles.errorText}>{error}</Text>}

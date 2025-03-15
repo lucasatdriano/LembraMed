@@ -1,11 +1,11 @@
 import { StyleSheet, TouchableOpacity } from 'react-native';
 
-import { View } from '@/components/ui/Themed';
+import { View } from '@/src/components/ui/Themed';
 import { Plus } from 'lucide-react-native';
-import Colors from '@/constants/Colors';
+import Colors from '@/src/constants/Colors';
 import { useState } from 'react';
-import CreateContactModal from '@/components/modals/createContactModal';
-import CreateMedicationModal from '@/components/modals/createMedicationModal';
+import CreateContactModal from '@/src/components/modals/createContactModal';
+import CreateMedicationModal from '@/src/components/modals/createMedicationModal';
 
 interface FloatingActionButtonProps {
     type: 'contactScreen' | 'medicationScreen';

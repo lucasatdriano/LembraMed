@@ -1,22 +1,15 @@
 import { View, Text, StyleSheet, TextInput } from 'react-native';
 import Modal from 'react-native-modal';
-import Colors from '@/constants/Colors';
-import {
-    User2,
-    Phone,
-    Calendar,
-    Repeat,
-    Clock,
-    Pill,
-} from 'lucide-react-native';
+import Colors from '@/src/constants/Colors';
+import { Calendar, Repeat, Clock, Pill } from 'lucide-react-native';
 import { Formik, FormikHelpers } from 'formik';
-import * as Yup from 'yup';
-import CustomButton from '../buttons/customButton';
-import CustomTextInput from '../form/inputTextField';
+import CustomButton from '@/src/components/buttons/customButton';
 import { useState } from 'react';
-import CustomDateInput from '../form/inputDateField';
-import CustomDropdownInput from '../form/inputDropdownField';
-import CustomHourInput from '../form/inputHourField';
+import CustomDateInput from '@/src/components/form/inputDateField';
+import CustomDropdownInput from '@/src/components/form/inputDropdownField';
+import CustomHourInput from '@/src/components/form/inputHourField';
+import { MEDICATION_INTERVALS } from '@/src/constants/medicationIntervals';
+import { medicationValidationSchema } from '@/src/validation/medicationValidation';
 
 interface ModalProps {
     isVisible: boolean;
@@ -31,12 +24,6 @@ export default function updateContactModal({
     const [selectedInterval, setSelectedInterval] = useState<string | number>(
         '',
     );
-
-    const validationSchema = Yup.object().shape({
-        medicationName: Yup.string().required('Nome do remédio é obrigatório'),
-        hour: Yup.string().required('Horário é obrigatório'),
-        interval: Yup.string().required('Intervalo é obrigatório'),
-    });
 
     async function handleSubmit(
         values: {
@@ -72,7 +59,7 @@ export default function updateContactModal({
                     interval: '',
                     period: '',
                 }}
-                validationSchema={validationSchema}
+                validationSchema={medicationValidationSchema}
                 onSubmit={handleSubmit}
             >
                 {({
@@ -130,11 +117,7 @@ export default function updateContactModal({
                             onBlur={() => handleBlur('interval')}
                             touched={touched.interval}
                             error={errors.interval}
-                            options={[
-                                { label: 'A cada 8 horas', value: '8h' },
-                                { label: 'A cada 7 horas', value: '7h' },
-                                { label: 'A cada 6 horas', value: '6h' },
-                            ]}
+                            options={MEDICATION_INTERVALS}
                             icon={<Repeat />}
                         />
 
@@ -148,7 +131,7 @@ export default function updateContactModal({
                             onBlur={() => handleBlur('period')}
                             touched={touched.period}
                             error={errors.period}
-                            icon={<Calendar />}
+                            // icon={<Calendar />}
                         />
 
                         <View style={styles.containerButtons}>

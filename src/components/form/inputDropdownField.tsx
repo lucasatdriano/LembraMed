@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import { ChevronDown } from 'lucide-react-native';
-import Colors from '@/constants/Colors';
+import Colors from '@/src/constants/Colors';
 
 interface Option {
     label: string;

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, TextInput, useColorScheme } from 'react-native';
 
-import { Text, View } from '@/components/ui/Themed';
-import Colors from '@/constants/Colors';
+import { Text, View } from '@/src/components/ui/Themed';
+import Colors from '@/src/constants/Colors';
 import { Phone, Pill, User } from 'lucide-react-native';
 
 export default function CardContact() {

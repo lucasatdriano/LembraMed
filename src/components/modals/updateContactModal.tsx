@@ -1,12 +1,12 @@
+import { useState } from 'react';
 import { View, Text, StyleSheet, TextInput } from 'react-native';
 import Modal from 'react-native-modal';
-import Colors from '@/constants/Colors';
 import { User2, Phone } from 'lucide-react-native';
 import { Formik, FormikHelpers } from 'formik';
-import * as Yup from 'yup';
-import CustomButton from '../buttons/customButton';
-import CustomTextInput from '../form/inputTextField';
-import { useState } from 'react';
+import { contactValidationSchema } from '@/src/validation/contactValidation';
+import Colors from '@/src/constants/Colors';
+import CustomButton from '@/src/components/buttons/customButton';
+import CustomTextInput from '@/src/components/form/inputTextField';
 
 interface ModalProps {
     isVisible: boolean;
@@ -21,11 +21,6 @@ export default function updateContactModal({
     const [selectedInterval, setSelectedInterval] = useState<string | number>(
         '',
     );
-
-    const validationSchema = Yup.object().shape({
-        contactName: Yup.string().required('Nome do contato é obrigatório'),
-        phoneNumber: Yup.string().required('Número de telefone é obrigatório'),
-    });
 
     async function handleSubmit(
         values: {
@@ -55,7 +50,7 @@ export default function updateContactModal({
                     contactName: '',
                     phoneNumber: '',
                 }}
-                validationSchema={validationSchema}
+                validationSchema={contactValidationSchema}
                 onSubmit={handleSubmit}
             >
                 {({

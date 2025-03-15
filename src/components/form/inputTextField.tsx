@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { TextInputMask } from 'react-native-masked-text';
-import Colors from '@/constants/Colors';
+import React, { useState } from 'react';
+import { View, TextInput, Text, StyleSheet, Pressable } from 'react-native';
+import { Eye, EyeClosed, LockKeyhole, User } from 'lucide-react-native';
+import Colors from '@/src/constants/Colors';
 
-interface CustomHourInputProps {
+interface CustomInputTextFieldProps {
     placeholder: string;
     value: string;
     onChangeText: (text: string) => void;
@@ -11,31 +11,51 @@ interface CustomHourInputProps {
     touched: boolean | undefined;
     error?: string;
     icon?: React.ReactNode;
+    secureTextEntry?: boolean;
+    autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+    isPasswordField?: boolean;
+    showPassword?: boolean;
+    togglePasswordVisibility?: () => void;
 }
 
-export default function CustomHourInput({
+export default function CustomTextInput({
     placeholder,
     value,
     onChangeText,
     onBlur,
-    touched,
     error,
+    touched,
     icon,
-}: CustomHourInputProps) {
+    secureTextEntry = false,
+    autoCapitalize = 'none',
+    isPasswordField = false,
+    showPassword,
+    togglePasswordVisibility,
+}: CustomInputTextFieldProps) {
     return (
         <View style={styles.inputWrapperErrorContainer}>
             <View style={styles.inputContainer}>
                 {icon && <View style={styles.iconInput}>{icon}</View>}
-                <TextInputMask
-                    type={'custom'}
-                    options={{ mask: '99:99' }}
+                <TextInput
+                    style={styles.input}
+                    placeholder={placeholder}
                     value={value}
                     onChangeText={onChangeText}
                     onBlur={onBlur}
-                    placeholder={placeholder}
                     placeholderTextColor="#888"
-                    style={styles.input}
+                    autoCapitalize={autoCapitalize}
+                    secureTextEntry={
+                        isPasswordField ? !showPassword : secureTextEntry
+                    }
                 />
+                {isPasswordField && (
+                    <Pressable
+                        onPress={togglePasswordVisibility}
+                        style={styles.iconEye}
+                    >
+                        {showPassword ? <EyeClosed /> : <Eye />}
+                    </Pressable>
+                )}
             </View>
             {touched && error && <Text style={styles.errorText}>{error}</Text>}
         </View>
@@ -74,6 +94,10 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 5,
         elevation: 5,
+    },
+    iconEye: {
+        position: 'absolute',
+        right: 10,
     },
     errorText: {
         color: Colors.light.error,

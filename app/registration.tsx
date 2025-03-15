@@ -1,28 +1,18 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import { Formik, FormikHelpers } from 'formik';
-import * as Yup from 'yup';
 import { useRouter } from 'expo-router';
 import { LockKeyhole, User } from 'lucide-react-native';
-import CustomButton from '@/components/buttons/customButton';
+import CustomButton from '@/src/components/buttons/customButton';
 import { authScreenStyles } from './styles/authScreensStyles';
-import { Text, View } from '@/components/ui/Themed';
-import CustomTextInput from '@/components/form/inputTextField';
+import { Text, View } from '@/src/components/ui/Themed';
+import CustomTextInput from '@/src/components/form/inputTextField';
+import { registerValidationSchema } from '@/src/validation/userValidation';
 
 export default function RegistrationScreen() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const router = useRouter();
-
-    const validationSchema = Yup.object().shape({
-        username: Yup.string().required('Nome de usuário obrigatório'),
-        password: Yup.string()
-            .min(4, 'A senha deve ter no mínimo 4 caracteres')
-            .required('Senha obrigatória'),
-        confirmPassword: Yup.string()
-            .oneOf([Yup.ref('password')], 'As senhas devem ser iguais')
-            .required('Confirmação de senha obrigatória'),
-    });
 
     function handleSubmit(
         values: { username: string; password: string; confirmPassword: string },
@@ -50,7 +40,7 @@ export default function RegistrationScreen() {
                     password: '',
                     confirmPassword: '',
                 }}
-                validationSchema={validationSchema}
+                validationSchema={registerValidationSchema}
                 onSubmit={handleSubmit}
             >
                 {({

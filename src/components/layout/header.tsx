@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { StyleSheet, TextInput } from 'react-native';
 
-import { Text, View } from '@/components/ui/Themed';
-import Colors from '@/constants/Colors';
+import { Text, View } from '@/src/components/ui/Themed';
+import Colors from '@/src/constants/Colors';
 import { Search } from 'lucide-react-native';
-import MenuAccount from '@/components/layout/menuAccount';
+import MenuAccount from '@/src/components/layout/menuAccount';
 
 export default function Header({ placeholder }: { placeholder: string }) {
     const [text, setText] = useState('');
