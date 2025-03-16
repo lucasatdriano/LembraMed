@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Pressable, StyleSheet } from 'react-native';
-import { Phone, Calendar } from 'lucide-react-native';
+import { Phone, CalendarDays } from 'lucide-react-native';
 import { Tabs } from 'expo-router';
 
 import Colors from '@/src/constants/Colors';
@@ -40,7 +40,7 @@ export default function TabLayout() {
                 options={{
                     title: 'Cronograma de Remédios',
                     tabBarIcon: ({ color }) => (
-                        <TabBarIcon Icon={Calendar} color={color} />
+                        <TabBarIcon Icon={CalendarDays} color={color} />
                     ),
                     tabBarButton: (props) => (
                         <View style={styles.tabBarButtonContainer}>
