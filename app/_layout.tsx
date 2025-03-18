@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { ThemeProvider, DefaultTheme } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { localStorageUtil } from '@/src/util/localStorageUtil';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -24,31 +23,30 @@ export default function RootLayout() {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(
         null,
     );
+    const router = useRouter();
 
     useEffect(() => {
         if (error) throw error;
     }, [error]);
 
     useEffect(() => {
+        const checkToken = async () => {
+            try {
+                const token = await localStorageUtil.get('token');
+                setIsAuthenticated(!!token);
+            } catch (err) {
+                console.error('Erro ao verificar o token', err);
+                setIsAuthenticated(false);
+            }
+        };
+
         if (loaded) {
             SplashScreen.hideAsync();
             checkToken();
         }
     }, [loaded]);
 
-    const checkToken = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token');
-            setIsAuthenticated(!!token);
-        } catch (error) {
-            console.error('Erro ao verificar o token', error);
-            setIsAuthenticated(false);
-        }
-    };
-
-    if (isAuthenticated === null || !loaded) {
-        return <ActivityIndicator size="large" color="#0000ff" />;
-    }
+    if (isAuthenticated === null || !loaded) return null;
 
     return <RootLayoutNav isAuthenticated={isAuthenticated} />;
 }
@@ -58,13 +56,14 @@ function RootLayoutNav({ isAuthenticated }: { isAuthenticated: boolean }) {
     const segments = useSegments();
 
     useEffect(() => {
-        const isAuthRoute =
+        const inAuthGroup =
             segments[0] === 'login' || segments[0] === 'registration';
-
-        if (!isAuthenticated && !isAuthRoute) {
+        if (isAuthenticated && inAuthGroup) {
+            router.replace('/(tabs)');
+        } else if (!isAuthenticated && !inAuthGroup) {
             router.replace('/login');
         }
-    }, [isAuthenticated, segments]);
+    }, [isAuthenticated]);
 
     return (
         <ThemeProvider value={DefaultTheme}>

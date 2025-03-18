@@ -6,7 +6,12 @@ import Colors from '@/src/constants/Colors';
 import { Search } from 'lucide-react-native';
 import MenuAccount from '@/src/components/layout/menuAccount';
 
-export default function Header({ placeholder }: { placeholder: string }) {
+interface HeaderProps {
+    placeholder: string;
+    screen: 'contactScreen' | 'medicationScreen';
+}
+
+export default function Header({ placeholder, screen }: HeaderProps) {
     const [text, setText] = useState('');
 
     return (

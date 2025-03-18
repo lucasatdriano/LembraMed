@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import Modal from 'react-native-modal';
 import Colors from '@/src/constants/Colors';
 import { User2, Phone } from 'lucide-react-native';
@@ -7,20 +7,22 @@ import { Formik, FormikHelpers } from 'formik';
 import CustomButton from '@/src/components/buttons/customButton';
 import CustomTextInput from '@/src/components/form/inputTextField';
 import { contactValidationSchema } from '@/src/validation/contactValidation';
+import contactService from '@/src/service/api/contactService';
 
 interface ModalProps {
     isVisible: boolean;
     setVisible: (visible: boolean) => void;
+    userId: string;
+    onContactCreated?: () => void;
 }
 
-export default function createContactModal({
+export default function CreateContactModal({
     isVisible,
     setVisible,
+    userId,
+    onContactCreated,
 }: ModalProps) {
-    const [selectedDate, setSelectedDate] = useState('');
-    const [selectedInterval, setSelectedInterval] = useState<string | number>(
-        '',
-    );
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     async function handleSubmit(
         values: {
@@ -32,8 +34,34 @@ export default function createContactModal({
             phoneNumber: string;
         }>,
     ) {
-        console.log('Contato Adicionado:', values);
-        setVisible(false);
+        try {
+            setIsSubmitting(true);
+
+            const response = await contactService.createContact(
+                userId,
+                values.contactName,
+                values.phoneNumber,
+            );
+
+            setVisible(false);
+            if (onContactCreated) {
+                onContactCreated();
+            }
+
+            formikHelpers.resetForm();
+        } catch (error) {
+            if (error instanceof Error) {
+                Alert.alert('Erro', error.message);
+            } else {
+                Alert.alert(
+                    'Erro',
+                    'Ocorreu um erro inesperado ao adicionar o contato.',
+                );
+            }
+        } finally {
+            setIsSubmitting(false);
+            formikHelpers.resetForm();
+        }
     }
 
     return (
@@ -60,7 +88,6 @@ export default function createContactModal({
                     values,
                     errors,
                     touched,
-                    setFieldValue,
                 }) => (
                     <View style={styles.menu}>
                         <Text style={styles.title}>Adicionar Novo Contato</Text>
@@ -90,6 +117,7 @@ export default function createContactModal({
                         <CustomButton
                             text="Adicionar Contato"
                             onPress={() => handleSubmit()}
+                            disabled={isSubmitting}
                         />
                     </View>
                 )}

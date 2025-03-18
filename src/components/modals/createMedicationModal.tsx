@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import Modal from 'react-native-modal';
 import { Pill, Clock, Calendar, Repeat } from 'lucide-react-native';
 import { Formik, FormikHelpers } from 'formik';
@@ -11,20 +11,31 @@ import CustomTextInput from '@/src/components/form/inputTextField';
 import CustomHourInput from '@/src/components/form/inputHourField';
 import CustomDropdownInput from '@/src/components/form/inputDropdownField';
 import CustomDateInput from '@/src/components/form/inputDateField';
+import medicationService from '@/src/service/api/medicationService';
 
 interface ModalProps {
     isVisible: boolean;
     setVisible: (visible: boolean) => void;
+    userId: string;
+    onMedicationCreated?: () => void; // Função para atualizar a lista após a criação
 }
 
 export default function CreateMedicationModal({
     isVisible,
     setVisible,
+    userId,
+    onMedicationCreated,
 }: ModalProps) {
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedInterval, setSelectedInterval] = useState<string | number>(
         '',
     );
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const splitPeriod = (period: string) => {
+        const [start, end] = period.split(' - ');
+        return { start, end };
+    };
 
     async function handleSubmit(
         values: {
@@ -40,8 +51,40 @@ export default function CreateMedicationModal({
             period: string;
         }>,
     ) {
-        console.log('Remédio Adicionado:', values);
-        setVisible(false);
+        try {
+            setIsSubmitting(true);
+
+            const { start: periodStart, end: periodEnd } = splitPeriod(
+                values.period,
+            );
+
+            await medicationService.createMedication(
+                userId,
+                values.medicationName,
+                values.hour,
+                Number(values.interval),
+                periodStart,
+                periodEnd,
+            );
+
+            setVisible(false);
+            if (onMedicationCreated) {
+                onMedicationCreated();
+            }
+
+            formikHelpers.resetForm();
+        } catch (error) {
+            if (error instanceof Error) {
+                Alert.alert('Erro', error.message);
+            } else {
+                Alert.alert(
+                    'Erro',
+                    'Ocorreu um erro inesperado ao criar o medicamento.',
+                );
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     return (
@@ -120,12 +163,12 @@ export default function CreateMedicationModal({
                             onBlur={() => handleBlur('period')}
                             touched={touched.period}
                             error={errors.period}
-                            // icon={<Calendar />}
                         />
 
                         <CustomButton
                             text="Adicionar Remédio"
                             onPress={() => handleSubmit()}
+                            disabled={isSubmitting}
                         />
                     </View>
                 )}

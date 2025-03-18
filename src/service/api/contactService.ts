@@ -26,7 +26,7 @@ const contactService = {
             const response = await api.post(
                 API_ROUTES.CONTACTS.CREATE_CONTACT({ userId }),
                 {
-                    contactName,
+                    name: contactName,
                     numberPhone,
                 },
             );

@@ -1,35 +1,47 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import { LockKeyhole, User } from 'lucide-react-native';
-import { useNavigation } from '@react-navigation/native';
 import { Formik, FormikHelpers } from 'formik';
 import { Text, View } from '@/src/components/ui/Themed';
-import { authScreenStyles } from './styles/authScreensStyles';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import authScreenStyles from './styles/authScreensStyles';
 import { useRouter } from 'expo-router';
 import CustomButton from '@/src/components/buttons/customButton';
 import CustomTextInput from '@/src/components/form/inputTextField';
 import { loginValidationSchema } from '@/src/validation/userValidation';
+import userService from '@/src/service/api/userService';
+import { localStorageUtil } from '@/src/util/localStorageUtil';
 
 export default function LoginScreen() {
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
 
     async function handleSubmit(
-        values: { username: string; password: string },
-        formikHelpers: FormikHelpers<{ username: string; password: string }>,
+        values: { name: string; password: string },
+        formikHelpers: FormikHelpers<{ name: string; password: string }>,
     ) {
         try {
-            // Simulação de autenticação (trocar por API real)
-            if (values.username === 'admin' && values.password === '1234') {
-                const fakeToken = 'token123'; // Troque pelo token real da API
-                await AsyncStorage.setItem('token', fakeToken);
-                router.replace('/(tabs)');
-            } else {
-                Alert.alert('Erro', 'Usuário ou senha incorretos');
+            const response = await userService.login(
+                values.name,
+                values.password,
+            );
+
+            if (!response.accessToken || !response.id) {
+                throw new Error('Dados de autenticação inválidos.');
             }
+
+            await localStorageUtil.set('userId', response.id);
+            await localStorageUtil.set('accessToken', response.accessToken);
+            await localStorageUtil.set('refreshToken', response.refreshToken);
+
+            router.replace('/(tabs)');
         } catch (error) {
-            console.error('Erro ao salvar token', error);
+            if (error instanceof Error) {
+                Alert.alert('Erro', error.message);
+            } else {
+                Alert.alert('Erro', 'Ocorreu um erro ao fazer login.');
+            }
+        } finally {
+            formikHelpers.setSubmitting(false);
         }
     }
 
@@ -40,7 +52,7 @@ export default function LoginScreen() {
     return (
         <View style={authScreenStyles.pageContainer}>
             <Formik
-                initialValues={{ username: '', password: '' }}
+                initialValues={{ name: '', password: '' }}
                 validationSchema={loginValidationSchema}
                 onSubmit={handleSubmit}
             >
@@ -57,11 +69,11 @@ export default function LoginScreen() {
 
                         <CustomTextInput
                             placeholder="Nome de usuário"
-                            value={values.username}
-                            onChangeText={handleChange('username')}
-                            onBlur={handleBlur('username')}
-                            error={errors.username}
-                            touched={touched.username}
+                            value={values.name}
+                            onChangeText={handleChange('name')}
+                            onBlur={handleBlur('name')}
+                            error={errors.name}
+                            touched={touched.name}
                             icon={<User />}
                             autoCapitalize="none"
                         />

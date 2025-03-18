@@ -1,29 +1,88 @@
-import { View, Text, StyleSheet, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Alert } from 'react-native';
 import Modal from 'react-native-modal';
 import Colors from '@/src/constants/Colors';
 import { Calendar, Repeat, Clock, Pill } from 'lucide-react-native';
 import { Formik, FormikHelpers } from 'formik';
 import CustomButton from '@/src/components/buttons/customButton';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CustomDateInput from '@/src/components/form/inputDateField';
 import CustomDropdownInput from '@/src/components/form/inputDropdownField';
 import CustomHourInput from '@/src/components/form/inputHourField';
 import { MEDICATION_INTERVALS } from '@/src/constants/medicationIntervals';
 import { medicationValidationSchema } from '@/src/validation/medicationValidation';
+import medicationService from '@/src/service/api/medicationService';
 
 interface ModalProps {
     isVisible: boolean;
     setVisible: (visible: boolean) => void;
+    userId: string;
+    medicationId: string;
+    onMedicationDeleted?: () => void;
 }
 
-export default function updateContactModal({
+export default function UpdateMedicationModal({
     isVisible,
     setVisible,
+    userId,
+    medicationId,
+    onMedicationDeleted,
 }: ModalProps) {
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedInterval, setSelectedInterval] = useState<string | number>(
         '',
     );
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [initialValues, setInitialValues] = useState({
+        medicationName: '',
+        hour: '',
+        interval: '',
+        period: '',
+    });
+
+    useEffect(() => {
+        if (isVisible && medicationId) {
+            fetchMedicationData();
+        }
+    }, [isVisible, medicationId]);
+
+    const formatPeriod = (start: string, end: string) => {
+        return `${start} - ${end}`;
+    };
+
+    const splitPeriod = (period: string) => {
+        const [start, end] = period.split(' - ');
+        return { start, end };
+    };
+
+    async function fetchMedicationData() {
+        try {
+            const response = await medicationService.medication(
+                userId,
+                medicationId,
+            );
+            const formattedPeriod = formatPeriod(
+                response.periodStart,
+                response.periodEnd,
+            );
+            setInitialValues({
+                medicationName: response.medicationName,
+                hour: response.hourFirstDose,
+                interval: response.intervalInHours.toString(),
+                period: formattedPeriod,
+            });
+            setSelectedDate(formattedPeriod);
+            setSelectedInterval(response.intervalInHours.toString());
+        } catch (error) {
+            if (error instanceof Error) {
+                Alert.alert('Erro', error.message);
+            } else {
+                Alert.alert(
+                    'Erro',
+                    'Ocorreu um erro ao carregar os dados do medicamento.',
+                );
+            }
+        }
+    }
 
     async function handleSubmit(
         values: {
@@ -39,8 +98,80 @@ export default function updateContactModal({
             period: string;
         }>,
     ) {
-        console.log('Remédio Atualizado:', values);
-        setVisible(false);
+        try {
+            setIsSubmitting(true);
+
+            const { start: periodStart, end: periodEnd } = splitPeriod(
+                values.period,
+            );
+
+            await medicationService.updateMedication(
+                userId,
+                medicationId,
+                values.medicationName,
+                values.hour,
+                Number(values.interval),
+                periodStart,
+                periodEnd,
+            );
+
+            setVisible(false);
+
+            formikHelpers.resetForm();
+        } catch (error) {
+            if (error instanceof Error) {
+                Alert.alert('Erro', error.message);
+            } else {
+                Alert.alert(
+                    'Erro',
+                    'Ocorreu um erro inesperado ao atualizar o medicamento.',
+                );
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
+
+    async function handleDeleteMedication() {
+        try {
+            Alert.alert(
+                'Confirmar Remoção',
+                'Tem certeza que deseja remover este medicamento?',
+                [
+                    {
+                        text: 'Cancelar',
+                        style: 'cancel',
+                    },
+                    {
+                        text: 'Remover',
+                        onPress: async () => {
+                            setIsSubmitting(true);
+                            await medicationService.deleteMedication(
+                                userId,
+                                medicationId,
+                            );
+
+                            setVisible(false);
+                            if (onMedicationDeleted) {
+                                onMedicationDeleted();
+                            }
+                        },
+                    },
+                ],
+                { cancelable: true },
+            );
+        } catch (error) {
+            if (error instanceof Error) {
+                Alert.alert('Erro', error.message);
+            } else {
+                Alert.alert(
+                    'Erro',
+                    'Ocorreu um erro inesperado ao remover o medicamento.',
+                );
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     return (
@@ -53,14 +184,10 @@ export default function updateContactModal({
             style={styles.modal}
         >
             <Formik
-                initialValues={{
-                    medicationName: '',
-                    hour: '',
-                    interval: '',
-                    period: '',
-                }}
+                initialValues={initialValues}
                 validationSchema={medicationValidationSchema}
                 onSubmit={handleSubmit}
+                enableReinitialize
             >
                 {({
                     handleChange,
@@ -72,8 +199,6 @@ export default function updateContactModal({
                     setFieldValue,
                 }) => (
                     <View style={styles.menu}>
-                        {/* <Text style={styles.title}>Atualizar Remédio</Text> */}
-
                         <View style={styles.inputWrapperErrorContainer}>
                             <View style={styles.inputContainer}>
                                 <Pill style={styles.iconInput} />
@@ -131,19 +256,20 @@ export default function updateContactModal({
                             onBlur={() => handleBlur('period')}
                             touched={touched.period}
                             error={errors.period}
-                            // icon={<Calendar />}
                         />
 
                         <View style={styles.containerButtons}>
                             <CustomButton
                                 text="Atualizar Remédio"
                                 onPress={() => handleSubmit()}
+                                disabled={isSubmitting}
                             />
 
                             <CustomButton
                                 text="Remover Remédio"
-                                onPress={() => handleSubmit()}
+                                onPress={handleDeleteMedication}
                                 backgroundColor={Colors.light.error}
+                                disabled={isSubmitting}
                             />
                         </View>
                     </View>

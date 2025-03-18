@@ -7,6 +7,7 @@ interface CustomButtonProps {
     onPress: () => void;
     backgroundColor?: string;
     textColor?: string;
+    disabled?: boolean;
 }
 
 export default function CustomButton({
@@ -14,11 +15,13 @@ export default function CustomButton({
     onPress,
     backgroundColor = Colors.light.button,
     textColor = Colors.light.text,
+    disabled = false,
 }: CustomButtonProps) {
     return (
         <Pressable
             style={[styles.button, { backgroundColor }]}
             onPress={onPress}
+            disabled={disabled}
         >
             <Text style={[styles.buttonText, { color: textColor }]}>
                 {text}
@@ -30,6 +33,7 @@ export default function CustomButton({
 const styles = StyleSheet.create({
     button: {
         width: '60%',
+        maxWidth: 175,
         alignItems: 'center',
         paddingVertical: 12,
         borderRadius: 15,

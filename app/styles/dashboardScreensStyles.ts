@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 import Colors from '@/src/constants/Colors';
 
-export const dashboardScreenStyles = StyleSheet.create({
+const dashboardScreenStyles = StyleSheet.create({
     titleContainer: {
         position: 'relative',
         alignItems: 'flex-start',
@@ -24,4 +24,9 @@ export const dashboardScreenStyles = StyleSheet.create({
         textAlign: 'center',
         marginInlineStart: 20,
     },
+    containerCards: {
+        gap: 10,
+    },
 });
+
+export default dashboardScreenStyles;

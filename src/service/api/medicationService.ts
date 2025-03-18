@@ -20,7 +20,6 @@ const medicationService = {
     createMedication: async (
         userId: string,
         medicationName: string,
-        numberPhone: string,
         hourFirstDose: string,
         intervalInHours: number,
         periodStart?: string,
@@ -31,7 +30,6 @@ const medicationService = {
                 API_ROUTES.MEDICATIONS.CREATE_MEDICATION({ userId }),
                 {
                     medicationName,
-                    numberPhone,
                     hourFirstDose,
                     intervalInHours,
                     periodStart,

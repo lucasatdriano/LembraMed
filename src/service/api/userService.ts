@@ -3,11 +3,10 @@ import API_ROUTES from '@/src/service/routes';
 import api from '@/src/service/index';
 
 const userService = {
-    register: async (name: string, email: string, password: string) => {
+    register: async (name: string, password: string) => {
         try {
             const response = await api.post(API_ROUTES.USERS.REGISTER, {
                 name,
-                email,
                 password,
             });
             return response.data;
@@ -19,10 +18,10 @@ const userService = {
             throw new Error('Erro ao conectar ao servidor.');
         }
     },
-    login: async (email: string, password: string) => {
+    login: async (name: string, password: string) => {
         try {
             const reponse = await api.post(API_ROUTES.USERS.LOGIN, {
-                email,
+                name,
                 password,
             });
             return reponse.data;

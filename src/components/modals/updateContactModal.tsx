@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, TextInput } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, Alert } from 'react-native';
 import Modal from 'react-native-modal';
 import { User2, Phone } from 'lucide-react-native';
 import { Formik, FormikHelpers } from 'formik';
@@ -7,20 +7,53 @@ import { contactValidationSchema } from '@/src/validation/contactValidation';
 import Colors from '@/src/constants/Colors';
 import CustomButton from '@/src/components/buttons/customButton';
 import CustomTextInput from '@/src/components/form/inputTextField';
+import contactService from '@/src/service/api/contactService';
 
 interface ModalProps {
     isVisible: boolean;
     setVisible: (visible: boolean) => void;
+    userId: string;
+    contactId: string;
+    onContactDeleted?: () => void;
 }
 
-export default function updateContactModal({
+export default function UpdateContactModal({
     isVisible,
     setVisible,
+    userId,
+    contactId,
+    onContactDeleted,
 }: ModalProps) {
-    const [selectedDate, setSelectedDate] = useState('');
-    const [selectedInterval, setSelectedInterval] = useState<string | number>(
-        '',
-    );
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [initialValues, setInitialValues] = useState({
+        contactName: '',
+        phoneNumber: '',
+    });
+
+    useEffect(() => {
+        if (isVisible && contactId) {
+            fetchContactData();
+        }
+    }, [isVisible, contactId]);
+
+    async function fetchContactData() {
+        try {
+            const response = await contactService.contact(userId, contactId);
+            setInitialValues({
+                contactName: response.name,
+                phoneNumber: response.numberPhone,
+            });
+        } catch (error) {
+            if (error instanceof Error) {
+                Alert.alert('Erro', error.message);
+            } else {
+                Alert.alert(
+                    'Erro',
+                    'Ocorreu um erro ao carregar os dados do contato.',
+                );
+            }
+        }
+    }
 
     async function handleSubmit(
         values: {
@@ -32,8 +65,73 @@ export default function updateContactModal({
             phoneNumber: string;
         }>,
     ) {
-        console.log('Contato Atualizado:', values);
-        setVisible(false);
+        try {
+            setIsSubmitting(true);
+
+            const response = await contactService.updateContact(
+                userId,
+                contactId,
+                values.contactName,
+                values.phoneNumber,
+            );
+
+            setVisible(false);
+
+            formikHelpers.resetForm();
+        } catch (error) {
+            if (error instanceof Error) {
+                Alert.alert('Erro', error.message);
+            } else {
+                Alert.alert(
+                    'Erro',
+                    'Ocorreu um erro inesperado ao atualizar o contato.',
+                );
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
+
+    async function handleDeleteContact() {
+        try {
+            Alert.alert(
+                'Confirmar Remoção',
+                'Tem certeza que deseja remover este contato?',
+                [
+                    {
+                        text: 'Cancelar',
+                        style: 'cancel',
+                    },
+                    {
+                        text: 'Remover',
+                        onPress: async () => {
+                            setIsSubmitting(true);
+                            await contactService.deleteContact(
+                                userId,
+                                contactId,
+                            );
+
+                            setVisible(false);
+                            if (onContactDeleted) {
+                                onContactDeleted();
+                            }
+                        },
+                    },
+                ],
+                { cancelable: true },
+            );
+        } catch (error) {
+            if (error instanceof Error) {
+                Alert.alert('Erro', error.message);
+            } else {
+                Alert.alert(
+                    'Erro',
+                    'Ocorreu um erro inesperado ao remover o contato.',
+                );
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     return (
@@ -46,12 +144,10 @@ export default function updateContactModal({
             style={styles.modal}
         >
             <Formik
-                initialValues={{
-                    contactName: '',
-                    phoneNumber: '',
-                }}
+                initialValues={initialValues}
                 validationSchema={contactValidationSchema}
                 onSubmit={handleSubmit}
+                enableReinitialize
             >
                 {({
                     handleChange,
@@ -60,11 +156,8 @@ export default function updateContactModal({
                     values,
                     errors,
                     touched,
-                    setFieldValue,
                 }) => (
                     <View style={styles.menu}>
-                        {/* <Text style={styles.title}>Atualizar Contato</Text> */}
-
                         <View style={styles.inputWrapperErrorContainer}>
                             <View style={styles.inputContainer}>
                                 <User2 style={styles.iconInput} />
@@ -100,12 +193,14 @@ export default function updateContactModal({
                             <CustomButton
                                 text="Atualizar Contato"
                                 onPress={() => handleSubmit()}
+                                disabled={isSubmitting}
                             />
 
                             <CustomButton
                                 text="Remover Contato"
-                                onPress={() => handleSubmit()}
+                                onPress={handleDeleteContact}
                                 backgroundColor={Colors.light.error}
+                                disabled={isSubmitting}
                             />
                         </View>
                     </View>
@@ -127,6 +222,7 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         padding: 20,
         gap: 20,
+        width: '50%',
         shadowColor: Colors.light.shadow,
         shadowOffset: { width: 2, height: -2 },
         shadowOpacity: 0.25,
@@ -172,6 +268,8 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start',
     },
     containerButtons: {
+        justifyContent: 'center',
         flexDirection: 'row',
+        gap: 25,
     },
 });

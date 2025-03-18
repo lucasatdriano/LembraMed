@@ -28,6 +28,7 @@
     "expo-system-ui": "~4.0.8",
     "expo-web-browser": "~14.0.2",
     "formik": "^2.4.6",
+    "lembramed": "file:",
     "lucide-react-native": "^0.479.0",
     "moment": "^2.30.1",
     "react": "18.3.1",

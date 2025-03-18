@@ -1,30 +1,87 @@
-import React, { useState } from 'react';
-import { Pressable, StyleSheet, TextInput, useColorScheme } from 'react-native';
-
-import { Text, View } from '@/src/components/ui/Themed';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/src/components/ui/Themed';
 import Colors from '@/src/constants/Colors';
-import { Phone, Pill, User } from 'lucide-react-native';
+import { Pill } from 'lucide-react-native';
 
-export default function CardContact() {
-    const [text, setText] = useState('');
-    const colorScheme = useColorScheme();
+interface CardMedicationProps {
+    medication: {
+        id: string;
+        name: string;
+        hourFirstDose: string;
+        periodStart: string;
+        periodEnd: string;
+        userId: string;
+        doseIntervalId: number;
+        intervalInHours: number;
+    };
+}
+
+export default function CardMedication({ medication }: CardMedicationProps) {
+    const [nextDoseTime, setNextDoseTime] = useState<string>('');
+    const [nextDoseCountdown, setNextDoseCountdown] = useState<string>('');
+
+    const calculateNextDose = () => {
+        const now = new Date();
+        const firstDoseTime = new Date(
+            `${now.toISOString().split('T')[0]}T${medication.hourFirstDose}:00`,
+        );
+
+        let nextDose = new Date(firstDoseTime);
+        while (nextDose <= now) {
+            nextDose.setHours(nextDose.getHours() + medication.intervalInHours);
+        }
+
+        const nextDoseFormatted = nextDose.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+
+        const diffInSeconds = Math.floor(
+            (nextDose.getTime() - now.getTime()) / 1000,
+        );
+        const hours = Math.floor(diffInSeconds / 3600);
+        const minutes = Math.floor((diffInSeconds % 3600) / 60);
+        const seconds = diffInSeconds % 60;
+        const countdownFormatted = `${String(hours).padStart(2, '0')}:${String(
+            minutes,
+        ).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        setNextDoseTime(nextDoseFormatted);
+        setNextDoseCountdown(countdownFormatted);
+    };
+
+    useEffect(() => {
+        calculateNextDose();
+        const interval = setInterval(calculateNextDose, 1000);
+        return () => clearInterval(interval);
+    }, [medication]);
 
     return (
         <View style={styles.cardContainer}>
             <View style={styles.containerText}>
                 <Pill style={styles.icon} />
-                <Text style={styles.textName}>Ibuprofeno</Text>
-            </View>
-            <View style={styles.containerText}>
-                <Text style={styles.textInfo}>Intervalo: 8/8 horas</Text>
+                <Text style={styles.textName}>{medication.name}</Text>
             </View>
             <View style={styles.containerText}>
                 <Text style={styles.textInfo}>
-                    Horário da próxima dose: 09:00
+                    Intervalo: {medication.intervalInHours} horas
                 </Text>
             </View>
             <View style={styles.containerText}>
-                <Text style={styles.textInfo}>Próxima dose: 03:32:12</Text>
+                <Text style={styles.textInfo}>
+                    Horário da próxima dose: {nextDoseTime}
+                </Text>
+            </View>
+            <View style={styles.containerText}>
+                <Text style={styles.textInfo}>
+                    Próxima dose: {nextDoseCountdown}
+                </Text>
+            </View>
+            <View style={styles.containerText}>
+                <Text style={styles.textInfo}>
+                    Período: {medication.periodStart} - {medication.periodEnd}
+                </Text>
             </View>
         </View>
     );

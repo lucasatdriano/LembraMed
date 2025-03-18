@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 import Colors from '@/src/constants/Colors';
 
-export const authScreenStyles = StyleSheet.create({
+const authScreenStyles = StyleSheet.create({
     pageContainer: {
         flex: 1,
         alignItems: 'center',
@@ -57,3 +57,5 @@ export const authScreenStyles = StyleSheet.create({
         textAlign: 'center',
     },
 });
+
+export default authScreenStyles;

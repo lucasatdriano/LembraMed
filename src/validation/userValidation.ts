@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
 
 const validation = {
-    username: Yup.string().required('Nome de usuário obrigatório'),
+    name: Yup.string().required('Nome de usuário obrigatório'),
     password: Yup.string()
         .min(4, 'A senha deve ter no mínimo 4 caracteres')
         .required('Senha obrigatória'),
@@ -11,12 +11,12 @@ const validation = {
 };
 
 export const loginValidationSchema = Yup.object().shape({
-    username: validation.username,
+    name: validation.name,
     password: validation.password,
 });
 
 export const registerValidationSchema = Yup.object().shape({
-    username: validation.username,
+    name: validation.name,
     password: validation.password,
     confirmPassword: validation.confirmPassword,
 });
