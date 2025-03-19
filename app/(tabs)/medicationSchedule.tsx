@@ -11,16 +11,19 @@ interface Medication {
     id: string;
     name: string;
     hourFirstDose: string;
-    periodStart: string;
-    periodEnd: string;
+    periodStart: string | null;
+    periodEnd: string | null;
     userId: string;
     doseIntervalId: number;
-    intervalInHours: number;
+    doseInterval: {
+        intervalInHours: number;
+    };
 }
 
 export default function MedicationScheduleScreen() {
     const [medications, setMedications] = useState<Medication[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -33,13 +36,16 @@ export default function MedicationScheduleScreen() {
 
     useEffect(() => {
         if (userId) {
-            fetchMedications();
+            fetchMedications(searchQuery);
         }
-    }, [userId]);
+    }, [userId, searchQuery]);
 
-    const fetchMedications = async () => {
+    const fetchMedications = async (search: string = '') => {
         try {
-            const response = await medicationService.medications(userId || '');
+            const response = await medicationService.medications(
+                userId || '',
+                search,
+            );
             setMedications(response);
         } catch (error) {
             if (error instanceof Error) {
@@ -51,14 +57,14 @@ export default function MedicationScheduleScreen() {
     };
 
     const handleMedicationCreated = () => {
-        fetchMedications();
+        fetchMedications(searchQuery);
     };
 
     return (
-        <View>
+        <View style={dashboardScreenStyles.containerPage}>
             <Header
                 placeholder="Pesquise um remédio"
-                screen="medicationScreen"
+                onSearch={setSearchQuery}
             />
             <View style={dashboardScreenStyles.titleContainer}>
                 <View style={dashboardScreenStyles.separator} />
@@ -71,7 +77,7 @@ export default function MedicationScheduleScreen() {
                 {medications.map((medication) => (
                     <CardMedication
                         key={medication.id}
-                        medication={medication}
+                        medicationId={medication.id}
                     />
                 ))}
             </View>

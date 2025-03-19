@@ -1,99 +1,183 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Text } from '@/src/components/ui/Themed';
 import Colors from '@/src/constants/Colors';
-import { Pill } from 'lucide-react-native';
+import { Check, Pill } from 'lucide-react-native';
+import medicationService from '@/src/service/api/medicationService';
+import { localStorageUtil } from '@/src/util/localStorageUtil';
+import Formatters from '@/src/util/formatters';
+import UpdateMedicationModal from '../modals/updateMedicationModal';
 
 interface CardMedicationProps {
-    medication: {
-        id: string;
-        name: string;
-        hourFirstDose: string;
-        periodStart: string;
-        periodEnd: string;
-        userId: string;
-        doseIntervalId: number;
-        intervalInHours: number;
-    };
+    medicationId: string;
 }
 
-export default function CardMedication({ medication }: CardMedicationProps) {
+interface MedicationData {
+    id: string;
+    name: string;
+    hourFirstDose: string;
+    periodStart: string | null;
+    periodEnd: string | null;
+    userId: string;
+    doseIntervalId: number;
+    intervalInHours: number;
+}
+
+export default function CardMedication({ medicationId }: CardMedicationProps) {
+    const [medicationData, setMedicationData] = useState<MedicationData | null>(
+        null,
+    );
     const [nextDoseTime, setNextDoseTime] = useState<string>('');
     const [nextDoseCountdown, setNextDoseCountdown] = useState<string>('');
+    const [userId, setUserId] = useState<string | null>(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isSelected, setIsSelected] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const lastTap = useRef(0);
 
-    const calculateNextDose = () => {
-        const now = new Date();
-        const firstDoseTime = new Date(
-            `${now.toISOString().split('T')[0]}T${medication.hourFirstDose}:00`,
-        );
+    useEffect(() => {
+        const fetchUserId = async () => {
+            const id = await localStorageUtil.get('userId');
+            setUserId(id);
+        };
+        fetchUserId();
+    }, []);
 
-        let nextDose = new Date(firstDoseTime);
-        while (nextDose <= now) {
-            nextDose.setHours(nextDose.getHours() + medication.intervalInHours);
+    useEffect(() => {
+        if (userId) {
+            fetchMedication();
         }
+    }, [userId, medicationId]);
 
-        const nextDoseFormatted = nextDose.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-
-        const diffInSeconds = Math.floor(
-            (nextDose.getTime() - now.getTime()) / 1000,
-        );
-        const hours = Math.floor(diffInSeconds / 3600);
-        const minutes = Math.floor((diffInSeconds % 3600) / 60);
-        const seconds = diffInSeconds % 60;
-        const countdownFormatted = `${String(hours).padStart(2, '0')}:${String(
-            minutes,
-        ).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
-        setNextDoseTime(nextDoseFormatted);
-        setNextDoseCountdown(countdownFormatted);
+    const fetchMedication = async () => {
+        try {
+            if (!userId) throw new Error('Usuário não autenticado.');
+            const response = await medicationService.medication(
+                userId,
+                medicationId,
+            );
+            setMedicationData(response);
+        } catch (error) {
+            console.error('Erro ao encontrar medicamento:', error);
+        }
     };
 
     useEffect(() => {
-        calculateNextDose();
-        const interval = setInterval(calculateNextDose, 1000);
-        return () => clearInterval(interval);
-    }, [medication]);
+        if (medicationData) {
+            const { nextDoseFormatted, countdownFormatted } =
+                Formatters.calculateNextDose(
+                    medicationData.hourFirstDose,
+                    medicationData.intervalInHours,
+                );
+            setNextDoseTime(nextDoseFormatted);
+            setNextDoseCountdown(countdownFormatted);
+
+            const interval = setInterval(() => {
+                const { nextDoseFormatted, countdownFormatted } =
+                    Formatters.calculateNextDose(
+                        medicationData.hourFirstDose,
+                        medicationData.intervalInHours,
+                    );
+                setNextDoseTime(nextDoseFormatted);
+                setNextDoseCountdown(countdownFormatted);
+            }, 1000);
+
+            return () => clearInterval(interval);
+        }
+    }, [medicationData]);
+
+    const handlePress = () => {
+        const now = Date.now();
+        const DOUBLE_PRESS_DELAY = 300;
+
+        if (lastTap.current && now - lastTap.current < DOUBLE_PRESS_DELAY) {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+            setIsSelected((prev) => !prev);
+        } else {
+            lastTap.current = now;
+            timeoutRef.current = setTimeout(() => {
+                setIsModalVisible(true);
+            }, DOUBLE_PRESS_DELAY);
+        }
+    };
+
+    if (!medicationData) {
+        return (
+            <View style={styles.cardContainer}>
+                <Text>Nenhum medicamento encontrado.</Text>
+            </View>
+        );
+    }
 
     return (
-        <View style={styles.cardContainer}>
-            <View style={styles.containerText}>
-                <Pill style={styles.icon} />
-                <Text style={styles.textName}>{medication.name}</Text>
-            </View>
-            <View style={styles.containerText}>
-                <Text style={styles.textInfo}>
-                    Intervalo: {medication.intervalInHours} horas
-                </Text>
-            </View>
-            <View style={styles.containerText}>
-                <Text style={styles.textInfo}>
-                    Horário da próxima dose: {nextDoseTime}
-                </Text>
-            </View>
-            <View style={styles.containerText}>
-                <Text style={styles.textInfo}>
-                    Próxima dose: {nextDoseCountdown}
-                </Text>
-            </View>
-            <View style={styles.containerText}>
-                <Text style={styles.textInfo}>
-                    Período: {medication.periodStart} - {medication.periodEnd}
-                </Text>
-            </View>
-        </View>
+        <>
+            <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
+                <View
+                    style={[
+                        styles.cardContainer,
+                        isSelected && styles.selectedCardContainer,
+                    ]}
+                >
+                    {isSelected && (
+                        <Check color={Colors.light.tabIconSelected} />
+                    )}
+                    <View style={styles.containerData}>
+                        <View style={styles.containerText}>
+                            <Pill style={styles.icon} />
+                            <Text style={styles.textName}>
+                                {medicationData.name}
+                            </Text>
+                        </View>
+                        <View style={styles.containerText}>
+                            <Text style={styles.textInfo}>
+                                Intervalo: {medicationData.intervalInHours}{' '}
+                                horas
+                            </Text>
+                        </View>
+                        <View style={styles.containerText}>
+                            <Text style={styles.textInfo}>
+                                Horário da próxima dose: {nextDoseTime}
+                            </Text>
+                        </View>
+                        <View style={styles.containerText}>
+                            <Text style={styles.textInfo}>
+                                Próxima dose em: {nextDoseCountdown}
+                            </Text>
+                        </View>
+                        {medicationData.periodStart !== null &&
+                            medicationData.periodEnd !== null && (
+                                <View style={styles.containerText}>
+                                    <Text style={styles.textInfo}>
+                                        Período: {medicationData.periodStart} -{' '}
+                                        {medicationData.periodEnd}
+                                    </Text>
+                                </View>
+                            )}
+                    </View>
+                </View>
+            </TouchableOpacity>
+
+            <UpdateMedicationModal
+                isVisible={isModalVisible}
+                setVisible={setIsModalVisible}
+                userId={userId || ''}
+                medicationId={medicationId}
+                onMedicationUpdated={fetchMedication}
+            />
+        </>
     );
 }
 
 const styles = StyleSheet.create({
     cardContainer: {
-        alignItems: 'flex-start',
+        flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'flex-start',
         backgroundColor: Colors.light.colorPrimary,
+        width: '100%',
         paddingHorizontal: 10,
-        marginHorizontal: 10,
         paddingVertical: 20,
         borderRadius: 15,
         shadowColor: Colors.light.shadow,
@@ -103,10 +187,15 @@ const styles = StyleSheet.create({
         elevation: 5,
         gap: 10,
     },
+    selectedCardContainer: {
+        backgroundColor: Colors.light.button,
+    },
+    containerData: {
+        gap: 5,
+    },
     containerText: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: Colors.light.colorPrimary,
         gap: 10,
     },
     textName: {

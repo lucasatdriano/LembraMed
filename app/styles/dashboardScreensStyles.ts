@@ -2,6 +2,9 @@ import { StyleSheet } from 'react-native';
 import Colors from '@/src/constants/Colors';
 
 const dashboardScreenStyles = StyleSheet.create({
+    containerPage: {
+        alignItems: 'center',
+    },
     titleContainer: {
         position: 'relative',
         alignItems: 'flex-start',
@@ -25,7 +28,9 @@ const dashboardScreenStyles = StyleSheet.create({
         marginInlineStart: 20,
     },
     containerCards: {
+        width: '95%',
         gap: 10,
+        // alignItems: 'center',
     },
 });
 

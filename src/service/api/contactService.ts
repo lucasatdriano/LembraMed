@@ -3,10 +3,11 @@ import API_ROUTES from '@/src/service/routes';
 import api from '@/src/service/index';
 
 const contactService = {
-    contacts: async (userId: string) => {
+    contacts: async (userId: string, search: string = '') => {
         try {
             const response = await api.get(
                 API_ROUTES.CONTACTS.CONTACTS({ userId }),
+                { params: { search } },
             );
             return response.data;
         } catch (error) {
@@ -63,7 +64,7 @@ const contactService = {
             const response = await api.put(
                 API_ROUTES.CONTACTS.UPDATE_CONTACT({ userId, contactId }),
                 {
-                    contactName,
+                    name: contactName,
                     numberPhone,
                 },
             );

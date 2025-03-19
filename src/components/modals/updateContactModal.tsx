@@ -8,13 +8,14 @@ import Colors from '@/src/constants/Colors';
 import CustomButton from '@/src/components/buttons/customButton';
 import CustomTextInput from '@/src/components/form/inputTextField';
 import contactService from '@/src/service/api/contactService';
+import Formatters from '@/src/util/formatters';
 
 interface ModalProps {
     isVisible: boolean;
     setVisible: (visible: boolean) => void;
     userId: string;
     contactId: string;
-    onContactDeleted?: () => void;
+    onContactUpdated?: () => void;
 }
 
 export default function UpdateContactModal({
@@ -22,7 +23,7 @@ export default function UpdateContactModal({
     setVisible,
     userId,
     contactId,
-    onContactDeleted,
+    onContactUpdated,
 }: ModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [initialValues, setInitialValues] = useState({
@@ -72,9 +73,12 @@ export default function UpdateContactModal({
                 userId,
                 contactId,
                 values.contactName,
-                values.phoneNumber,
+                values.phoneNumber.replace(/\D/g, ''),
             );
 
+            if (onContactUpdated) {
+                onContactUpdated();
+            }
             setVisible(false);
 
             formikHelpers.resetForm();
@@ -112,8 +116,8 @@ export default function UpdateContactModal({
                             );
 
                             setVisible(false);
-                            if (onContactDeleted) {
-                                onContactDeleted();
+                            if (onContactUpdated) {
+                                onContactUpdated();
                             }
                         },
                     },
@@ -156,6 +160,7 @@ export default function UpdateContactModal({
                     values,
                     errors,
                     touched,
+                    setFieldValue,
                 }) => (
                     <View style={styles.menu}>
                         <View style={styles.inputWrapperErrorContainer}>
@@ -180,8 +185,13 @@ export default function UpdateContactModal({
 
                         <CustomTextInput
                             placeholder="Número de telefone"
+                            maxLength={15}
                             value={values.phoneNumber}
-                            onChangeText={handleChange('phoneNumber')}
+                            onChangeText={(text) => {
+                                const formattedText =
+                                    Formatters.formatPhoneNumber(text);
+                                setFieldValue('phoneNumber', formattedText);
+                            }}
                             onBlur={handleBlur('phoneNumber')}
                             error={errors.phoneNumber}
                             touched={touched.phoneNumber}
@@ -219,10 +229,10 @@ const styles = StyleSheet.create({
     menu: {
         alignItems: 'center',
         backgroundColor: Colors.light.colorPrimary,
+        width: '90%',
         borderRadius: 15,
         padding: 20,
         gap: 20,
-        width: '50%',
         shadowColor: Colors.light.shadow,
         shadowOffset: { width: 2, height: -2 },
         shadowOpacity: 0.25,
@@ -270,6 +280,6 @@ const styles = StyleSheet.create({
     containerButtons: {
         justifyContent: 'center',
         flexDirection: 'row',
-        gap: 25,
+        gap: 10,
     },
 });

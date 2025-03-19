@@ -32,7 +32,7 @@ export default function RootLayout() {
     useEffect(() => {
         const checkToken = async () => {
             try {
-                const token = await localStorageUtil.get('token');
+                const token = await localStorageUtil.get('accessToken');
                 setIsAuthenticated(!!token);
             } catch (err) {
                 console.error('Erro ao verificar o token', err);

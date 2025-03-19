@@ -8,6 +8,7 @@ import CustomButton from '@/src/components/buttons/customButton';
 import CustomTextInput from '@/src/components/form/inputTextField';
 import { contactValidationSchema } from '@/src/validation/contactValidation';
 import contactService from '@/src/service/api/contactService';
+import Formatters from '@/src/util/formatters';
 
 interface ModalProps {
     isVisible: boolean;
@@ -40,7 +41,7 @@ export default function CreateContactModal({
             const response = await contactService.createContact(
                 userId,
                 values.contactName,
-                values.phoneNumber,
+                values.phoneNumber.replace(/\D/g, ''),
             );
 
             setVisible(false);
@@ -88,6 +89,7 @@ export default function CreateContactModal({
                     values,
                     errors,
                     touched,
+                    setFieldValue,
                 }) => (
                     <View style={styles.menu}>
                         <Text style={styles.title}>Adicionar Novo Contato</Text>
@@ -105,8 +107,13 @@ export default function CreateContactModal({
 
                         <CustomTextInput
                             placeholder="Número de telefone"
+                            maxLength={15}
                             value={values.phoneNumber}
-                            onChangeText={handleChange('phoneNumber')}
+                            onChangeText={(text) => {
+                                const formattedText =
+                                    Formatters.formatPhoneNumber(text);
+                                setFieldValue('phoneNumber', formattedText);
+                            }}
                             onBlur={handleBlur('phoneNumber')}
                             error={errors.phoneNumber}
                             touched={touched.phoneNumber}

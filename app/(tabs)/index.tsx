@@ -12,10 +12,12 @@ interface Contact {
     contactName: string;
     phoneNumber: string;
 }
+0;
 
 export default function ContactScreen() {
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -28,14 +30,17 @@ export default function ContactScreen() {
 
     useEffect(() => {
         if (userId) {
-            fetchContacts();
+            fetchContacts(searchQuery);
         }
-    }, [userId]);
+    }, [userId, searchQuery]);
 
-    const fetchContacts = async () => {
+    const fetchContacts = async (search: string = '') => {
         try {
-            const response = await contactService.contacts(userId || '');
-            console.log(response);
+            const response = await contactService.contacts(
+                userId || '',
+                search,
+            );
+
             setContacts(response);
         } catch (error) {
             if (error instanceof Error) {
@@ -47,12 +52,15 @@ export default function ContactScreen() {
     };
 
     const handleContactCreated = () => {
-        fetchContacts();
+        fetchContacts(searchQuery);
     };
 
     return (
-        <View>
-            <Header placeholder="Pesquise um contato" screen="contactScreen" />
+        <View style={dashboardScreenStyles.containerPage}>
+            <Header
+                placeholder="Pesquise um contato"
+                onSearch={setSearchQuery}
+            />
             <View style={dashboardScreenStyles.titleContainer}>
                 <View style={dashboardScreenStyles.separator} />
                 <Text style={dashboardScreenStyles.title}>

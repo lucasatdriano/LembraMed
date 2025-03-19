@@ -1,16 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import {
-    StyleSheet,
-    View,
-    ActivityIndicator,
-    TouchableOpacity,
-} from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { StyleSheet, View, TouchableOpacity, Linking } from 'react-native';
 import { Text } from '@/src/components/ui/Themed';
 import Colors from '@/src/constants/Colors';
 import { Phone, User } from 'lucide-react-native';
 import { localStorageUtil } from '@/src/util/localStorageUtil';
 import contactService from '@/src/service/api/contactService';
 import UpdateContactModal from '../modals/updateContactModal';
+import Formatters from '@/src/util/formatters';
 
 interface CardContactProps {
     contactId: string;
@@ -26,6 +22,8 @@ export default function CardContact({ contactId }: CardContactProps) {
     const [contactData, setContactData] = useState<ContactData | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const lastTap = useRef(0);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -59,8 +57,29 @@ export default function CardContact({ contactId }: CardContactProps) {
         }
     };
 
-    const handleDoubleClick = () => {
-        setIsModalVisible(true);
+    const handlePress = () => {
+        const now = Date.now();
+        const DOUBLE_PRESS_DELAY = 300;
+
+        if (lastTap.current && now - lastTap.current < DOUBLE_PRESS_DELAY) {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+            handleCall();
+        } else {
+            lastTap.current = now;
+            timeoutRef.current = setTimeout(() => {
+                setIsModalVisible(true);
+            }, DOUBLE_PRESS_DELAY);
+        }
+    };
+
+    const handleCall = () => {
+        if (contactData?.numberPhone) {
+            Linking.openURL(`tel:${contactData.numberPhone}`);
+        } else {
+            console.error('Número de telefone não disponível.');
+        }
     };
 
     if (!contactData) {
@@ -73,7 +92,7 @@ export default function CardContact({ contactId }: CardContactProps) {
 
     return (
         <>
-            <TouchableOpacity onPress={handleDoubleClick} activeOpacity={0.8}>
+            <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
                 <View style={styles.cardContainer}>
                     <View style={styles.containerText}>
                         <User style={styles.icon} />
@@ -82,7 +101,9 @@ export default function CardContact({ contactId }: CardContactProps) {
                     <View style={styles.containerText}>
                         <Phone style={styles.icon} />
                         <Text style={styles.textContact}>
-                            {contactData.numberPhone}
+                            {Formatters.formatPhoneNumber(
+                                contactData.numberPhone,
+                            )}
                         </Text>
                     </View>
                 </View>
@@ -93,7 +114,7 @@ export default function CardContact({ contactId }: CardContactProps) {
                 setVisible={setIsModalVisible}
                 userId={userId || ''}
                 contactId={contactId}
-                onContactDeleted={() => {
+                onContactUpdated={() => {
                     fetchContact();
                 }}
             />
@@ -106,9 +127,9 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         justifyContent: 'flex-start',
         backgroundColor: Colors.light.colorPrimary,
+        width: '100%',
         paddingHorizontal: 10,
-        marginHorizontal: 10,
-        paddingVertical: 20,
+        paddingVertical: 15,
         borderRadius: 15,
         shadowColor: Colors.light.shadow,
         shadowOffset: { width: 2, height: 2 },

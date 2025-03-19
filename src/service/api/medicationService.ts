@@ -3,10 +3,11 @@ import API_ROUTES from '@/src/service/routes';
 import api from '@/src/service/index';
 
 const medicationService = {
-    medications: async (userId: string) => {
+    medications: async (userId: string, search: string = '') => {
         try {
             const response = await api.get(
                 API_ROUTES.MEDICATIONS.MEDICATIONS({ userId }),
+                { params: { search } },
             );
             return response.data;
         } catch (error) {
@@ -29,7 +30,7 @@ const medicationService = {
             const response = await api.post(
                 API_ROUTES.MEDICATIONS.CREATE_MEDICATION({ userId }),
                 {
-                    medicationName,
+                    name: medicationName,
                     hourFirstDose,
                     intervalInHours,
                     periodStart,
@@ -75,7 +76,7 @@ const medicationService = {
                     medicationId,
                 }),
                 {
-                    medicationName,
+                    name: medicationName,
                     hourFirstDose,
                     intervalInHours,
                     periodStart,

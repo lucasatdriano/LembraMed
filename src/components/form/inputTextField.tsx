@@ -9,6 +9,7 @@ interface CustomInputTextFieldProps {
     onChangeText: (text: string) => void;
     onBlur: (e: any) => void;
     touched: boolean | undefined;
+    maxLength?: number;
     error?: string;
     icon?: React.ReactNode;
     secureTextEntry?: boolean;
@@ -24,6 +25,7 @@ export default function CustomTextInput({
     onChangeText,
     onBlur,
     error,
+    maxLength,
     touched,
     icon,
     secureTextEntry = false,
@@ -39,6 +41,7 @@ export default function CustomTextInput({
                 <TextInput
                     style={styles.input}
                     placeholder={placeholder}
+                    maxLength={maxLength}
                     value={value}
                     onChangeText={onChangeText}
                     onBlur={onBlur}

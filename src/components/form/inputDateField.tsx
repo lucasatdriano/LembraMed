@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     TextInput,
@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import DatePicker from 'react-native-date-picker';
 import Colors from '@/src/constants/Colors';
+import Formatters from '@/src/util/formatters';
 
 interface CustomDateInputProps {
     placeholder: string;
@@ -35,25 +36,20 @@ export default function CustomDateInput({
         if (isStartDate) {
             setStartDate(date);
             setIsStartDate(false);
-            setOpen(true); // Abrir o segundo seletor de data
+            setOpen(true);
         } else {
             setEndDate(date);
             setOpen(false);
         }
     };
 
-    const formatDate = (date: Date | null) =>
-        date
-            ? `${date.getDate().toString().padStart(2, '0')}/${(
-                  date.getMonth() + 1
-              )
-                  .toString()
-                  .padStart(2, '0')}/${date.getFullYear()}`
-            : '';
-
-    React.useEffect(() => {
+    useEffect(() => {
         if (startDate && endDate) {
-            onChangeText(`${formatDate(startDate)} - ${formatDate(endDate)}`);
+            onChangeText(
+                `${Formatters.formatDate(startDate)} - ${Formatters.formatDate(
+                    endDate,
+                )}`,
+            );
         }
     }, [startDate, endDate]);
 

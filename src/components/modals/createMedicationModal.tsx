@@ -12,12 +12,13 @@ import CustomHourInput from '@/src/components/form/inputHourField';
 import CustomDropdownInput from '@/src/components/form/inputDropdownField';
 import CustomDateInput from '@/src/components/form/inputDateField';
 import medicationService from '@/src/service/api/medicationService';
+import Formatters from '@/src/util/formatters';
 
 interface ModalProps {
     isVisible: boolean;
     setVisible: (visible: boolean) => void;
     userId: string;
-    onMedicationCreated?: () => void; // Função para atualizar a lista após a criação
+    onMedicationCreated?: () => void;
 }
 
 export default function CreateMedicationModal({
@@ -31,11 +32,6 @@ export default function CreateMedicationModal({
         '',
     );
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const splitPeriod = (period: string) => {
-        const [start, end] = period.split(' - ');
-        return { start, end };
-    };
 
     async function handleSubmit(
         values: {
@@ -54,9 +50,8 @@ export default function CreateMedicationModal({
         try {
             setIsSubmitting(true);
 
-            const { start: periodStart, end: periodEnd } = splitPeriod(
-                values.period,
-            );
+            const { start: periodStart, end: periodEnd } =
+                Formatters.splitPeriod(values.period);
 
             await medicationService.createMedication(
                 userId,

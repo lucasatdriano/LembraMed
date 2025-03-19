@@ -46,6 +46,7 @@ export default function CustomDropdownInput({
                     style={{
                         inputIOS: styles.input,
                         inputAndroid: styles.input,
+                        inputWeb: styles.input,
                     }}
                     useNativeAndroidPickerStyle={false}
                 />
@@ -70,6 +71,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.light.colorPrimary,
     },
     iconInput: {
+        zIndex: 999,
         position: 'absolute',
         left: 10,
     },
@@ -78,7 +80,8 @@ const styles = StyleSheet.create({
         height: '100%',
         backgroundColor: Colors.light.input,
         color: Colors.light.text,
-        paddingHorizontal: 40,
+        paddingLeft: 35,
+        paddingRight: 10,
         fontSize: 16,
         borderRadius: 10,
         borderWidth: 1,

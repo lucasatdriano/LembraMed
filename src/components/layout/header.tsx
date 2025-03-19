@@ -1,18 +1,33 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, TextInput } from 'react-native';
-
-import { Text, View } from '@/src/components/ui/Themed';
+import { View } from '@/src/components/ui/Themed';
 import Colors from '@/src/constants/Colors';
 import { Search } from 'lucide-react-native';
 import MenuAccount from '@/src/components/layout/menuAccount';
+import { localStorageUtil } from '@/src/util/localStorageUtil';
 
 interface HeaderProps {
     placeholder: string;
-    screen: 'contactScreen' | 'medicationScreen';
+    onSearch: (search: string) => void;
 }
 
-export default function Header({ placeholder, screen }: HeaderProps) {
+export default function Header({ placeholder, onSearch }: HeaderProps) {
     const [text, setText] = useState('');
+    const [userId, setUserId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchUserId = async () => {
+            const id = await localStorageUtil.get('userId');
+            setUserId(id);
+        };
+
+        fetchUserId();
+    }, []);
+
+    const handleSearch = (searchText: string) => {
+        setText(searchText);
+        onSearch(searchText);
+    };
 
     return (
         <View style={styles.headerContainer}>
@@ -22,11 +37,11 @@ export default function Header({ placeholder, screen }: HeaderProps) {
                     style={styles.input}
                     placeholder={placeholder}
                     value={text}
-                    onChangeText={setText}
+                    onChangeText={handleSearch}
                     placeholderTextColor="#888"
                 />
             </View>
-            <MenuAccount />
+            <MenuAccount userId={userId || ''} />
         </View>
     );
 }
@@ -37,6 +52,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: Colors.light.colorPrimary,
+        width: '100%',
         paddingHorizontal: 20,
         paddingVertical: 10,
         borderBottomLeftRadius: 15,

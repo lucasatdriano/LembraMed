@@ -11,13 +11,14 @@ import CustomHourInput from '@/src/components/form/inputHourField';
 import { MEDICATION_INTERVALS } from '@/src/constants/medicationIntervals';
 import { medicationValidationSchema } from '@/src/validation/medicationValidation';
 import medicationService from '@/src/service/api/medicationService';
+import Formatters from '@/src/util/formatters';
 
 interface ModalProps {
     isVisible: boolean;
     setVisible: (visible: boolean) => void;
     userId: string;
     medicationId: string;
-    onMedicationDeleted?: () => void;
+    onMedicationUpdated?: () => void;
 }
 
 export default function UpdateMedicationModal({
@@ -25,7 +26,7 @@ export default function UpdateMedicationModal({
     setVisible,
     userId,
     medicationId,
-    onMedicationDeleted,
+    onMedicationUpdated,
 }: ModalProps) {
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedInterval, setSelectedInterval] = useState<string | number>(
@@ -45,22 +46,13 @@ export default function UpdateMedicationModal({
         }
     }, [isVisible, medicationId]);
 
-    const formatPeriod = (start: string, end: string) => {
-        return `${start} - ${end}`;
-    };
-
-    const splitPeriod = (period: string) => {
-        const [start, end] = period.split(' - ');
-        return { start, end };
-    };
-
     async function fetchMedicationData() {
         try {
             const response = await medicationService.medication(
                 userId,
                 medicationId,
             );
-            const formattedPeriod = formatPeriod(
+            const formattedPeriod = Formatters.formatPeriod(
                 response.periodStart,
                 response.periodEnd,
             );
@@ -101,9 +93,8 @@ export default function UpdateMedicationModal({
         try {
             setIsSubmitting(true);
 
-            const { start: periodStart, end: periodEnd } = splitPeriod(
-                values.period,
-            );
+            const { start: periodStart, end: periodEnd } =
+                Formatters.splitPeriod(values.period);
 
             await medicationService.updateMedication(
                 userId,
@@ -152,8 +143,8 @@ export default function UpdateMedicationModal({
                             );
 
                             setVisible(false);
-                            if (onMedicationDeleted) {
-                                onMedicationDeleted();
+                            if (onMedicationUpdated) {
+                                onMedicationUpdated();
                             }
                         },
                     },
@@ -288,6 +279,7 @@ const styles = StyleSheet.create({
     menu: {
         alignItems: 'center',
         backgroundColor: Colors.light.colorPrimary,
+        width: '95%',
         borderRadius: 15,
         padding: 20,
         gap: 20,
@@ -336,6 +328,8 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start',
     },
     containerButtons: {
+        justifyContent: 'center',
         flexDirection: 'row',
+        gap: 10,
     },
 });

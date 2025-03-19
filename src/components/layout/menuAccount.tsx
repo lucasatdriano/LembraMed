@@ -28,6 +28,7 @@ export default function MenuAccount({ userId }: MenuAccountProps) {
 
     async function handleLogout() {
         try {
+            console.log('Abrir alert');
             Alert.alert(
                 'Confirmar Logout',
                 'Tem certeza que deseja sair da sua conta?',
@@ -40,16 +41,24 @@ export default function MenuAccount({ userId }: MenuAccountProps) {
                         text: 'Sair',
                         onPress: async () => {
                             try {
+                                console.log('Iniciando logout...');
                                 await userService.logout(userId);
 
+                                console.log(
+                                    'Removendo tokens do localStorage...',
+                                );
                                 await localStorageUtil.remove('token');
                                 await localStorageUtil.remove('userId');
                                 await localStorageUtil.remove('refreshToken');
 
+                                console.log(
+                                    'Redirecionando para a tela de login...',
+                                );
                                 router.replace('/login');
 
                                 Alert.alert('', 'Você foi desconectado.');
                             } catch (error) {
+                                console.error('Erro durante o logout:', error);
                                 if (error instanceof Error) {
                                     Alert.alert('Erro', error.message);
                                 } else {
@@ -67,6 +76,7 @@ export default function MenuAccount({ userId }: MenuAccountProps) {
                 { cancelable: true },
             );
         } catch (error) {
+            console.error('Erro ao tentar exibir o alerta de logout:', error);
             if (error instanceof Error) {
                 Alert.alert('Erro', error.message);
             } else {
