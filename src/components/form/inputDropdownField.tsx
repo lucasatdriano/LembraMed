@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
-import { ChevronDown } from 'lucide-react-native';
 import Colors from '@/src/constants/Colors';
 
 interface Option {
@@ -35,21 +34,23 @@ export default function CustomDropdownInput({
             <View style={styles.inputContainer}>
                 {icon && <View style={styles.iconInput}>{icon}</View>}
 
-                <RNPickerSelect
-                    onValueChange={(selectedValue: string | number) => {
-                        onChangeText(selectedValue);
-                        onBlur();
-                    }}
-                    value={value}
-                    placeholder={{ label: placeholder, value: null }}
-                    items={options}
-                    style={{
-                        inputIOS: styles.input,
-                        inputAndroid: styles.input,
-                        inputWeb: styles.input,
-                    }}
-                    useNativeAndroidPickerStyle={false}
-                />
+                <View style={styles.inputPicker}>
+                    <RNPickerSelect
+                        onValueChange={(selectedValue: string | number) => {
+                            onChangeText(selectedValue);
+                            onBlur();
+                        }}
+                        value={value}
+                        placeholder={{ label: placeholder, value: null }}
+                        items={options}
+                        style={{
+                            inputIOS: styles.input,
+                            inputAndroid: styles.input,
+                            inputWeb: styles.input,
+                        }}
+                        useNativeAndroidPickerStyle={false}
+                    />
+                </View>
             </View>
 
             {touched && error && <Text style={styles.errorText}>{error}</Text>}
@@ -64,8 +65,6 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.light.colorPrimary,
     },
     inputContainer: {
-        position: 'relative',
-        height: 40,
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: Colors.light.colorPrimary,
@@ -75,9 +74,12 @@ const styles = StyleSheet.create({
         position: 'absolute',
         left: 10,
     },
-    input: {
+    inputPicker: {
         flex: 1,
-        height: '100%',
+    },
+    input: {
+        position: 'relative',
+        height: 40,
         backgroundColor: Colors.light.input,
         color: Colors.light.text,
         paddingLeft: 35,

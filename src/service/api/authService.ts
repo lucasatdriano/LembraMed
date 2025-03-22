@@ -58,7 +58,7 @@ const authService = {
 
         try {
             const response = await api.post(API_ROUTES.AUTH.REFRESH_TOKEN, {
-                refreshToken,
+                refreshtoken: refreshToken,
             });
 
             if (!response.data.accessToken) {

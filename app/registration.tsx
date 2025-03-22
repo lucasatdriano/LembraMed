@@ -120,7 +120,7 @@ export default function RegistrationScreen() {
                                 </Text>
                             </View>
                             <CustomButton
-                                text="Login"
+                                text="Ir para o Login"
                                 onPress={navigationToLogin}
                             />
                         </View>

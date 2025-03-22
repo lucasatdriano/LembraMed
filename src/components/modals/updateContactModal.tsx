@@ -42,7 +42,7 @@ export default function UpdateContactModal({
             const response = await contactService.contact(userId, contactId);
             setInitialValues({
                 contactName: response.name,
-                phoneNumber: response.numberPhone,
+                phoneNumber: response.numberphone,
             });
         } catch (error) {
             if (error instanceof Error) {
@@ -69,12 +69,10 @@ export default function UpdateContactModal({
         try {
             setIsSubmitting(true);
 
-            const response = await contactService.updateContact(
-                userId,
-                contactId,
-                values.contactName,
-                values.phoneNumber.replace(/\D/g, ''),
-            );
+            await contactService.updateContact(userId, contactId, {
+                contactName: values.contactName,
+                numberPhone: values.phoneNumber.replace(/\D/g, ''),
+            });
 
             if (onContactUpdated) {
                 onContactUpdated();
@@ -163,25 +161,18 @@ export default function UpdateContactModal({
                     setFieldValue,
                 }) => (
                     <View style={styles.menu}>
-                        <View style={styles.inputWrapperErrorContainer}>
-                            <View style={styles.inputContainer}>
-                                <User2 style={styles.iconInput} />
+                        <Text style={styles.title}>Atualizar Contato</Text>
 
-                                <TextInput
-                                    style={styles.inputTitle}
-                                    placeholder="Nome do contato"
-                                    value={values.contactName}
-                                    onChangeText={handleChange('contactName')}
-                                    onBlur={handleBlur('contactName')}
-                                    placeholderTextColor="#888"
-                                />
-                            </View>
-                            {touched.contactName && errors.contactName && (
-                                <Text style={styles.errorText}>
-                                    {errors.contactName}
-                                </Text>
-                            )}
-                        </View>
+                        <CustomTextInput
+                            placeholder="Nome do contato"
+                            value={values.contactName}
+                            onChangeText={handleChange('contactName')}
+                            onBlur={handleBlur('contactName')}
+                            error={errors.contactName}
+                            touched={touched.contactName}
+                            icon={<User2 />}
+                            autoCapitalize="none"
+                        />
 
                         <CustomTextInput
                             placeholder="Número de telefone"
@@ -229,9 +220,10 @@ const styles = StyleSheet.create({
     menu: {
         alignItems: 'center',
         backgroundColor: Colors.light.colorPrimary,
-        width: '90%',
         borderRadius: 15,
-        padding: 20,
+        width: '90%',
+        paddingHorizontal: 10,
+        paddingVertical: 20,
         gap: 20,
         shadowColor: Colors.light.shadow,
         shadowOffset: { width: 2, height: -2 },
@@ -239,47 +231,11 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         elevation: 5,
     },
-    inputWrapperErrorContainer: {
-        width: '100%',
-        gap: 5,
-        backgroundColor: Colors.light.colorPrimary,
-    },
-    inputContainer: {
-        position: 'relative',
-        height: 40,
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: Colors.light.colorPrimary,
-    },
-    iconInput: {
-        position: 'absolute',
-        left: 10,
-    },
-    inputTitle: {
-        flex: 1,
-        height: '100%',
-        backgroundColor: Colors.light.input,
-        color: Colors.light.text,
-        paddingHorizontal: 40,
-        fontSize: 16,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: Colors.light.text,
-        shadowColor: Colors.light.shadow,
-        shadowOffset: { width: 2, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 5,
-        elevation: 5,
-    },
-    errorText: {
-        color: Colors.light.error,
-        paddingLeft: 30,
-        fontSize: 12,
-        alignSelf: 'flex-start',
+    title: {
+        fontSize: 20,
     },
     containerButtons: {
         justifyContent: 'center',
-        flexDirection: 'row',
         gap: 10,
     },
 });

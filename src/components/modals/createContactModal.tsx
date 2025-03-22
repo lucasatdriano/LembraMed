@@ -38,11 +38,10 @@ export default function CreateContactModal({
         try {
             setIsSubmitting(true);
 
-            const response = await contactService.createContact(
-                userId,
-                values.contactName,
-                values.phoneNumber.replace(/\D/g, ''),
-            );
+            await contactService.createContact(userId, {
+                contactName: values.contactName,
+                numberPhone: values.phoneNumber.replace(/\D/g, ''),
+            });
 
             setVisible(false);
             if (onContactCreated) {
@@ -143,7 +142,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: Colors.light.colorPrimary,
         borderRadius: 15,
-        padding: 20,
+        width: '90%',
+        paddingHorizontal: 10,
+        paddingVertical: 20,
         gap: 20,
         shadowColor: Colors.light.shadow,
         shadowOffset: { width: 2, height: -2 },

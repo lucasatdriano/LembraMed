@@ -12,6 +12,7 @@ import { MEDICATION_INTERVALS } from '@/src/constants/medicationIntervals';
 import { medicationValidationSchema } from '@/src/validation/medicationValidation';
 import medicationService from '@/src/service/api/medicationService';
 import Formatters from '@/src/util/formatters';
+import CustomTextInput from '../form/inputTextField';
 
 interface ModalProps {
     isVisible: boolean;
@@ -35,7 +36,6 @@ export default function UpdateMedicationModal({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [initialValues, setInitialValues] = useState({
         medicationName: '',
-        hour: '',
         interval: '',
         period: '',
     });
@@ -53,17 +53,16 @@ export default function UpdateMedicationModal({
                 medicationId,
             );
             const formattedPeriod = Formatters.formatPeriod(
-                response.periodStart,
-                response.periodEnd,
+                response.periodstart,
+                response.periodend,
             );
             setInitialValues({
-                medicationName: response.medicationName,
-                hour: response.hourFirstDose,
-                interval: response.intervalInHours.toString(),
+                medicationName: response.name,
+                interval: response.intervalinhours.toString(),
                 period: formattedPeriod,
             });
             setSelectedDate(formattedPeriod);
-            setSelectedInterval(response.intervalInHours.toString());
+            setSelectedInterval(response.intervalinhours.toString());
         } catch (error) {
             if (error instanceof Error) {
                 Alert.alert('Erro', error.message);
@@ -79,13 +78,11 @@ export default function UpdateMedicationModal({
     async function handleSubmit(
         values: {
             medicationName: string;
-            hour: string;
             interval: string;
             period: string;
         },
         formikHelpers: FormikHelpers<{
             medicationName: string;
-            hour: string;
             interval: string;
             period: string;
         }>,
@@ -96,15 +93,12 @@ export default function UpdateMedicationModal({
             const { start: periodStart, end: periodEnd } =
                 Formatters.splitPeriod(values.period);
 
-            await medicationService.updateMedication(
-                userId,
-                medicationId,
-                values.medicationName,
-                values.hour,
-                Number(values.interval),
-                periodStart,
-                periodEnd,
-            );
+            await medicationService.updateMedication(userId, medicationId, {
+                medicationName: values.medicationName,
+                intervalInHours: Number(values.interval),
+                periodStart: periodStart,
+                periodEnd: periodEnd,
+            });
 
             setVisible(false);
 
@@ -190,37 +184,17 @@ export default function UpdateMedicationModal({
                     setFieldValue,
                 }) => (
                     <View style={styles.menu}>
-                        <View style={styles.inputWrapperErrorContainer}>
-                            <View style={styles.inputContainer}>
-                                <Pill style={styles.iconInput} />
+                        <Text style={styles.title}>Atualizar Medicamento</Text>
 
-                                <TextInput
-                                    style={styles.inputTitle}
-                                    placeholder="Nome do remédio"
-                                    value={values.medicationName}
-                                    onChangeText={handleChange(
-                                        'medicationName',
-                                    )}
-                                    onBlur={handleBlur('medicationName')}
-                                    placeholderTextColor="#888"
-                                />
-                            </View>
-                            {touched.medicationName &&
-                                errors.medicationName && (
-                                    <Text style={styles.errorText}>
-                                        {errors.medicationName}
-                                    </Text>
-                                )}
-                        </View>
-
-                        <CustomHourInput
-                            placeholder="HH:MM"
-                            value={values.hour}
-                            onChangeText={handleChange('hour')}
-                            onBlur={handleBlur('hour')}
-                            touched={touched.hour}
-                            error={errors.hour}
-                            icon={<Clock />}
+                        <CustomTextInput
+                            placeholder="Nome do remédio"
+                            value={values.medicationName}
+                            onChangeText={handleChange('medicationName')}
+                            onBlur={handleBlur('medicationName')}
+                            error={errors.medicationName}
+                            touched={touched.medicationName}
+                            icon={<Pill />}
+                            autoCapitalize="none"
                         />
 
                         <CustomDropdownInput
@@ -279,9 +253,10 @@ const styles = StyleSheet.create({
     menu: {
         alignItems: 'center',
         backgroundColor: Colors.light.colorPrimary,
-        width: '95%',
         borderRadius: 15,
-        padding: 20,
+        width: '90%',
+        paddingHorizontal: 10,
+        paddingVertical: 20,
         gap: 20,
         shadowColor: Colors.light.shadow,
         shadowOffset: { width: 2, height: -2 },
@@ -289,47 +264,11 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         elevation: 5,
     },
-    inputWrapperErrorContainer: {
-        width: '100%',
-        gap: 5,
-        backgroundColor: Colors.light.colorPrimary,
-    },
-    inputContainer: {
-        position: 'relative',
-        height: 40,
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: Colors.light.colorPrimary,
-    },
-    iconInput: {
-        position: 'absolute',
-        left: 10,
-    },
-    inputTitle: {
-        flex: 1,
-        height: '100%',
-        backgroundColor: Colors.light.input,
-        color: Colors.light.text,
-        paddingHorizontal: 40,
-        fontSize: 16,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: Colors.light.text,
-        shadowColor: Colors.light.shadow,
-        shadowOffset: { width: 2, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 5,
-        elevation: 5,
-    },
-    errorText: {
-        color: Colors.light.error,
-        paddingLeft: 30,
-        fontSize: 12,
-        alignSelf: 'flex-start',
+    title: {
+        fontSize: 20,
     },
     containerButtons: {
         justifyContent: 'center',
-        flexDirection: 'row',
         gap: 10,
     },
 });

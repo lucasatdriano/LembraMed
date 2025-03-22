@@ -9,34 +9,6 @@ const Formatters = {
     formatPeriod: (start: string, end: string) => {
         return `${start} - ${end}`;
     },
-    calculateNextDose: (hourFirstDose: string, intervalInHours: number) => {
-        const now = new Date();
-        const firstDoseTime = new Date(
-            `${now.toISOString().split('T')[0]}T${hourFirstDose}`,
-        );
-
-        let nextDose = new Date(firstDoseTime);
-        while (nextDose <= now) {
-            nextDose.setHours(nextDose.getHours() + intervalInHours);
-        }
-
-        const nextDoseFormatted = nextDose.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-
-        const diffInSeconds = Math.floor(
-            (nextDose.getTime() - now.getTime()) / 1000,
-        );
-        const hours = Math.floor(diffInSeconds / 3600);
-        const minutes = Math.floor((diffInSeconds % 3600) / 60);
-        const seconds = diffInSeconds % 60;
-        const countdownFormatted = `${String(hours).padStart(2, '0')}:${String(
-            minutes,
-        ).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
-        return { nextDoseFormatted, countdownFormatted };
-    },
     formatPhoneNumber: (phoneNumber: string) => {
         const cleaned = phoneNumber.replace(/\D/g, '');
 

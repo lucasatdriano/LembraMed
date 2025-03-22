@@ -20,21 +20,23 @@ const medicationService = {
     },
     createMedication: async (
         userId: string,
-        medicationName: string,
-        hourFirstDose: string,
-        intervalInHours: number,
-        periodStart?: string,
-        periodEnd?: string,
+        data: {
+            medicationName: string;
+            hourFirstDose: string;
+            intervalInHours: number;
+            periodStart?: string;
+            periodEnd?: string;
+        },
     ) => {
         try {
             const response = await api.post(
                 API_ROUTES.MEDICATIONS.CREATE_MEDICATION({ userId }),
                 {
-                    name: medicationName,
-                    hourFirstDose,
-                    intervalInHours,
-                    periodStart,
-                    periodEnd,
+                    name: data.medicationName,
+                    hourfirstdose: data.hourFirstDose,
+                    intervalinhours: data.intervalInHours,
+                    periodstart: data.periodStart,
+                    periodend: data.periodEnd,
                 },
             );
             return response.data;
@@ -63,11 +65,13 @@ const medicationService = {
     updateMedication: async (
         userId: string,
         medicationId: string,
-        medicationName?: string,
-        hourFirstDose?: string,
-        intervalInHours?: number,
-        periodStart?: string,
-        periodEnd?: string,
+        data: {
+            medicationName?: string;
+            hourNextDose?: string;
+            intervalInHours?: number;
+            periodStart?: string;
+            periodEnd?: string;
+        },
     ) => {
         try {
             const response = await api.put(
@@ -76,11 +80,11 @@ const medicationService = {
                     medicationId,
                 }),
                 {
-                    name: medicationName,
-                    hourFirstDose,
-                    intervalInHours,
-                    periodStart,
-                    periodEnd,
+                    name: data.medicationName,
+                    hournextdose: data.hourNextDose,
+                    intervalinhours: data.intervalInHours,
+                    periodstart: data.periodStart,
+                    periodend: data.periodEnd,
                 },
             );
             return response.data;

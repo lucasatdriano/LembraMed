@@ -25,13 +25,13 @@ export default function LoginScreen() {
                 values.password,
             );
 
-            if (!response.accessToken || !response.id) {
+            if (!response.accesstoken || !response.id) {
                 throw new Error('Dados de autenticação inválidos.');
             }
 
             await localStorageUtil.set('userId', response.id);
-            await localStorageUtil.set('accessToken', response.accessToken);
-            await localStorageUtil.set('refreshToken', response.refreshToken);
+            await localStorageUtil.set('accessToken', response.accesstoken);
+            await localStorageUtil.set('refreshToken', response.refreshtoken);
 
             router.replace('/(tabs)');
         } catch (error) {

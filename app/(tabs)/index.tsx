@@ -6,13 +6,13 @@ import FloatingActionButton from '@/src/components/buttons/floatingActionButton'
 import { useEffect, useState } from 'react';
 import contactService from '@/src/service/api/contactService';
 import { localStorageUtil } from '@/src/util/localStorageUtil';
+import { ScrollView } from 'react-native';
 
 interface Contact {
     id: string;
-    contactName: string;
-    phoneNumber: string;
+    contactname: string;
+    phonenumber: string;
 }
-0;
 
 export default function ContactScreen() {
     const [contacts, setContacts] = useState<Contact[]>([]);
@@ -61,18 +61,21 @@ export default function ContactScreen() {
                 placeholder="Pesquise um contato"
                 onSearch={setSearchQuery}
             />
-            <View style={dashboardScreenStyles.titleContainer}>
-                <View style={dashboardScreenStyles.separator} />
-                <Text style={dashboardScreenStyles.title}>
-                    Lista de Contatos
-                </Text>
-            </View>
 
-            <View style={dashboardScreenStyles.containerCards}>
-                {contacts.map((contact) => (
-                    <CardContact key={contact.id} contactId={contact.id} />
-                ))}
-            </View>
+            <ScrollView style={dashboardScreenStyles.scrollContainer}>
+                <View style={dashboardScreenStyles.titleContainer}>
+                    <View style={dashboardScreenStyles.separator} />
+                    <Text style={dashboardScreenStyles.title}>
+                        Lista de Contatos
+                    </Text>
+                </View>
+
+                <View style={dashboardScreenStyles.containerCards}>
+                    {contacts.map((contact) => (
+                        <CardContact key={contact.id} contactId={contact.id} />
+                    ))}
+                </View>
+            </ScrollView>
 
             <FloatingActionButton
                 screen="contactScreen"

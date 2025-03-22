@@ -6,17 +6,19 @@ import FloatingActionButton from '@/src/components/buttons/floatingActionButton'
 import { useEffect, useState } from 'react';
 import medicationService from '@/src/service/api/medicationService';
 import { localStorageUtil } from '@/src/util/localStorageUtil';
+import { ScrollView } from 'react-native';
 
 interface Medication {
     id: string;
     name: string;
-    hourFirstDose: string;
-    periodStart: string | null;
-    periodEnd: string | null;
-    userId: string;
-    doseIntervalId: number;
-    doseInterval: {
-        intervalInHours: number;
+    hourfirstdose: string;
+    hournextdose: string;
+    periodstart: string | null;
+    periodend: string | null;
+    userid: string;
+    doseintervalid: number;
+    doseinterval: {
+        intervalinhours: number;
     };
 }
 
@@ -66,21 +68,24 @@ export default function MedicationScheduleScreen() {
                 placeholder="Pesquise um remédio"
                 onSearch={setSearchQuery}
             />
-            <View style={dashboardScreenStyles.titleContainer}>
-                <View style={dashboardScreenStyles.separator} />
-                <Text style={dashboardScreenStyles.title}>
-                    Lista de Remédios
-                </Text>
-            </View>
 
-            <View style={dashboardScreenStyles.containerCards}>
-                {medications.map((medication) => (
-                    <CardMedication
-                        key={medication.id}
-                        medicationId={medication.id}
-                    />
-                ))}
-            </View>
+            <ScrollView style={dashboardScreenStyles.scrollContainer}>
+                <View style={dashboardScreenStyles.titleContainer}>
+                    <View style={dashboardScreenStyles.separator} />
+                    <Text style={dashboardScreenStyles.title}>
+                        Lista de Remédios
+                    </Text>
+                </View>
+
+                <View style={dashboardScreenStyles.containerCards}>
+                    {medications.map((medication) => (
+                        <CardMedication
+                            key={medication.id}
+                            medicationId={medication.id}
+                        />
+                    ))}
+                </View>
+            </ScrollView>
 
             <FloatingActionButton
                 screen="medicationScreen"

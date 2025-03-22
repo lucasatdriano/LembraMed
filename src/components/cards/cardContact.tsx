@@ -15,7 +15,7 @@ interface CardContactProps {
 interface ContactData {
     id: string;
     name: string;
-    numberPhone: string;
+    numberphone: string;
 }
 
 export default function CardContact({ contactId }: CardContactProps) {
@@ -47,6 +47,7 @@ export default function CardContact({ contactId }: CardContactProps) {
             }
 
             const response = await contactService.contact(userId, contactId);
+
             setContactData(response);
         } catch (error) {
             if (error instanceof Error) {
@@ -75,8 +76,8 @@ export default function CardContact({ contactId }: CardContactProps) {
     };
 
     const handleCall = () => {
-        if (contactData?.numberPhone) {
-            Linking.openURL(`tel:${contactData.numberPhone}`);
+        if (contactData?.numberphone) {
+            Linking.openURL(`tel:${contactData.numberphone}`);
         } else {
             console.error('Número de telefone não disponível.');
         }
@@ -102,7 +103,7 @@ export default function CardContact({ contactId }: CardContactProps) {
                         <Phone style={styles.icon} />
                         <Text style={styles.textContact}>
                             {Formatters.formatPhoneNumber(
-                                contactData.numberPhone,
+                                contactData.numberphone,
                             )}
                         </Text>
                     </View>

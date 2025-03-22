@@ -53,14 +53,13 @@ export default function CreateMedicationModal({
             const { start: periodStart, end: periodEnd } =
                 Formatters.splitPeriod(values.period);
 
-            await medicationService.createMedication(
-                userId,
-                values.medicationName,
-                values.hour,
-                Number(values.interval),
-                periodStart,
-                periodEnd,
-            );
+            await medicationService.createMedication(userId, {
+                medicationName: values.medicationName,
+                hourFirstDose: values.hour,
+                intervalInHours: Number(values.interval),
+                periodStart: periodStart,
+                periodEnd: periodEnd,
+            });
 
             setVisible(false);
             if (onMedicationCreated) {
@@ -135,7 +134,7 @@ export default function CreateMedicationModal({
                         />
 
                         <CustomDropdownInput
-                            placeholder="Escolha o intervalo entre as doses"
+                            placeholder="selecione o intervalo"
                             value={selectedInterval}
                             onChangeText={(value) => {
                                 setSelectedInterval(value);
@@ -182,7 +181,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: Colors.light.colorPrimary,
         borderRadius: 15,
-        padding: 20,
+        width: '90%',
+        paddingHorizontal: 10,
+        paddingVertical: 20,
         gap: 20,
         shadowColor: Colors.light.shadow,
         shadowOffset: { width: 2, height: -2 },

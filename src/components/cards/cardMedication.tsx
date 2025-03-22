@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import * as Notifications from 'expo-notifications';
 import { Text } from '@/src/components/ui/Themed';
 import Colors from '@/src/constants/Colors';
 import { Check, Pill } from 'lucide-react-native';
 import medicationService from '@/src/service/api/medicationService';
 import { localStorageUtil } from '@/src/util/localStorageUtil';
-import Formatters from '@/src/util/formatters';
 import UpdateMedicationModal from '../modals/updateMedicationModal';
 
 interface CardMedicationProps {
@@ -15,25 +15,28 @@ interface CardMedicationProps {
 interface MedicationData {
     id: string;
     name: string;
-    hourFirstDose: string;
-    periodStart: string | null;
-    periodEnd: string | null;
-    userId: string;
-    doseIntervalId: number;
-    intervalInHours: number;
+    hourfirstdose: string;
+    hournextdose: string;
+    periodstart: string | null;
+    periodend: string | null;
+    userid: string;
+    doseintervalid: number;
+    doseinterval: {
+        intervalinhours: number;
+    };
 }
 
 export default function CardMedication({ medicationId }: CardMedicationProps) {
     const [medicationData, setMedicationData] = useState<MedicationData | null>(
         null,
     );
-    const [nextDoseTime, setNextDoseTime] = useState<string>('');
     const [nextDoseCountdown, setNextDoseCountdown] = useState<string>('');
     const [userId, setUserId] = useState<string | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isSelected, setIsSelected] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const lastTap = useRef(0);
+    const notificationIds = useRef<string[]>([]);
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -56,35 +59,140 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
                 userId,
                 medicationId,
             );
+
             setMedicationData(response);
         } catch (error) {
             console.error('Erro ao encontrar medicamento:', error);
         }
     };
 
+    const updateNextDose = async () => {
+        try {
+            if (!userId || !medicationData) return;
+
+            const [hours, minutes] = medicationData.hournextdose.split(':');
+            const formattedHourNextDose = `${hours}:${minutes}`;
+            const now = new Date();
+
+            const nextDose = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate(),
+                Number(hours),
+                Number(minutes),
+                0,
+                0,
+            );
+
+            nextDose.setHours(
+                nextDose.getHours() +
+                    medicationData.doseinterval.intervalinhours,
+            );
+            const formattedNextDose = nextDose.toTimeString().slice(0, 5);
+
+            await medicationService.updateMedication(userId, medicationId, {
+                hourNextDose: formattedNextDose,
+            });
+
+            fetchMedication();
+        } catch (error) {
+            console.error('Erro ao atualizar próximo horário de dose:', error);
+        }
+    };
+
+    const scheduleNotifications = async (nextDose: Date) => {
+        for (const notificationId of notificationIds.current) {
+            await Notifications.cancelScheduledNotificationAsync(
+                notificationId,
+            );
+        }
+        notificationIds.current = [];
+
+        for (let i = 0; i < 6; i++) {
+            const notificationTime = new Date(
+                nextDose.getTime() + i * 10 * 60 * 1000,
+            );
+            const notificationId =
+                await Notifications.scheduleNotificationAsync({
+                    content: {
+                        title: 'Hora de tomar seu medicamento!',
+                        body: `Não se esqueça de tomar ${medicationData!.name}`,
+                        sound: true,
+                    },
+                    trigger: {
+                        type: Notifications.SchedulableTriggerInputTypes.DATE,
+                        date: notificationTime,
+                    },
+                });
+            notificationIds.current.push(notificationId);
+        }
+    };
+
     useEffect(() => {
         if (medicationData) {
-            const { nextDoseFormatted, countdownFormatted } =
-                Formatters.calculateNextDose(
-                    medicationData.hourFirstDose,
-                    medicationData.intervalInHours,
+            const nextDose = new Date();
+            const [hours, minutes] = medicationData.hournextdose
+                .split(':')
+                .map(Number);
+
+            if (!isNaN(hours) && !isNaN(minutes)) {
+                nextDose.setHours(hours, minutes, 0, 0);
+            } else {
+                console.error(
+                    'Formato inválido de hournextdose:',
+                    medicationData.hournextdose,
                 );
-            setNextDoseTime(nextDoseFormatted);
-            setNextDoseCountdown(countdownFormatted);
+                return;
+            }
+
+            scheduleNotifications(nextDose);
 
             const interval = setInterval(() => {
-                const { nextDoseFormatted, countdownFormatted } =
-                    Formatters.calculateNextDose(
-                        medicationData.hourFirstDose,
-                        medicationData.intervalInHours,
-                    );
-                setNextDoseTime(nextDoseFormatted);
+                const now = new Date();
+                let diffInSeconds = Math.floor(
+                    (nextDose.getTime() - now.getTime()) / 1000,
+                );
+
+                if (diffInSeconds < 0) {
+                    diffInSeconds = 0;
+                }
+
+                const hours = Math.floor(diffInSeconds / 3600);
+                const minutes = Math.floor((diffInSeconds % 3600) / 60);
+                const seconds = diffInSeconds % 60;
+
+                const countdownFormatted = `${String(hours).padStart(
+                    2,
+                    '0',
+                )}:${String(minutes).padStart(2, '0')}:${String(
+                    seconds,
+                ).padStart(2, '0')}`;
                 setNextDoseCountdown(countdownFormatted);
+
+                if (diffInSeconds <= 0) {
+                    updateNextDose();
+                }
             }, 1000);
 
             return () => clearInterval(interval);
         }
     }, [medicationData]);
+
+    useEffect(() => {
+        if (isSelected) {
+            for (const notificationId of notificationIds.current) {
+                Notifications.cancelScheduledNotificationAsync(notificationId);
+            }
+            notificationIds.current = [];
+
+            const timeout = setTimeout(() => {
+                setIsSelected(false);
+                updateNextDose();
+            }, 30 * 60 * 1000); // 30 minutos
+
+            return () => clearTimeout(timeout);
+        }
+    }, [isSelected, medicationData]);
 
     const handlePress = () => {
         const now = Date.now();
@@ -132,13 +240,16 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
                         </View>
                         <View style={styles.containerText}>
                             <Text style={styles.textInfo}>
-                                Intervalo: {medicationData.intervalInHours}{' '}
+                                Intervalo:{' '}
+                                {medicationData.doseinterval.intervalinhours}/
+                                {medicationData.doseinterval.intervalinhours}{' '}
                                 horas
                             </Text>
                         </View>
                         <View style={styles.containerText}>
                             <Text style={styles.textInfo}>
-                                Horário da próxima dose: {nextDoseTime}
+                                Horário da próxima dose:{' '}
+                                {medicationData.hournextdose}
                             </Text>
                         </View>
                         <View style={styles.containerText}>
@@ -146,12 +257,12 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
                                 Próxima dose em: {nextDoseCountdown}
                             </Text>
                         </View>
-                        {medicationData.periodStart !== null &&
-                            medicationData.periodEnd !== null && (
+                        {medicationData.periodstart !== null &&
+                            medicationData.periodend !== null && (
                                 <View style={styles.containerText}>
                                     <Text style={styles.textInfo}>
-                                        Período: {medicationData.periodStart} -{' '}
-                                        {medicationData.periodEnd}
+                                        Período: {medicationData.periodstart} -{' '}
+                                        {medicationData.periodend}
                                     </Text>
                                 </View>
                             )}

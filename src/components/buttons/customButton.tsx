@@ -32,10 +32,9 @@ export default function CustomButton({
 
 const styles = StyleSheet.create({
     button: {
-        width: '60%',
-        maxWidth: 175,
         alignItems: 'center',
-        paddingVertical: 12,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
         borderRadius: 15,
         shadowColor: Colors.light.shadow,
         shadowOffset: { width: 2, height: 2 },

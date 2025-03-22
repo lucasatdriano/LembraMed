@@ -20,15 +20,17 @@ const contactService = {
     },
     createContact: async (
         userId: string,
-        contactName: string,
-        numberPhone: string,
+        data: {
+            contactName: string;
+            numberPhone: string;
+        },
     ) => {
         try {
             const response = await api.post(
                 API_ROUTES.CONTACTS.CREATE_CONTACT({ userId }),
                 {
-                    name: contactName,
-                    numberPhone,
+                    name: data.contactName,
+                    numberphone: data.numberPhone,
                 },
             );
             return response.data;
@@ -57,15 +59,17 @@ const contactService = {
     updateContact: async (
         userId: string,
         contactId: string,
-        contactName?: string,
-        numberPhone?: string,
+        data: {
+            contactName?: string;
+            numberPhone?: string;
+        },
     ) => {
         try {
             const response = await api.put(
                 API_ROUTES.CONTACTS.UPDATE_CONTACT({ userId, contactId }),
                 {
-                    name: contactName,
-                    numberPhone,
+                    name: data.contactName,
+                    numberphone: data.numberPhone,
                 },
             );
             return response.data;

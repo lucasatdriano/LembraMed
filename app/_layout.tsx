@@ -5,6 +5,16 @@ import * as SplashScreen from 'expo-splash-screen';
 import { ThemeProvider, DefaultTheme } from '@react-navigation/native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { localStorageUtil } from '@/src/util/localStorageUtil';
+import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
+
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+    }),
+});
 
 SplashScreen.preventAutoHideAsync();
 
@@ -26,6 +36,17 @@ export default function RootLayout() {
     const router = useRouter();
 
     useEffect(() => {
+        const requestPermissions = async () => {
+            const { status } = await Notifications.requestPermissionsAsync();
+            if (status !== 'granted') {
+                console.warn('Permissão para notificações não concedida!');
+            }
+        };
+
+        requestPermissions();
+    }, []);
+
+    useEffect(() => {
         if (error) throw error;
     }, [error]);
 
@@ -45,6 +66,16 @@ export default function RootLayout() {
             checkToken();
         }
     }, [loaded]);
+
+    useEffect(() => {
+        const subscription = Notifications.addNotificationReceivedListener(
+            (notification) => {
+                console.log('Notificação recebida:', notification);
+            },
+        );
+
+        return () => subscription.remove();
+    }, []);
 
     if (isAuthenticated === null || !loaded) return null;
 
