@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { StyleSheet, View, TouchableOpacity, Linking } from 'react-native';
 import { Text } from '@/src/components/ui/Themed';
-import Colors from '@/src/constants/Colors';
+import Colors from '@/src/constants/colors';
 import { Phone, User } from 'lucide-react-native';
 import { localStorageUtil } from '@/src/util/localStorageUtil';
 import contactService from '@/src/service/api/contactService';
@@ -84,11 +84,7 @@ export default function CardContact({ contactId }: CardContactProps) {
     };
 
     if (!contactData) {
-        return (
-            <View style={styles.cardContainer}>
-                <Text>Nenhum contato encontrado.</Text>
-            </View>
-        );
+        return null;
     }
 
     return (
@@ -96,11 +92,11 @@ export default function CardContact({ contactId }: CardContactProps) {
             <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
                 <View style={styles.cardContainer}>
                     <View style={styles.containerText}>
-                        <User style={styles.icon} />
+                        <User style={styles.icon} color={Colors.light.text} />
                         <Text style={styles.textName}>{contactData.name}</Text>
                     </View>
                     <View style={styles.containerText}>
-                        <Phone style={styles.icon} />
+                        <Phone style={styles.icon} color={Colors.light.text} />
                         <Text style={styles.textContact}>
                             {Formatters.formatPhoneNumber(
                                 contactData.numberphone,

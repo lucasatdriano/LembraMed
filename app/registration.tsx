@@ -9,6 +9,7 @@ import { Text, View } from '@/src/components/ui/Themed';
 import CustomTextInput from '@/src/components/form/inputTextField';
 import { registerValidationSchema } from '@/src/validation/userValidation';
 import userService from '@/src/service/api/userService';
+import Colors from '@/src/constants/colors';
 
 export default function RegistrationScreen() {
     const [showPassword, setShowPassword] = useState(false);
@@ -74,7 +75,7 @@ export default function RegistrationScreen() {
                             onBlur={handleBlur('name')}
                             error={errors.name}
                             touched={touched.name}
-                            icon={<User />}
+                            icon={<User color={Colors.light.text} />}
                             autoCapitalize="none"
                         />
 
@@ -85,7 +86,7 @@ export default function RegistrationScreen() {
                             onBlur={handleBlur('password')}
                             error={errors.password}
                             touched={touched.password}
-                            icon={<LockKeyhole />}
+                            icon={<LockKeyhole color={Colors.light.text} />}
                             isPasswordField={true}
                             showPassword={showPassword}
                             togglePasswordVisibility={() =>
@@ -100,7 +101,7 @@ export default function RegistrationScreen() {
                             onBlur={handleBlur('confirmPassword')}
                             error={errors.confirmPassword}
                             touched={touched.confirmPassword}
-                            icon={<LockKeyhole />}
+                            icon={<LockKeyhole color={Colors.light.text} />}
                             isPasswordField={true}
                             showPassword={showConfirmPassword}
                             togglePasswordVisibility={() =>

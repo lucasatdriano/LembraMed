@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Text, StyleSheet, Pressable } from 'react-native';
 import { Eye, EyeClosed, LockKeyhole, User } from 'lucide-react-native';
-import Colors from '@/src/constants/Colors';
+import Colors from '@/src/constants/colors';
 
 interface CustomInputTextFieldProps {
     placeholder: string;
@@ -56,7 +56,11 @@ export default function CustomTextInput({
                         onPress={togglePasswordVisibility}
                         style={styles.iconEye}
                     >
-                        {showPassword ? <EyeClosed /> : <Eye />}
+                        {showPassword ? (
+                            <EyeClosed color={Colors.light.text} />
+                        ) : (
+                            <Eye color={Colors.light.text} />
+                        )}
                     </Pressable>
                 )}
             </View>
@@ -81,10 +85,12 @@ const styles = StyleSheet.create({
     iconInput: {
         position: 'absolute',
         left: 10,
+        zIndex: 1,
     },
     input: {
         flex: 1,
-        height: '100%',
+        position: 'absolute',
+        width: '100%',
         backgroundColor: Colors.light.input,
         color: Colors.light.text,
         paddingHorizontal: 40,
@@ -92,11 +98,6 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 1,
         borderColor: Colors.light.text,
-        shadowColor: Colors.light.shadow,
-        shadowOffset: { width: 2, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 5,
-        elevation: 5,
     },
     iconEye: {
         position: 'absolute',

@@ -1,4 +1,4 @@
-import Colors from '@/src/constants/Colors';
+import Colors from '@/src/constants/colors';
 import React from 'react';
 import { Pressable, Text, StyleSheet } from 'react-native';
 
@@ -40,7 +40,6 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 2, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 5,
-        elevation: 5,
     },
     buttonText: {
         fontSize: 16,

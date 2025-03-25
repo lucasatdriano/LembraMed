@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, Alert } from 'react-native';
 import Modal from 'react-native-modal';
-import Colors from '@/src/constants/Colors';
+import Colors from '@/src/constants/colors';
 import { User2, Phone } from 'lucide-react-native';
 import { Formik, FormikHelpers } from 'formik';
 import CustomButton from '@/src/components/buttons/customButton';
@@ -100,7 +100,7 @@ export default function CreateContactModal({
                             onBlur={handleBlur('contactName')}
                             error={errors.contactName}
                             touched={touched.contactName}
-                            icon={<User2 />}
+                            icon={<User2 color={Colors.light.text} />}
                             autoCapitalize="none"
                         />
 
@@ -116,7 +116,7 @@ export default function CreateContactModal({
                             onBlur={handleBlur('phoneNumber')}
                             error={errors.phoneNumber}
                             touched={touched.phoneNumber}
-                            icon={<Phone />}
+                            icon={<Phone color={Colors.light.text} />}
                             autoCapitalize="none"
                         />
 
@@ -146,11 +146,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 20,
         gap: 20,
-        shadowColor: Colors.light.shadow,
-        shadowOffset: { width: 2, height: -2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 5,
-        elevation: 5,
     },
     title: {
         fontSize: 18,

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { TextInputMask } from 'react-native-masked-text';
-import Colors from '@/src/constants/Colors';
+import Colors from '@/src/constants/colors';
 
 interface CustomHourInputProps {
     placeholder: string;
@@ -58,10 +58,12 @@ const styles = StyleSheet.create({
     iconInput: {
         position: 'absolute',
         left: 10,
+        zIndex: 1,
     },
     input: {
         flex: 1,
-        height: '100%',
+        position: 'absolute',
+        width: '100%',
         backgroundColor: Colors.light.input,
         color: Colors.light.text,
         paddingHorizontal: 40,
@@ -69,11 +71,6 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 1,
         borderColor: Colors.light.text,
-        shadowColor: Colors.light.shadow,
-        shadowOffset: { width: 2, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 5,
-        elevation: 5,
     },
     errorText: {
         color: Colors.light.error,

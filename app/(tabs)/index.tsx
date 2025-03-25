@@ -6,7 +6,8 @@ import FloatingActionButton from '@/src/components/buttons/floatingActionButton'
 import { useEffect, useState } from 'react';
 import contactService from '@/src/service/api/contactService';
 import { localStorageUtil } from '@/src/util/localStorageUtil';
-import { ScrollView } from 'react-native';
+import { ScrollView, ActivityIndicator } from 'react-native';
+import Colors from '@/src/constants/colors';
 
 interface Contact {
     id: string;
@@ -18,6 +19,8 @@ export default function ContactScreen() {
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -35,6 +38,8 @@ export default function ContactScreen() {
     }, [userId, searchQuery]);
 
     const fetchContacts = async (search: string = '') => {
+        setLoading(true);
+        setError(null);
         try {
             const response = await contactService.contacts(
                 userId || '',
@@ -42,12 +47,19 @@ export default function ContactScreen() {
             );
 
             setContacts(response);
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error('Erro ao buscar contatos:', error.message);
-            } else {
-                console.error('Erro inesperado ao buscar contatos.');
+
+            if (response.length === 0) {
+                setError(null);
             }
+        } catch (error) {
+            let errorMessage = 'Erro ao buscar contatos';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            setError(errorMessage);
+            setContacts([]);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -70,11 +82,28 @@ export default function ContactScreen() {
                     </Text>
                 </View>
 
-                <View style={dashboardScreenStyles.containerCards}>
-                    {contacts.map((contact) => (
-                        <CardContact key={contact.id} contactId={contact.id} />
-                    ))}
-                </View>
+                {loading ? (
+                    <ActivityIndicator
+                        size="large"
+                        color={Colors.light.colorPrimary}
+                        style={dashboardScreenStyles.loadingIndicator}
+                    />
+                ) : contacts.length === 0 ? (
+                    <Text style={dashboardScreenStyles.emptyListText}>
+                        {searchQuery
+                            ? `Nenhum contato encontrado para "${searchQuery}"`
+                            : 'Nenhum contato encontrado.'}
+                    </Text>
+                ) : (
+                    <View style={dashboardScreenStyles.containerCards}>
+                        {contacts.map((contact) => (
+                            <CardContact
+                                key={contact.id}
+                                contactId={contact.id}
+                            />
+                        ))}
+                    </View>
+                )}
             </ScrollView>
 
             <FloatingActionButton

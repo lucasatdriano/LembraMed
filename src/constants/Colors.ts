@@ -1,7 +1,7 @@
 const tintColorLight = '#032E70';
 const tintColorDark = '#032E70';
 
-export default {
+const Colors = {
     light: {
         text: '#1E1E1E',
         background: '#F4F4F4',
@@ -27,3 +27,5 @@ export default {
         error: '#DA8585',
     },
 };
+
+export default Colors;

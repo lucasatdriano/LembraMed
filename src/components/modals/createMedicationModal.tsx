@@ -5,7 +5,7 @@ import { Pill, Clock, Calendar, Repeat } from 'lucide-react-native';
 import { Formik, FormikHelpers } from 'formik';
 import { MEDICATION_INTERVALS } from '@/src/constants/medicationIntervals';
 import { medicationValidationSchema } from '@/src/validation/medicationValidation';
-import Colors from '@/src/constants/Colors';
+import Colors from '@/src/constants/colors';
 import CustomButton from '@/src/components/buttons/customButton';
 import CustomTextInput from '@/src/components/form/inputTextField';
 import CustomHourInput from '@/src/components/form/inputHourField';
@@ -119,7 +119,7 @@ export default function CreateMedicationModal({
                             onBlur={handleBlur('medicationName')}
                             error={errors.medicationName}
                             touched={touched.medicationName}
-                            icon={<Pill />}
+                            icon={<Pill color={Colors.light.text} />}
                             autoCapitalize="none"
                         />
 
@@ -130,11 +130,11 @@ export default function CreateMedicationModal({
                             onBlur={handleBlur('hour')}
                             touched={touched.hour}
                             error={errors.hour}
-                            icon={<Clock />}
+                            icon={<Clock color={Colors.light.text} />}
                         />
 
                         <CustomDropdownInput
-                            placeholder="selecione o intervalo"
+                            placeholder="Selecione o intervalo"
                             value={selectedInterval}
                             onChangeText={(value) => {
                                 setSelectedInterval(value);
@@ -144,7 +144,7 @@ export default function CreateMedicationModal({
                             touched={touched.interval}
                             error={errors.interval}
                             options={MEDICATION_INTERVALS}
-                            icon={<Repeat />}
+                            icon={<Repeat color={Colors.light.text} />}
                         />
 
                         <CustomDateInput
@@ -178,6 +178,7 @@ const styles = StyleSheet.create({
         margin: 0,
     },
     menu: {
+        position: 'relative',
         alignItems: 'center',
         backgroundColor: Colors.light.colorPrimary,
         borderRadius: 15,
@@ -185,11 +186,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 20,
         gap: 20,
-        shadowColor: Colors.light.shadow,
-        shadowOffset: { width: 2, height: -2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 5,
-        elevation: 5,
     },
     title: {
         fontSize: 18,

@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import Colors from '@/src/constants/Colors';
+import Colors from '@/src/constants/colors';
 
 const dashboardScreenStyles = StyleSheet.create({
     containerPage: {
@@ -36,6 +36,15 @@ const dashboardScreenStyles = StyleSheet.create({
     },
     containerCards: {
         gap: 10,
+    },
+    loadingIndicator: {
+        marginTop: 20,
+    },
+    emptyListText: {
+        textAlign: 'center',
+        marginTop: 20,
+        fontSize: 16,
+        color: Colors.light.text,
     },
 });
 

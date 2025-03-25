@@ -3,7 +3,7 @@ import { View, Pressable, StyleSheet } from 'react-native';
 import { Phone, CalendarDays } from 'lucide-react-native';
 import { Tabs } from 'expo-router';
 
-import Colors from '@/src/constants/Colors';
+import Colors from '@/src/constants/colors';
 
 function TabBarIcon({
     Icon,

@@ -7,6 +7,8 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { localStorageUtil } from '@/src/util/localStorageUtil';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import { PaperProvider } from 'react-native-paper';
+import { paperTheme } from '@/src/constants/paperTheme';
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -97,15 +99,23 @@ function RootLayoutNav({ isAuthenticated }: { isAuthenticated: boolean }) {
     }, [isAuthenticated]);
 
     return (
-        <ThemeProvider value={DefaultTheme}>
-            <Stack>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="login" options={{ headerShown: false }} />
-                <Stack.Screen
-                    name="registration"
-                    options={{ headerShown: false }}
-                />
-            </Stack>
-        </ThemeProvider>
+        <PaperProvider theme={paperTheme}>
+            <ThemeProvider value={DefaultTheme}>
+                <Stack>
+                    <Stack.Screen
+                        name="(tabs)"
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name="login"
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name="registration"
+                        options={{ headerShown: false }}
+                    />
+                </Stack>
+            </ThemeProvider>
+        </PaperProvider>
     );
 }

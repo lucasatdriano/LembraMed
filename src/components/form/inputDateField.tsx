@@ -1,14 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
     View,
     TextInput,
     Text,
     StyleSheet,
     TouchableOpacity,
+    Platform,
 } from 'react-native';
-import DatePicker from 'react-native-date-picker';
-import Colors from '@/src/constants/Colors';
+import DateTimePicker, {
+    DateTimePickerEvent,
+} from '@react-native-community/datetimepicker';
+import Colors from '@/src/constants/colors';
 import Formatters from '@/src/util/formatters';
+import { CalendarDays, Clock3 } from 'lucide-react-native';
 
 interface CustomDateInputProps {
     placeholder: string;
@@ -27,41 +31,60 @@ export default function CustomDateInput({
     error,
     touched,
 }: CustomDateInputProps) {
-    const [open, setOpen] = useState(false);
-    const [isStartDate, setIsStartDate] = useState(true);
+    const [showStartPicker, setShowStartPicker] = useState(false);
+    const [showEndPicker, setShowEndPicker] = useState(false);
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
+    const [dateError, setDateError] = useState<string | null>(null);
 
-    const handleDateConfirm = (date: Date) => {
-        if (isStartDate) {
-            setStartDate(date);
-            setIsStartDate(false);
-            setOpen(true);
-        } else {
-            setEndDate(date);
-            setOpen(false);
+    const handleStartDateChange = (
+        event: DateTimePickerEvent,
+        selectedDate?: Date,
+    ) => {
+        setShowStartPicker(false);
+        if (selectedDate) {
+            setStartDate(selectedDate);
+            setEndDate(null);
+            setDateError(null);
+            setShowEndPicker(true);
         }
     };
 
-    useEffect(() => {
-        if (startDate && endDate) {
-            onChangeText(
-                `${Formatters.formatDate(startDate)} - ${Formatters.formatDate(
-                    endDate,
-                )}`,
-            );
+    const handleEndDateChange = (
+        event: DateTimePickerEvent,
+        selectedDate?: Date,
+    ) => {
+        setShowEndPicker(false);
+        if (selectedDate && startDate) {
+            if (selectedDate < startDate) {
+                setDateError(
+                    'A data de término deve ser posterior à data de início',
+                );
+                onChangeText('');
+                setStartDate(null);
+                setEndDate(null);
+            } else {
+                setEndDate(selectedDate);
+                setDateError(null);
+                onChangeText(
+                    `${Formatters.formatDate(
+                        startDate,
+                    )} - ${Formatters.formatDate(selectedDate)}`,
+                );
+            }
         }
-    }, [startDate, endDate]);
+    };
 
     return (
         <View style={styles.inputWrapperErrorContainer}>
             <TouchableOpacity
-                onPress={() => {
-                    setOpen(true);
-                    setIsStartDate(true);
-                }}
+                onPress={() => setShowStartPicker(true)}
                 style={styles.inputContainer}
             >
+                <CalendarDays
+                    style={styles.iconInput}
+                    color={Colors.light.text}
+                />
                 <TextInput
                     style={styles.input}
                     placeholder={placeholder}
@@ -72,16 +95,27 @@ export default function CustomDateInput({
                 />
             </TouchableOpacity>
 
-            <DatePicker
-                modal
-                open={open}
-                date={isStartDate ? new Date() : startDate || new Date()}
-                mode="date"
-                onConfirm={handleDateConfirm}
-                onCancel={() => setOpen(false)}
-            />
+            {showStartPicker && (
+                <DateTimePicker
+                    value={startDate || new Date()}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={handleStartDateChange}
+                />
+            )}
+
+            {showEndPicker && (
+                <DateTimePicker
+                    value={endDate || new Date()}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={handleEndDateChange}
+                    minimumDate={startDate || undefined}
+                />
+            )}
 
             {touched && error && <Text style={styles.errorText}>{error}</Text>}
+            {dateError && <Text style={styles.errorText}>{dateError}</Text>}
         </View>
     );
 }
@@ -93,22 +127,22 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.light.colorPrimary,
     },
     inputContainer: {
-        height: 40,
         justifyContent: 'center',
         backgroundColor: Colors.light.input,
         borderRadius: 10,
         borderWidth: 1,
         borderColor: Colors.light.text,
-        shadowColor: Colors.light.shadow,
-        shadowOffset: { width: 2, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 5,
-        elevation: 5,
         paddingHorizontal: 10,
     },
     input: {
         color: Colors.light.text,
         fontSize: 16,
+        paddingLeft: 30,
+    },
+    iconInput: {
+        position: 'absolute',
+        top: 10,
+        marginLeft: 10,
     },
     errorText: {
         color: Colors.light.error,

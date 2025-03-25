@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TextInput, Alert } from 'react-native';
 import Modal from 'react-native-modal';
-import Colors from '@/src/constants/Colors';
+import Colors from '@/src/constants/colors';
 import { Calendar, Repeat, Clock, Pill } from 'lucide-react-native';
 import { Formik, FormikHelpers } from 'formik';
 import CustomButton from '@/src/components/buttons/customButton';
@@ -58,11 +58,11 @@ export default function UpdateMedicationModal({
             );
             setInitialValues({
                 medicationName: response.name,
-                interval: response.intervalinhours.toString(),
+                interval: response.intervalinhours,
                 period: formattedPeriod,
             });
             setSelectedDate(formattedPeriod);
-            setSelectedInterval(response.intervalinhours.toString());
+            setSelectedInterval(response.intervalinhours);
         } catch (error) {
             if (error instanceof Error) {
                 Alert.alert('Erro', error.message);
@@ -193,12 +193,12 @@ export default function UpdateMedicationModal({
                             onBlur={handleBlur('medicationName')}
                             error={errors.medicationName}
                             touched={touched.medicationName}
-                            icon={<Pill />}
+                            icon={<Pill color={Colors.light.text} />}
                             autoCapitalize="none"
                         />
 
                         <CustomDropdownInput
-                            placeholder="Escolha o intervalo entre as doses"
+                            placeholder="Selecione o intervalo"
                             value={selectedInterval}
                             onChangeText={(value) => {
                                 setSelectedInterval(value);
@@ -208,7 +208,7 @@ export default function UpdateMedicationModal({
                             touched={touched.interval}
                             error={errors.interval}
                             options={MEDICATION_INTERVALS}
-                            icon={<Repeat />}
+                            icon={<Repeat color={Colors.light.text} />}
                         />
 
                         <CustomDateInput
@@ -258,11 +258,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 20,
         gap: 20,
-        shadowColor: Colors.light.shadow,
-        shadowOffset: { width: 2, height: -2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 5,
-        elevation: 5,
     },
     title: {
         fontSize: 20,

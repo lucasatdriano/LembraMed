@@ -6,7 +6,8 @@ import FloatingActionButton from '@/src/components/buttons/floatingActionButton'
 import { useEffect, useState } from 'react';
 import medicationService from '@/src/service/api/medicationService';
 import { localStorageUtil } from '@/src/util/localStorageUtil';
-import { ScrollView } from 'react-native';
+import { ScrollView, ActivityIndicator } from 'react-native';
+import Colors from '@/src/constants/colors';
 
 interface Medication {
     id: string;
@@ -26,6 +27,8 @@ export default function MedicationScheduleScreen() {
     const [medications, setMedications] = useState<Medication[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -43,18 +46,30 @@ export default function MedicationScheduleScreen() {
     }, [userId, searchQuery]);
 
     const fetchMedications = async (search: string = '') => {
+        setLoading(true);
+        setError(null);
         try {
             const response = await medicationService.medications(
                 userId || '',
                 search,
             );
+
             setMedications(response);
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error('Erro ao buscar medicamentos:', error.message);
-            } else {
-                console.error('Erro inesperado ao buscar medicamentos.');
+
+            if (response.length === 0) {
+                setError(null);
             }
+        } catch (error) {
+            let errorMessage = 'Erro ao conectar com o servidor';
+            if (error instanceof Error) {
+                errorMessage = error.message.includes('404')
+                    ? 'Nenhum medicamento encontrado'
+                    : error.message;
+            }
+            setError(errorMessage);
+            setMedications([]);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -77,14 +92,30 @@ export default function MedicationScheduleScreen() {
                     </Text>
                 </View>
 
-                <View style={dashboardScreenStyles.containerCards}>
-                    {medications.map((medication) => (
-                        <CardMedication
-                            key={medication.id}
-                            medicationId={medication.id}
-                        />
-                    ))}
-                </View>
+                {loading ? (
+                    <ActivityIndicator
+                        size="large"
+                        color={Colors.light.colorPrimary}
+                        style={dashboardScreenStyles.loadingIndicator}
+                    />
+                ) : error ? (
+                    <Text>{error}</Text>
+                ) : medications.length === 0 ? (
+                    <Text style={dashboardScreenStyles.emptyListText}>
+                        {searchQuery
+                            ? `Nenhum medicamento encontrado para "${searchQuery}"`
+                            : 'Nenhum medicamento cadastrado.'}
+                    </Text>
+                ) : (
+                    <View style={dashboardScreenStyles.containerCards}>
+                        {medications.map((medication) => (
+                            <CardMedication
+                                key={medication.id}
+                                medicationId={medication.id}
+                            />
+                        ))}
+                    </View>
+                )}
             </ScrollView>
 
             <FloatingActionButton

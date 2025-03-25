@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, TextInput } from 'react-native';
 import { View } from '@/src/components/ui/Themed';
-import Colors from '@/src/constants/Colors';
+import Colors from '@/src/constants/colors';
 import { Search } from 'lucide-react-native';
 import MenuAccount from '@/src/components/layout/menuAccount';
 import { localStorageUtil } from '@/src/util/localStorageUtil';
@@ -32,7 +32,7 @@ export default function Header({ placeholder, onSearch }: HeaderProps) {
     return (
         <View style={styles.headerContainer}>
             <View style={styles.inputContainer}>
-                <Search style={styles.iconInput} />
+                <Search style={styles.iconInput} color={Colors.light.text} />
                 <TextInput
                     style={styles.input}
                     placeholder={placeholder}
@@ -74,11 +74,13 @@ const styles = StyleSheet.create({
     iconInput: {
         position: 'absolute',
         left: 10,
+        zIndex: 1,
         alignSelf: 'center',
     },
     input: {
         flex: 1,
-        height: '100%',
+        width: '100%',
+        position: 'absolute',
         fontSize: 16,
         borderRadius: 10,
         borderWidth: 1,

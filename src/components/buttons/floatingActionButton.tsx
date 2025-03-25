@@ -1,7 +1,7 @@
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import { View } from '@/src/components/ui/Themed';
 import { Plus } from 'lucide-react-native';
-import Colors from '@/src/constants/Colors';
+import Colors from '@/src/constants/colors';
 import { useState, useEffect } from 'react';
 import CreateContactModal from '@/src/components/modals/createContactModal';
 import CreateMedicationModal from '@/src/components/modals/createMedicationModal';
@@ -35,6 +35,7 @@ export default function FloatingActionButton({
             <TouchableOpacity
                 style={styles.floatingButton}
                 onPress={() => setIsModalVisible(true)}
+                activeOpacity={0.7}
             >
                 <Plus color={Colors.light.text} />
             </TouchableOpacity>
@@ -60,13 +61,15 @@ export default function FloatingActionButton({
 
 const styles = StyleSheet.create({
     floatingButton: {
+        height: 65,
+        width: 65,
         backgroundColor: Colors.light.colorPrimary,
         alignItems: 'center',
         justifyContent: 'center',
         padding: 15,
-        position: 'fixed',
+        position: 'absolute',
         right: 20,
-        bottom: 70,
+        bottom: 30,
         borderRadius: 50,
         shadowColor: Colors.light.shadow,
         shadowOffset: { width: 2, height: 2 },

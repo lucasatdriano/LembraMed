@@ -1,10 +1,17 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Alert } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TextInput,
+    Alert,
+    ActivityIndicator,
+} from 'react-native';
 import Modal from 'react-native-modal';
 import { User2, Phone } from 'lucide-react-native';
 import { Formik, FormikHelpers } from 'formik';
 import { contactValidationSchema } from '@/src/validation/contactValidation';
-import Colors from '@/src/constants/Colors';
+import Colors from '@/src/constants/colors';
 import CustomButton from '@/src/components/buttons/customButton';
 import CustomTextInput from '@/src/components/form/inputTextField';
 import contactService from '@/src/service/api/contactService';
@@ -30,14 +37,21 @@ export default function UpdateContactModal({
         contactName: '',
         phoneNumber: '',
     });
+    const [isLoading, setIsLoading] = useState(true);
+    const [fetchError, setFetchError] = useState('');
 
     useEffect(() => {
         if (isVisible && contactId) {
             fetchContactData();
+        } else {
+            setIsLoading(false);
+            setFetchError('');
         }
     }, [isVisible, contactId]);
 
     async function fetchContactData() {
+        setIsLoading(true);
+        setFetchError('');
         try {
             const response = await contactService.contact(userId, contactId);
             setInitialValues({
@@ -45,14 +59,13 @@ export default function UpdateContactModal({
                 phoneNumber: response.numberphone,
             });
         } catch (error) {
+            let errorMessage = 'Erro ao conectar com o servidor';
             if (error instanceof Error) {
-                Alert.alert('Erro', error.message);
-            } else {
-                Alert.alert(
-                    'Erro',
-                    'Ocorreu um erro ao carregar os dados do contato.',
-                );
+                errorMessage = error.message;
             }
+            setFetchError(errorMessage);
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -145,68 +158,88 @@ export default function UpdateContactModal({
             animationOut="fadeOut"
             style={styles.modal}
         >
-            <Formik
-                initialValues={initialValues}
-                validationSchema={contactValidationSchema}
-                onSubmit={handleSubmit}
-                enableReinitialize
-            >
-                {({
-                    handleChange,
-                    handleBlur,
-                    handleSubmit,
-                    values,
-                    errors,
-                    touched,
-                    setFieldValue,
-                }) => (
-                    <View style={styles.menu}>
-                        <Text style={styles.title}>Atualizar Contato</Text>
+            <View style={styles.menu}>
+                <Text style={styles.title}>Atualizar Contato</Text>
 
-                        <CustomTextInput
-                            placeholder="Nome do contato"
-                            value={values.contactName}
-                            onChangeText={handleChange('contactName')}
-                            onBlur={handleBlur('contactName')}
-                            error={errors.contactName}
-                            touched={touched.contactName}
-                            icon={<User2 />}
-                            autoCapitalize="none"
+                {isLoading ? (
+                    <ActivityIndicator
+                        size="large"
+                        color={Colors.light.colorPrimary}
+                    />
+                ) : fetchError ? (
+                    <>
+                        <Text>{fetchError}</Text>
+                        <CustomButton
+                            text="Tentar Novamente"
+                            onPress={fetchContactData}
                         />
+                    </>
+                ) : (
+                    <Formik
+                        initialValues={initialValues}
+                        validationSchema={contactValidationSchema}
+                        onSubmit={handleSubmit}
+                        enableReinitialize
+                    >
+                        {({
+                            handleChange,
+                            handleBlur,
+                            handleSubmit,
+                            values,
+                            errors,
+                            touched,
+                            setFieldValue,
+                        }) => (
+                            <>
+                                <CustomTextInput
+                                    placeholder="Nome do contato"
+                                    value={values.contactName}
+                                    onChangeText={handleChange('contactName')}
+                                    onBlur={handleBlur('contactName')}
+                                    error={errors.contactName}
+                                    touched={touched.contactName}
+                                    icon={<User2 color={Colors.light.text} />}
+                                    autoCapitalize="none"
+                                />
 
-                        <CustomTextInput
-                            placeholder="Número de telefone"
-                            maxLength={15}
-                            value={values.phoneNumber}
-                            onChangeText={(text) => {
-                                const formattedText =
-                                    Formatters.formatPhoneNumber(text);
-                                setFieldValue('phoneNumber', formattedText);
-                            }}
-                            onBlur={handleBlur('phoneNumber')}
-                            error={errors.phoneNumber}
-                            touched={touched.phoneNumber}
-                            icon={<Phone />}
-                            autoCapitalize="none"
-                        />
+                                <CustomTextInput
+                                    placeholder="Número de telefone"
+                                    maxLength={15}
+                                    value={values.phoneNumber}
+                                    onChangeText={(text) => {
+                                        const formattedText =
+                                            Formatters.formatPhoneNumber(text);
+                                        setFieldValue(
+                                            'phoneNumber',
+                                            formattedText,
+                                        );
+                                    }}
+                                    onBlur={handleBlur('phoneNumber')}
+                                    error={errors.phoneNumber}
+                                    touched={touched.phoneNumber}
+                                    icon={<Phone color={Colors.light.text} />}
+                                    autoCapitalize="none"
+                                />
 
-                        <View style={styles.containerButtons}>
-                            <CustomButton
-                                text="Atualizar Contato"
-                                onPress={() => handleSubmit()}
-                                disabled={isSubmitting}
-                            />
+                                <View style={styles.containerButtons}>
+                                    <CustomButton
+                                        text="Atualizar Contato"
+                                        onPress={() => handleSubmit()}
+                                        disabled={isSubmitting}
+                                    />
 
-                            <CustomButton
-                                text="Remover Contato"
-                                onPress={handleDeleteContact}
-                                backgroundColor={Colors.light.error}
-                                disabled={isSubmitting}
-                            />
-                        </View>
-                    </View>
+                                    <CustomButton
+                                        text="Remover Contato"
+                                        onPress={handleDeleteContact}
+                                        backgroundColor={Colors.light.error}
+                                        disabled={isSubmitting}
+                                    />
+                                </View>
+                            </>
+                        )}
+                    </Formik>
                 )}
-            </Formik>
+            </View>
         </Modal>
     );
 }
@@ -225,11 +258,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 20,
         gap: 20,
-        shadowColor: Colors.light.shadow,
-        shadowOffset: { width: 2, height: -2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 5,
-        elevation: 5,
     },
     title: {
         fontSize: 20,

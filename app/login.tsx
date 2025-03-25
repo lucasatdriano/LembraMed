@@ -10,6 +10,7 @@ import CustomTextInput from '@/src/components/form/inputTextField';
 import { loginValidationSchema } from '@/src/validation/userValidation';
 import userService from '@/src/service/api/userService';
 import { localStorageUtil } from '@/src/util/localStorageUtil';
+import Colors from '@/src/constants/colors';
 
 export default function LoginScreen() {
     const [showPassword, setShowPassword] = useState(false);
@@ -74,7 +75,7 @@ export default function LoginScreen() {
                             onBlur={handleBlur('name')}
                             error={errors.name}
                             touched={touched.name}
-                            icon={<User />}
+                            icon={<User color={Colors.light.text} />}
                             autoCapitalize="none"
                         />
 
@@ -85,7 +86,7 @@ export default function LoginScreen() {
                             onBlur={handleBlur('password')}
                             error={errors.password}
                             touched={touched.password}
-                            icon={<LockKeyhole />}
+                            icon={<LockKeyhole color={Colors.light.text} />}
                             isPasswordField={true}
                             showPassword={showPassword}
                             togglePasswordVisibility={() =>

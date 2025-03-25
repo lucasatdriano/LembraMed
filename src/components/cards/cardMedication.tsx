@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { Text } from '@/src/components/ui/Themed';
-import Colors from '@/src/constants/Colors';
+import Colors from '@/src/constants/colors';
 import { Check, Pill } from 'lucide-react-native';
 import medicationService from '@/src/service/api/medicationService';
 import { localStorageUtil } from '@/src/util/localStorageUtil';
@@ -52,6 +52,16 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
         }
     }, [userId, medicationId]);
 
+    useEffect(() => {
+        const loadSelectedState = async () => {
+            const selected = await localStorageUtil.get(
+                `medication_${medicationId}_selected`,
+            );
+            setIsSelected(selected === 'true');
+        };
+        loadSelectedState();
+    }, [medicationId]);
+
     const fetchMedication = async () => {
         try {
             if (!userId) throw new Error('Usuário não autenticado.');
@@ -59,7 +69,6 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
                 userId,
                 medicationId,
             );
-
             setMedicationData(response);
         } catch (error) {
             console.error('Erro ao encontrar medicamento:', error);
@@ -187,6 +196,7 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
 
             const timeout = setTimeout(() => {
                 setIsSelected(false);
+                localStorageUtil.remove(`medication_${medicationId}_selected`);
                 updateNextDose();
             }, 30 * 60 * 1000); // 30 minutos
 
@@ -202,7 +212,12 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current);
             }
-            setIsSelected((prev) => !prev);
+            const newSelectedState = !isSelected;
+            setIsSelected(newSelectedState);
+            localStorageUtil.set(
+                `medication_${medicationId}_selected`,
+                newSelectedState.toString(),
+            );
         } else {
             lastTap.current = now;
             timeoutRef.current = setTimeout(() => {
@@ -212,11 +227,7 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
     };
 
     if (!medicationData) {
-        return (
-            <View style={styles.cardContainer}>
-                <Text>Nenhum medicamento encontrado.</Text>
-            </View>
-        );
+        return null;
     }
 
     return (
@@ -233,7 +244,10 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
                     )}
                     <View style={styles.containerData}>
                         <View style={styles.containerText}>
-                            <Pill style={styles.icon} />
+                            <Pill
+                                style={styles.icon}
+                                color={Colors.light.text}
+                            />
                             <Text style={styles.textName}>
                                 {medicationData.name}
                             </Text>
