@@ -33,6 +33,8 @@ const API_ROUTES = {
             `/medications/${userId}/${medicationId}`,
         UPDATE_MEDICATION: ({ userId, medicationId }: Params) =>
             `/medications/${userId}/${medicationId}`,
+        UPDATE_STATUS_MEDICATION: ({ userId, medicationId }: Params) =>
+            `/medications/${userId}/${medicationId}/status`,
         DELETE_MEDICATION: ({ userId, medicationId }: Params) =>
             `/medications/${userId}/${medicationId}`,
     },

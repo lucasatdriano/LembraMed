@@ -1,40 +1,46 @@
-import { useRouter } from 'expo-router';
 import { localStorageUtil } from '@/src/util/localStorageUtil';
 import authService from './api/authService';
 import api from '@/src/service/index';
+import { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 let isRefreshing = false;
 let refreshQueue: ((token: string) => void)[] = [];
 
 api.interceptors.request.use(
-    async (config: any) => {
+    async (config: InternalAxiosRequestConfig) => {
         const tokenAuthorization = await localStorageUtil.get('accessToken');
         if (tokenAuthorization) {
             config.headers = config.headers || {};
-            if (!config.headers.Authorization) {
-                config.headers.Authorization = `Bearer ${tokenAuthorization}`;
+            if (!config.headers['Authorization']) {
+                config.headers[
+                    'Authorization'
+                ] = `Bearer ${tokenAuthorization}`;
             }
         }
         return config;
     },
-    (error: any) => {
+    (error: AxiosError) => {
         return Promise.reject(error);
     },
 );
 
 api.interceptors.response.use(
-    (response: any) => {
+    (response: AxiosResponse) => {
         return response;
     },
-    async (error: any) => {
-        const originalRequest = error.config;
-        const router = useRouter();
+    async (error: AxiosError) => {
+        if (!error.config) {
+            return Promise.reject(error);
+        }
+
+        const originalRequest = error.config as InternalAxiosRequestConfig & {
+            _retry?: boolean;
+        };
 
         if (error.response?.status === 401 && !originalRequest._retry) {
             const refreshToken = await localStorageUtil.get('refreshToken');
 
             if (!refreshToken) {
-                router.navigate('/login');
                 return Promise.reject(error);
             }
 
@@ -56,7 +62,7 @@ api.interceptors.response.use(
                 const data = await authService.refreshToken(refreshToken);
                 await localStorageUtil.set('accessToken', data.accessToken);
 
-                api.defaults.headers[
+                api.defaults.headers.common[
                     'Authorization'
                 ] = `Bearer ${data.accessToken}`;
 
@@ -68,7 +74,6 @@ api.interceptors.response.use(
                 console.error('Erro ao renovar o token', refreshError);
                 await localStorageUtil.remove('accessToken');
                 await localStorageUtil.remove('refreshToken');
-                router.replace('/login');
                 return Promise.reject(refreshError);
             } finally {
                 isRefreshing = false;

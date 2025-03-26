@@ -45,7 +45,7 @@ const authScreenStyles = StyleSheet.create({
     separator: {
         width: '100%',
         height: 1,
-        backgroundColor: '#000',
+        backgroundColor: Colors.light.text,
         position: 'absolute',
         top: '50%',
     },

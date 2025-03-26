@@ -96,6 +96,32 @@ const medicationService = {
             throw new Error('Erro ao conectar ao servidor.');
         }
     },
+    updateMedicationStatus: async (
+        userId: string,
+        medicationId: string,
+        data: {
+            status: boolean;
+        },
+    ) => {
+        try {
+            const response = await api.put(
+                API_ROUTES.MEDICATIONS.UPDATE_STATUS_MEDICATION({
+                    userId,
+                    medicationId,
+                }),
+                {
+                    status: data.status,
+                },
+            );
+            return response.data;
+        } catch (error) {
+            if (error instanceof AxiosError && error.response?.data) {
+                const errorMessage = `${error.response.data.error} - ${error.response.data.details}`;
+                throw new Error(errorMessage);
+            }
+            throw new Error('Erro ao conectar ao servidor.');
+        }
+    },
     deleteMedication: async (userId: string, medicationId: string) => {
         try {
             const response = await api.delete(

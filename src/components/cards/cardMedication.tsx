@@ -21,6 +21,7 @@ interface MedicationData {
     periodend: string | null;
     userid: string;
     doseintervalid: number;
+    status: boolean;
     doseinterval: {
         intervalinhours: number;
     };
@@ -33,7 +34,6 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
     const [nextDoseCountdown, setNextDoseCountdown] = useState<string>('');
     const [userId, setUserId] = useState<string | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [isSelected, setIsSelected] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const lastTap = useRef(0);
     const notificationIds = useRef<string[]>([]);
@@ -51,16 +51,6 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
             fetchMedication();
         }
     }, [userId, medicationId]);
-
-    useEffect(() => {
-        const loadSelectedState = async () => {
-            const selected = await localStorageUtil.get(
-                `medication_${medicationId}_selected`,
-            );
-            setIsSelected(selected === 'true');
-        };
-        loadSelectedState();
-    }, [medicationId]);
 
     const fetchMedication = async () => {
         try {
@@ -137,6 +127,23 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
         }
     };
 
+    const handleUpdateStatus = async () => {
+        try {
+            if (!userId || !medicationData) return;
+
+            const newStatus = !medicationData.status;
+            await medicationService.updateMedicationStatus(
+                userId,
+                medicationId,
+                { status: newStatus },
+            );
+
+            fetchMedication();
+        } catch (error) {
+            console.error('Erro ao atualizar status do medicamento:', error);
+        }
+    };
+
     useEffect(() => {
         if (medicationData) {
             const nextDose = new Date();
@@ -187,23 +194,6 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
         }
     }, [medicationData]);
 
-    useEffect(() => {
-        if (isSelected) {
-            for (const notificationId of notificationIds.current) {
-                Notifications.cancelScheduledNotificationAsync(notificationId);
-            }
-            notificationIds.current = [];
-
-            const timeout = setTimeout(() => {
-                setIsSelected(false);
-                localStorageUtil.remove(`medication_${medicationId}_selected`);
-                updateNextDose();
-            }, 30 * 60 * 1000); // 30 minutos
-
-            return () => clearTimeout(timeout);
-        }
-    }, [isSelected, medicationData]);
-
     const handlePress = () => {
         const now = Date.now();
         const DOUBLE_PRESS_DELAY = 300;
@@ -212,12 +202,7 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current);
             }
-            const newSelectedState = !isSelected;
-            setIsSelected(newSelectedState);
-            localStorageUtil.set(
-                `medication_${medicationId}_selected`,
-                newSelectedState.toString(),
-            );
+            handleUpdateStatus();
         } else {
             lastTap.current = now;
             timeoutRef.current = setTimeout(() => {
@@ -236,10 +221,10 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
                 <View
                     style={[
                         styles.cardContainer,
-                        isSelected && styles.selectedCardContainer,
+                        medicationData.status && styles.selectedCardContainer,
                     ]}
                 >
-                    {isSelected && (
+                    {medicationData.status && (
                         <Check color={Colors.light.tabIconSelected} />
                     )}
                     <View style={styles.containerData}>

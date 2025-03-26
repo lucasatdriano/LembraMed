@@ -85,7 +85,7 @@ export default function ContactScreen() {
                 {loading ? (
                     <ActivityIndicator
                         size="large"
-                        color={Colors.light.colorPrimary}
+                        color={Colors.light.tabIconSelected}
                         style={dashboardScreenStyles.loadingIndicator}
                     />
                 ) : contacts.length === 0 ? (

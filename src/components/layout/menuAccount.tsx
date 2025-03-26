@@ -6,6 +6,7 @@ import Colors from '@/src/constants/colors';
 import { useRouter } from 'expo-router';
 import userService from '@/src/service/api/userService';
 import { localStorageUtil } from '@/src/util/localStorageUtil';
+import SwitchAccountModal from '@/src/components/modals/switchAccountModal';
 
 interface MenuAccountProps {
     userId: string;
@@ -13,14 +14,9 @@ interface MenuAccountProps {
 
 export default function MenuAccount({ userId }: MenuAccountProps) {
     const [isVisible, setIsVisible] = useState(false);
-    const [openModal, setOpenModal] = useState(false);
-    // const [selectedAccount, setSelectedAccount] = useState(accounts[0]);
+    const [switchAccountModalVisible, setSwitchAccountModalVisible] =
+        useState(false);
     const router = useRouter();
-
-    // function switchAccount(account: any) {
-    //     setSelectedAccount(account);
-    //     setIsVisible(false);
-    // }
 
     async function handleLogout(navigateToLogin?: boolean) {
         try {
@@ -37,12 +33,13 @@ export default function MenuAccount({ userId }: MenuAccountProps) {
                         onPress: async () => {
                             try {
                                 await userService.logout(userId);
-
-                                await localStorageUtil.remove('token');
+                                await localStorageUtil.remove('accessToken');
                                 await localStorageUtil.remove('userId');
                                 await localStorageUtil.remove('refreshToken');
 
                                 if (navigateToLogin) {
+                                    setSwitchAccountModalVisible(true);
+                                } else {
                                     router.replace('/login');
                                 }
 
@@ -70,6 +67,12 @@ export default function MenuAccount({ userId }: MenuAccountProps) {
         }
     }
 
+    function handleLoginAnotherAccount() {
+        console.log('AAAAAAAAAAAAAAA');
+        setIsVisible(false);
+        handleLogout(true);
+    }
+
     return (
         <View>
             <TouchableOpacity
@@ -90,19 +93,9 @@ export default function MenuAccount({ userId }: MenuAccountProps) {
                 style={styles.modal}
             >
                 <View style={styles.menu}>
-                    {/* {accounts.map((account) => (
-                    <TouchableOpacity
-                        key={account.id}
-                        style={styles.menuItem}
-                        onPress={() => switchAccount(account)}
-                    >
-                        <User2 color={Colors.light.text} />
-                        <Text style={styles.textItem}>{account.name}</Text>
-                    </TouchableOpacity>
-                    ))} */}
                     <TouchableOpacity
                         style={styles.menuItem}
-                        // onPress={!setOpenModal}
+                        onPress={handleLoginAnotherAccount}
                     >
                         <LogIn color={Colors.light.text} />
                         <Text style={styles.textItem}>
@@ -111,13 +104,22 @@ export default function MenuAccount({ userId }: MenuAccountProps) {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.menuItem}
-                        // onPress={handleLogout()}
+                        onPress={() => handleLogout()}
                     >
                         <LogOut color={Colors.light.text} />
                         <Text style={styles.textItem}>Sair da conta</Text>
                     </TouchableOpacity>
                 </View>
             </Modal>
+
+            <SwitchAccountModal
+                visible={switchAccountModalVisible}
+                onClose={() => setSwitchAccountModalVisible(false)}
+                onLoginSuccess={() => {
+                    setSwitchAccountModalVisible(false);
+                    router.replace('/(tabs)');
+                }}
+            />
         </View>
     );
 }

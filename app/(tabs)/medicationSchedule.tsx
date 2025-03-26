@@ -53,21 +53,13 @@ export default function MedicationScheduleScreen() {
                 userId || '',
                 search,
             );
-
             setMedications(response);
-
-            if (response.length === 0) {
-                setError(null);
-            }
         } catch (error) {
-            let errorMessage = 'Erro ao conectar com o servidor';
+            let errorMessage = 'Erro ao carregar medicamentos';
             if (error instanceof Error) {
-                errorMessage = error.message.includes('404')
-                    ? 'Nenhum medicamento encontrado'
-                    : error.message;
+                errorMessage = error.message || 'Erro desconhecido';
             }
             setError(errorMessage);
-            setMedications([]);
         } finally {
             setLoading(false);
         }
@@ -95,7 +87,7 @@ export default function MedicationScheduleScreen() {
                 {loading ? (
                     <ActivityIndicator
                         size="large"
-                        color={Colors.light.colorPrimary}
+                        color={Colors.light.tabIconSelected}
                         style={dashboardScreenStyles.loadingIndicator}
                     />
                 ) : error ? (
