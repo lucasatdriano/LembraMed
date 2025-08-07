@@ -6,7 +6,7 @@ const Formatters = {
         const [start, end] = period.split(' - ');
         return { start, end };
     },
-    formatPeriod: (start: string, end: string) => {
+    formatPeriod: (start: string | null, end: string | null) => {
         return `${start} - ${end}`;
     },
     formatPhoneNumber: (phoneNumber: string) => {

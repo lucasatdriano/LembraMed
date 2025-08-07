@@ -1,34 +1,20 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import * as Notifications from 'expo-notifications';
 import { Text } from '@/src/components/ui/Themed';
 import Colors from '@/src/constants/colors';
-import { Check, Pill } from 'lucide-react-native';
+import { Medication } from '@/src/interfaces/medication';
 import medicationService from '@/src/service/domains/medicationService';
-import { localStorageUtil } from '@/src/util/localStorageUtil';
+import { secureStorageUtil } from '@/src/util/secureStorageUtil';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Notifications from 'expo-notifications';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import UpdateMedicationModal from '../modals/updateMedicationModal';
 
 interface CardMedicationProps {
     medicationId: string;
 }
 
-interface MedicationData {
-    id: string;
-    name: string;
-    hourfirstdose: string;
-    hournextdose: string;
-    periodstart: string | null;
-    periodend: string | null;
-    userid: string;
-    doseintervalid: number;
-    status: boolean;
-    doseinterval: {
-        intervalinhours: number;
-    };
-}
-
 export default function CardMedication({ medicationId }: CardMedicationProps) {
-    const [medicationData, setMedicationData] = useState<MedicationData | null>(
+    const [medicationData, setMedicationData] = useState<Medication | null>(
         null,
     );
     const [nextDoseCountdown, setNextDoseCountdown] = useState<string>('');
@@ -41,7 +27,7 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
 
     useEffect(() => {
         const fetchUserId = async () => {
-            const id = await localStorageUtil.get('userId');
+            const id = await secureStorageUtil.get('userId');
             setUserId(id);
         };
         fetchUserId();
@@ -139,7 +125,6 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
 
                 // Se já passou do horário, calcula o próximo disponível
                 if (now > nextDose) {
-                    // Calcula quantos intervalos completos já passaram
                     const diffHours =
                         (now.getTime() - nextDose.getTime()) / (1000 * 60 * 60);
                     const intervalsPassed = Math.ceil(
@@ -337,14 +322,21 @@ export default function CardMedication({ medicationId }: CardMedicationProps) {
                     ]}
                 >
                     {medicationData.status && (
-                        <Check color={Colors.light.tabIconSelected} />
+                        <Feather
+                            name="check"
+                            size={24}
+                            color={Colors.light.tabIconSelected}
+                        />
                     )}
                     <View style={styles.containerData}>
                         <View style={styles.containerText}>
-                            <Pill
+                            <MaterialCommunityIcons
+                                name="pill"
+                                size={24}
                                 style={styles.icon}
                                 color={Colors.light.text}
                             />
+
                             <Text style={styles.textName}>
                                 {medicationData.name}
                             </Text>

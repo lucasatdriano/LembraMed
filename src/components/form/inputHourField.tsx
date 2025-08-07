@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { TextInputMask } from 'react-native-masked-text';
+import { MaskedTextInput } from 'react-native-mask-text';
 import Colors from '@/src/constants/colors';
 
 interface CustomHourInputProps {
@@ -26,15 +26,15 @@ export default function CustomHourInput({
         <View style={styles.inputWrapperErrorContainer}>
             <View style={styles.inputContainer}>
                 {icon && <View style={styles.iconInput}>{icon}</View>}
-                <TextInputMask
-                    type={'custom'}
-                    options={{ mask: '99:99' }}
+                <MaskedTextInput
+                    mask="99:99"
                     value={value}
                     onChangeText={onChangeText}
                     onBlur={onBlur}
                     placeholder={placeholder}
                     placeholderTextColor="#888"
                     style={styles.input}
+                    keyboardType="numeric"
                 />
             </View>
             {touched && error && <Text style={styles.errorText}>{error}</Text>}

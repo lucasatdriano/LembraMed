@@ -32,7 +32,7 @@ const dashboardScreenStyles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         textAlign: 'center',
-        marginInlineStart: 20,
+        marginStart: 20,
     },
     containerCards: {
         gap: 10,

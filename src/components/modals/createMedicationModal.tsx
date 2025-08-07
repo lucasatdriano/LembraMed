@@ -8,9 +8,9 @@ import { MEDICATION_INTERVALS } from '@/src/constants/medicationIntervals';
 import medicationService from '@/src/service/domains/medicationService';
 import Formatters from '@/src/util/formatters';
 import { medicationValidationSchema } from '@/src/validation/medicationValidation';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Formik, FormikHelpers } from 'formik';
-import { Clock, Pill, Repeat } from 'lucide-react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import Modal from 'react-native-modal';
 
@@ -128,7 +128,13 @@ export default function CreateMedicationModal({
                                 onBlur={handleBlur('medicationName')}
                                 error={errors.medicationName}
                                 touched={touched.medicationName}
-                                icon={<Pill color={Colors.light.text} />}
+                                icon={
+                                    <MaterialCommunityIcons
+                                        name="pill"
+                                        size={24}
+                                        color={Colors.light.text}
+                                    />
+                                }
                                 autoCapitalize="none"
                             />
 
@@ -139,7 +145,13 @@ export default function CreateMedicationModal({
                                 onBlur={handleBlur('hour')}
                                 touched={touched.hour}
                                 error={errors.hour}
-                                icon={<Clock color={Colors.light.text} />}
+                                icon={
+                                    <Feather
+                                        name="clock"
+                                        size={24}
+                                        color={Colors.light.text}
+                                    />
+                                }
                             />
 
                             <CustomDropdownInput
@@ -153,7 +165,13 @@ export default function CreateMedicationModal({
                                 touched={touched.interval}
                                 error={errors.interval}
                                 options={MEDICATION_INTERVALS}
-                                icon={<Repeat color={Colors.light.text} />}
+                                icon={
+                                    <Feather
+                                        name="repeat"
+                                        size={24}
+                                        color={Colors.light.text}
+                                    />
+                                }
                             />
 
                             <CustomDateInput

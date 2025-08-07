@@ -1,17 +1,12 @@
-import React from 'react';
-import { View, Pressable, StyleSheet, PressableProps } from 'react-native';
-import { Phone, CalendarDays } from 'lucide-react-native';
-import { Tabs } from 'expo-router';
 import Colors from '@/src/constants/colors';
+import { Feather } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
+import { Pressable, PressableProps, StyleSheet, View } from 'react-native';
 
-function TabBarIcon({
-    Icon,
-    color,
-}: {
-    Icon: React.ElementType;
-    color: string;
-}) {
-    return <Icon size={28} color={color} />;
+type FeatherIconName = React.ComponentProps<typeof Feather>['name'];
+
+function TabBarIcon({ name, color }: { name: FeatherIconName; color: string }) {
+    return <Feather name={name} size={24} color={color} />;
 }
 
 export default function TabLayout() {
@@ -29,7 +24,7 @@ export default function TabLayout() {
                 options={{
                     title: 'Lista Telefônica',
                     tabBarIcon: ({ color }) => (
-                        <TabBarIcon Icon={Phone} color={color} />
+                        <TabBarIcon name="phone" color={color} />
                     ),
                 }}
             />
@@ -39,7 +34,7 @@ export default function TabLayout() {
                 options={{
                     title: 'Cronograma de Remédios',
                     tabBarIcon: ({ color }) => (
-                        <TabBarIcon Icon={CalendarDays} color={color} />
+                        <TabBarIcon name="calendar" color={color} />
                     ),
                     tabBarButton: (props: PressableProps) => (
                         <View style={styles.tabBarButtonContainer}>

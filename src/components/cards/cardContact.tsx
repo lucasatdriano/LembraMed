@@ -1,10 +1,11 @@
 import { Text } from '@/src/components/ui/Themed';
 import Colors from '@/src/constants/colors';
+import { Contact } from '@/src/interfaces/contact';
 import contactService from '@/src/service/domains/contactService';
 import Formatters from '@/src/util/formatters';
-import { localStorageUtil } from '@/src/util/localStorageUtil';
-import { Phone, User } from 'lucide-react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { secureStorageUtil } from '@/src/util/secureStorageUtil';
+import { Feather } from '@expo/vector-icons';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Linking, StyleSheet, TouchableOpacity, View } from 'react-native';
 import UpdateContactModal from '../modals/updateContactModal';
 
@@ -12,14 +13,8 @@ interface CardContactProps {
     contactId: string;
 }
 
-interface ContactData {
-    id: string;
-    name: string;
-    numberphone: string;
-}
-
 export default function CardContact({ contactId }: CardContactProps) {
-    const [contactData, setContactData] = useState<ContactData | null>(null);
+    const [contactData, setContactData] = useState<Contact | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const lastTap = useRef(0);
@@ -45,7 +40,7 @@ export default function CardContact({ contactId }: CardContactProps) {
 
     useEffect(() => {
         const fetchUserId = async () => {
-            const id = await localStorageUtil.get('userId');
+            const id = await secureStorageUtil.get('userId');
             setUserId(id);
         };
 
@@ -92,11 +87,21 @@ export default function CardContact({ contactId }: CardContactProps) {
             <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
                 <View style={styles.cardContainer}>
                     <View style={styles.containerText}>
-                        <User style={styles.icon} color={Colors.light.text} />
+                        <Feather
+                            name="user"
+                            size={24}
+                            style={styles.icon}
+                            color={Colors.light.text}
+                        />
                         <Text style={styles.textName}>{contactData.name}</Text>
                     </View>
                     <View style={styles.containerText}>
-                        <Phone style={styles.icon} color={Colors.light.text} />
+                        <Feather
+                            name="phone"
+                            size={24}
+                            style={styles.icon}
+                            color={Colors.light.text}
+                        />
                         <Text style={styles.textContact}>
                             {Formatters.formatPhoneNumber(
                                 contactData.numberphone,

@@ -4,9 +4,9 @@ import Colors from '@/src/constants/colors';
 import contactService from '@/src/service/domains/contactService';
 import Formatters from '@/src/util/formatters';
 import { contactValidationSchema } from '@/src/validation/contactValidation';
+import { Feather } from '@expo/vector-icons';
 import { Formik, FormikHelpers } from 'formik';
-import { Phone, User2 } from 'lucide-react-native';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 import Modal from 'react-native-modal';
 
@@ -183,7 +183,13 @@ export default function UpdateContactModal({
                                     onBlur={handleBlur('contactName')}
                                     error={errors.contactName}
                                     touched={touched.contactName}
-                                    icon={<User2 color={Colors.light.text} />}
+                                    icon={
+                                        <Feather
+                                            name="user"
+                                            size={24}
+                                            color={Colors.light.text}
+                                        />
+                                    }
                                     autoCapitalize="none"
                                 />
 
@@ -202,7 +208,13 @@ export default function UpdateContactModal({
                                     onBlur={handleBlur('phoneNumber')}
                                     error={errors.phoneNumber}
                                     touched={touched.phoneNumber}
-                                    icon={<Phone color={Colors.light.text} />}
+                                    icon={
+                                        <Feather
+                                            name="phone"
+                                            size={24}
+                                            color={Colors.light.text}
+                                        />
+                                    }
                                     autoCapitalize="none"
                                 />
 

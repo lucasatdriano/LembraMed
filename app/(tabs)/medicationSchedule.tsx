@@ -5,8 +5,8 @@ import Header from '@/src/components/layout/header';
 import { Text, View } from '@/src/components/ui/Themed';
 import Colors from '@/src/constants/colors';
 import medicationService from '@/src/service/domains/medicationService';
-import { localStorageUtil } from '@/src/util/localStorageUtil';
-import React, { useCallback, useEffect, useState } from 'react';
+import { secureStorageUtil } from '@/src/util/secureStorageUtil';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView } from 'react-native';
 
 interface Medication {
@@ -53,7 +53,7 @@ export default function MedicationScheduleScreen() {
 
     useEffect(() => {
         const fetchUserId = async () => {
-            const id = await localStorageUtil.get('userId');
+            const id = await secureStorageUtil.get('userId');
             setUserId(id);
         };
 

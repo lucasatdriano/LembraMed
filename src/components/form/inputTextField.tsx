@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, TextInput, Text, StyleSheet, Pressable } from 'react-native';
-import { Eye, EyeClosed } from 'lucide-react-native';
 import Colors from '@/src/constants/colors';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import React from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 interface CustomInputTextFieldProps {
     placeholder: string;
@@ -57,9 +57,17 @@ export default function CustomTextInput({
                         style={styles.iconEye}
                     >
                         {showPassword ? (
-                            <EyeClosed color={Colors.light.text} />
+                            <MaterialCommunityIcons
+                                name="eye-off-outline"
+                                size={24}
+                                color={Colors.light.text}
+                            />
                         ) : (
-                            <Eye color={Colors.light.text} />
+                            <MaterialCommunityIcons
+                                name="eye-outline"
+                                size={24}
+                                color={Colors.light.text}
+                            />
                         )}
                     </Pressable>
                 )}

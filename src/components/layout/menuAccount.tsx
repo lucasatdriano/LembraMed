@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { EllipsisVertical, LogIn, LogOut } from 'lucide-react-native';
-import Modal from 'react-native-modal';
-import Colors from '@/src/constants/colors';
-import { useRouter } from 'expo-router';
-import userService from '@/src/service/domains/userService';
-import { localStorageUtil } from '@/src/util/localStorageUtil';
 import SwitchAccountModal from '@/src/components/modals/switchAccountModal';
+import Colors from '@/src/constants/colors';
+import userService from '@/src/service/domains/userService';
+import { secureStorageUtil } from '@/src/util/secureStorageUtil';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Modal from 'react-native-modal';
 
 interface MenuAccountProps {
     userId: string;
@@ -33,9 +33,9 @@ export default function MenuAccount({ userId }: MenuAccountProps) {
                         onPress: async () => {
                             try {
                                 await userService.logout(userId);
-                                await localStorageUtil.remove('accessToken');
-                                await localStorageUtil.remove('userId');
-                                await localStorageUtil.remove('refreshToken');
+                                await secureStorageUtil.remove('accessToken');
+                                await secureStorageUtil.remove('userId');
+                                await secureStorageUtil.remove('refreshToken');
 
                                 if (navigateToLogin) {
                                     setSwitchAccountModalVisible(true);
@@ -79,7 +79,11 @@ export default function MenuAccount({ userId }: MenuAccountProps) {
                 style={styles.menuButton}
                 onPress={() => setIsVisible(true)}
             >
-                <EllipsisVertical color={Colors.light.text} />
+                <MaterialCommunityIcons
+                    name="dots-vertical"
+                    size={24}
+                    color={Colors.light.text}
+                />
             </TouchableOpacity>
 
             <Modal
@@ -97,7 +101,11 @@ export default function MenuAccount({ userId }: MenuAccountProps) {
                         style={styles.menuItem}
                         onPress={handleLoginAnotherAccount}
                     >
-                        <LogIn color={Colors.light.text} />
+                        <Feather
+                            name="log-in"
+                            size={24}
+                            color={Colors.light.text}
+                        />
                         <Text style={styles.textItem}>
                             Logar em outra conta
                         </Text>
@@ -106,7 +114,11 @@ export default function MenuAccount({ userId }: MenuAccountProps) {
                         style={styles.menuItem}
                         onPress={() => handleLogout()}
                     >
-                        <LogOut color={Colors.light.text} />
+                        <Feather
+                            name="log-out"
+                            size={24}
+                            color={Colors.light.text}
+                        />
                         <Text style={styles.textItem}>Sair da conta</Text>
                     </TouchableOpacity>
                 </View>

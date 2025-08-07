@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { Alert } from 'react-native';
-import { Formik, FormikHelpers } from 'formik';
-import { useRouter } from 'expo-router';
-import { LockKeyhole, User } from 'lucide-react-native';
 import CustomButton from '@/src/components/buttons/customButton';
-import authScreenStyles from './styles/authScreensStyles';
-import { Text, View } from '@/src/components/ui/Themed';
 import CustomTextInput from '@/src/components/form/inputTextField';
-import { registerValidationSchema } from '@/src/validation/userValidation';
-import userService from '@/src/service/domains/userService';
+import { Text, View } from '@/src/components/ui/Themed';
 import Colors from '@/src/constants/colors';
+import userService from '@/src/service/domains/userService';
+import { registerValidationSchema } from '@/src/validation/userValidation';
+import { Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Formik, FormikHelpers } from 'formik';
+import { useState } from 'react';
+import { Alert } from 'react-native';
+import authScreenStyles from './styles/authScreensStyles';
 
 export default function RegistrationScreen() {
     const [showPassword, setShowPassword] = useState(false);
@@ -72,7 +72,13 @@ export default function RegistrationScreen() {
                             onBlur={handleBlur('name')}
                             error={errors.name}
                             touched={touched.name}
-                            icon={<User color={Colors.light.text} />}
+                            icon={
+                                <Feather
+                                    name="user"
+                                    size={24}
+                                    color={Colors.light.text}
+                                />
+                            }
                             autoCapitalize="none"
                         />
 
@@ -83,7 +89,13 @@ export default function RegistrationScreen() {
                             onBlur={handleBlur('password')}
                             error={errors.password}
                             touched={touched.password}
-                            icon={<LockKeyhole color={Colors.light.text} />}
+                            icon={
+                                <Feather
+                                    name="lock"
+                                    size={24}
+                                    color={Colors.light.text}
+                                />
+                            }
                             isPasswordField={true}
                             showPassword={showPassword}
                             togglePasswordVisibility={() =>
@@ -98,7 +110,13 @@ export default function RegistrationScreen() {
                             onBlur={handleBlur('confirmPassword')}
                             error={errors.confirmPassword}
                             touched={touched.confirmPassword}
-                            icon={<LockKeyhole color={Colors.light.text} />}
+                            icon={
+                                <Feather
+                                    name="lock"
+                                    size={24}
+                                    color={Colors.light.text}
+                                />
+                            }
                             isPasswordField={true}
                             showPassword={showConfirmPassword}
                             togglePasswordVisibility={() =>

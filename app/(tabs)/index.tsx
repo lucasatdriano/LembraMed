@@ -5,8 +5,8 @@ import Header from '@/src/components/layout/header';
 import { Text, View } from '@/src/components/ui/Themed';
 import Colors from '@/src/constants/colors';
 import contactService from '@/src/service/domains/contactService';
-import { localStorageUtil } from '@/src/util/localStorageUtil';
-import React, { useCallback, useEffect, useState } from 'react';
+import { secureStorageUtil } from '@/src/util/secureStorageUtil';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView } from 'react-native';
 
 interface Contact {
@@ -44,7 +44,7 @@ export default function ContactScreen() {
 
     useEffect(() => {
         const fetchUserId = async () => {
-            const id = await localStorageUtil.get('userId');
+            const id = await secureStorageUtil.get('userId');
             setUserId(id);
         };
 

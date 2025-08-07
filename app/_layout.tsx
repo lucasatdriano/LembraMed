@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import { paperTheme } from '@/src/constants/paperTheme';
+import { secureStorageUtil } from '@/src/util/secureStorageUtil';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
+import * as Notifications from 'expo-notifications';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { ThemeProvider, DefaultTheme } from '@react-navigation/native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { localStorageUtil } from '@/src/util/localStorageUtil';
-import * as Notifications from 'expo-notifications';
+import { useEffect, useState } from 'react';
 import { PaperProvider } from 'react-native-paper';
-import { paperTheme } from '@/src/constants/paperTheme';
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -55,7 +55,7 @@ export default function RootLayout() {
     useEffect(() => {
         const checkToken = async () => {
             try {
-                const token = await localStorageUtil.get('accessToken');
+                const token = await secureStorageUtil.get('accessToken');
                 setIsAuthenticated(!!token);
             } catch (err) {
                 console.error('Erro ao verificar o token', err);

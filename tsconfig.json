@@ -1,10 +1,12 @@
 {
     "extends": "expo/tsconfig.base",
     "compilerOptions": {
-        "jsx": "react",
+        "jsx": "react-jsx",
         "forceConsistentCasingInFileNames": true,
         "module": "ESNext",
         "esModuleInterop": true,
+        "moduleResolution": "node",
+        "skipLibCheck": true,
         "target": "ES6",
         "strict": true,
         "baseUrl": ".",
@@ -13,5 +15,6 @@
             "@/src/*": ["./src/*"]
         }
     },
-    "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+    "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
+    "exclude": ["node_modules"]
 }

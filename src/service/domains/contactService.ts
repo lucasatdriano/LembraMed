@@ -1,21 +1,17 @@
-import { AxiosError } from 'axios';
-import API_ROUTES from '../api/routes';
+import { Contact } from '@/src/interfaces/contact';
 import api from '../api/index';
+import API_ROUTES from '../api/routes';
 
 const contactService = {
     contacts: async (userId: string, search: string = '') => {
         try {
-            const response = await api.get(
+            const response = await api.get<Contact[]>(
                 API_ROUTES.CONTACTS.CONTACTS({ userId }),
                 { params: { search } },
             );
             return response.data;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.data) {
-                const errorMessage = `${error.response.data.error} - ${error.response.data.details}`;
-                throw new Error(error.response.data);
-            }
-            throw new Error('Erro ao conectar ao servidor.');
+            throw error;
         }
     },
     createContact: async (
@@ -26,7 +22,7 @@ const contactService = {
         },
     ) => {
         try {
-            const response = await api.post(
+            const response = await api.post<Contact>(
                 API_ROUTES.CONTACTS.CREATE_CONTACT({ userId }),
                 {
                     name: data.contactName,
@@ -35,25 +31,17 @@ const contactService = {
             );
             return response.data;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.data) {
-                const errorMessage = `${error.response.data.error} - ${error.response.data.details}`;
-                throw new Error(errorMessage);
-            }
-            throw new Error('Erro ao conectar ao servidor.');
+            throw error;
         }
     },
     contact: async (userId: string, contactId: string) => {
         try {
-            const response = await api.get(
+            const response = await api.get<Contact>(
                 API_ROUTES.CONTACTS.CONTACT({ userId, contactId }),
             );
             return response.data;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.data) {
-                const errorMessage = `${error.response.data.error} - ${error.response.data.details}`;
-                throw new Error(errorMessage);
-            }
-            throw new Error('Erro ao conectar ao servidor.');
+            throw error;
         }
     },
     updateContact: async (
@@ -65,7 +53,7 @@ const contactService = {
         },
     ) => {
         try {
-            const response = await api.put(
+            const response = await api.put<Contact>(
                 API_ROUTES.CONTACTS.UPDATE_CONTACT({ userId, contactId }),
                 {
                     name: data.contactName,
@@ -74,11 +62,7 @@ const contactService = {
             );
             return response.data;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.data) {
-                const errorMessage = `${error.response.data.error} - ${error.response.data.details}`;
-                throw new Error(errorMessage);
-            }
-            throw new Error('Erro ao conectar ao servidor.');
+            throw error;
         }
     },
     deleteContact: async (userId: string, contactId: string) => {
@@ -88,11 +72,7 @@ const contactService = {
             );
             return response.data;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.data) {
-                const errorMessage = `${error.response.data.error} - ${error.response.data.details}`;
-                throw new Error(errorMessage);
-            }
-            throw new Error('Erro ao conectar ao servidor.');
+            throw error;
         }
     },
 };

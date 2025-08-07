@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
+import CustomButton from '@/src/components/buttons/customButton';
+import CustomTextInput from '@/src/components/form/inputTextField';
+import { Text, View } from '@/src/components/ui/Themed';
+import Colors from '@/src/constants/colors';
+import userService from '@/src/service/domains/userService';
+import { secureStorageUtil } from '@/src/util/secureStorageUtil';
+import { loginValidationSchema } from '@/src/validation/userValidation';
+import { Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Formik, FormikHelpers } from 'formik';
+import { useState } from 'react';
 import {
     Alert,
     Modal,
     StyleSheet,
     TouchableWithoutFeedback,
 } from 'react-native';
-import { LockKeyhole, User, X } from 'lucide-react-native';
-import { Formik, FormikHelpers } from 'formik';
-import { Text, View } from '@/src/components/ui/Themed';
-import { useRouter } from 'expo-router';
-import CustomButton from '@/src/components/buttons/customButton';
-import CustomTextInput from '@/src/components/form/inputTextField';
-import { loginValidationSchema } from '@/src/validation/userValidation';
-import userService from '@/src/service/domains/userService';
-import { localStorageUtil } from '@/src/util/localStorageUtil';
-import Colors from '@/src/constants/colors';
 
 interface SwitchAccountModalProps {
     visible: boolean;
@@ -44,9 +44,9 @@ export default function SwitchAccountModal({
                 throw new Error('Dados de autenticação inválidos.');
             }
 
-            await localStorageUtil.set('userId', response.id);
-            await localStorageUtil.set('accessToken', response.accesstoken);
-            await localStorageUtil.set('refreshToken', response.refreshtoken);
+            await secureStorageUtil.set('userId', response.id);
+            await secureStorageUtil.set('accessToken', response.accesstoken);
+            await secureStorageUtil.set('refreshToken', response.refreshtoken);
 
             onClose();
             if (onLoginSuccess) {
@@ -81,7 +81,11 @@ export default function SwitchAccountModal({
                     <View style={styles.modalContent}>
                         <View style={styles.closeButtonContainer}>
                             <TouchableWithoutFeedback onPress={onClose}>
-                                <X size={24} color={Colors.light.text} />
+                                <Feather
+                                    name="x"
+                                    size={24}
+                                    color={Colors.light.text}
+                                />
                             </TouchableWithoutFeedback>
                         </View>
 
@@ -109,7 +113,11 @@ export default function SwitchAccountModal({
                                         error={errors.name}
                                         touched={touched.name}
                                         icon={
-                                            <User color={Colors.light.text} />
+                                            <Feather
+                                                name="user"
+                                                size={24}
+                                                color={Colors.light.text}
+                                            />
                                         }
                                         autoCapitalize="none"
                                     />
@@ -122,7 +130,9 @@ export default function SwitchAccountModal({
                                         error={errors.password}
                                         touched={touched.password}
                                         icon={
-                                            <LockKeyhole
+                                            <Feather
+                                                name="lock"
+                                                size={24}
                                                 color={Colors.light.text}
                                             />
                                         }

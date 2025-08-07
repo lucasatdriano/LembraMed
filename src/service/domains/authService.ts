@@ -1,7 +1,7 @@
-import { AxiosError, AxiosResponse } from 'axios';
-import { localStorageUtil } from '@/src/util/localStorageUtil';
-import API_ROUTES from '../api/routes';
+import { Login } from '@/src/interfaces/login';
+import { secureStorageUtil } from '@/src/util/secureStorageUtil';
 import api from '../api/index';
+import API_ROUTES from '../api/routes';
 
 interface TokenResponse {
     accessToken: string;
@@ -23,11 +23,7 @@ const authService: AuthService = {
             });
             return response.data;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.data) {
-                const errorMessage = `${error.response.data.error} - ${error.response.data.details}`;
-                throw new Error(errorMessage);
-            }
-            throw new Error('Erro ao conectar ao servidor.');
+            throw error;
         }
     },
     resetPassword: async (password: string) => {
@@ -37,11 +33,7 @@ const authService: AuthService = {
             });
             return response.data;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.data) {
-                const errorMessage = `${error.response.data.error} - ${error.response.data.details}`;
-                throw new Error(errorMessage);
-            }
-            throw new Error('Erro ao conectar ao servidor.');
+            throw error;
         }
     },
     refreshToken: async (refreshToken: string): Promise<TokenResponse> => {
@@ -50,16 +42,14 @@ const authService: AuthService = {
             throw new Error('Sessão expirada. Faça login novamente.');
         }
 
-        console.log('Validando refresh token...');
         if (!authService.isRefreshTokenValid(refreshToken)) {
-            await localStorageUtil.remove('accessToken');
-            await localStorageUtil.remove('refreshToken');
+            await secureStorageUtil.remove('accessToken');
+            await secureStorageUtil.remove('refreshToken');
             throw new Error('Sessão expirada. Faça login novamente.');
         }
 
         try {
-            console.log('Enviando requisição de refresh...');
-            const response: AxiosResponse<TokenResponse> = await api.post(
+            const response = await api.post<Login>(
                 API_ROUTES.AUTH.REFRESH_TOKEN,
                 { refresh_token: refreshToken },
                 {
@@ -70,43 +60,35 @@ const authService: AuthService = {
                 },
             );
 
-            if (!response.data?.accessToken) {
+            if (!response.data?.accesstoken) {
                 throw new Error('Resposta inválida do servidor');
             }
 
             console.log('Tokens recebidos:', {
-                access: response.data.accessToken?.slice(0, 10) + '...',
-                refresh: response.data.refreshToken?.slice(0, 10) + '...',
+                access: response.data.accesstoken?.slice(0, 10) + '...',
+                refresh: response.data.refreshtoken?.slice(0, 10) + '...',
             });
 
-            await localStorageUtil.set(
+            await secureStorageUtil.set(
                 'accessToken',
-                response.data.accessToken,
+                response.data.accesstoken,
             );
-            if (response.data.refreshToken) {
-                await localStorageUtil.set(
+            if (response.data.refreshtoken) {
+                await secureStorageUtil.set(
                     'refreshToken',
-                    response.data.refreshToken,
+                    response.data.refreshtoken,
                 );
             }
 
             return {
-                accessToken: response.data.accessToken,
-                refreshToken: response.data.refreshToken,
+                accessToken: response.data.accesstoken,
+                refreshToken: response.data.refreshtoken,
             };
         } catch (error) {
             console.error('Falha no refresh token:', error);
 
-            await localStorageUtil.remove('accessToken');
-            await localStorageUtil.remove('refreshToken');
-
-            if (error instanceof AxiosError) {
-                const serverMessage =
-                    error.response?.data?.message ||
-                    error.response?.data?.error ||
-                    'Erro no servidor';
-                throw new Error(serverMessage);
-            }
+            await secureStorageUtil.remove('accessToken');
+            await secureStorageUtil.remove('refreshToken');
 
             throw new Error('Falha ao renovar sessão');
         }

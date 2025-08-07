@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
-import { View } from '@/src/components/ui/Themed';
-import { Plus } from 'lucide-react-native';
-import Colors from '@/src/constants/colors';
 import CreateContactModal from '@/src/components/modals/createContactModal';
 import CreateMedicationModal from '@/src/components/modals/createMedicationModal';
-import { localStorageUtil } from '@/src/util/localStorageUtil';
+import { View } from '@/src/components/ui/Themed';
+import Colors from '@/src/constants/colors';
+import { secureStorageUtil } from '@/src/util/secureStorageUtil';
+import { Feather } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 
 interface FloatingActionButtonProps {
     screen: 'contactScreen' | 'medicationScreen';
@@ -23,7 +23,7 @@ export default function FloatingActionButton({
 
     useEffect(() => {
         const fetchUserId = async () => {
-            const id = await localStorageUtil.get('userId');
+            const id = await secureStorageUtil.get('userId');
             setUserId(id);
         };
 
@@ -37,7 +37,7 @@ export default function FloatingActionButton({
                 onPress={() => setIsModalVisible(true)}
                 activeOpacity={0.7}
             >
-                <Plus color={Colors.light.text} />
+                <Feather name="plus" size={24} color={Colors.light.text} />
             </TouchableOpacity>
 
             {screen === 'contactScreen' ? (

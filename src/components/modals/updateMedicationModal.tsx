@@ -6,9 +6,9 @@ import { MEDICATION_INTERVALS } from '@/src/constants/medicationIntervals';
 import medicationService from '@/src/service/domains/medicationService';
 import Formatters from '@/src/util/formatters';
 import { medicationValidationSchema } from '@/src/validation/medicationValidation';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Formik, FormikHelpers } from 'formik';
-import { Pill, Repeat } from 'lucide-react-native';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 import Modal from 'react-native-modal';
 import CustomTextInput from '../form/inputTextField';
@@ -44,6 +44,7 @@ export default function UpdateMedicationModal({
                 userId,
                 medicationId,
             );
+
             const formattedPeriod = Formatters.formatPeriod(
                 response.periodstart,
                 response.periodend,
@@ -203,7 +204,13 @@ export default function UpdateMedicationModal({
                                 onBlur={handleBlur('medicationName')}
                                 error={errors.medicationName}
                                 touched={touched.medicationName}
-                                icon={<Pill color={Colors.light.text} />}
+                                icon={
+                                    <MaterialCommunityIcons
+                                        name="pill"
+                                        size={24}
+                                        color={Colors.light.text}
+                                    />
+                                }
                                 autoCapitalize="none"
                             />
 
@@ -217,7 +224,13 @@ export default function UpdateMedicationModal({
                                 touched={touched.interval}
                                 error={errors.interval}
                                 options={MEDICATION_INTERVALS}
-                                icon={<Repeat color={Colors.light.text} />}
+                                icon={
+                                    <Feather
+                                        name="repeat"
+                                        size={24}
+                                        color={Colors.light.text}
+                                    />
+                                }
                             />
 
                             <CustomDateInput

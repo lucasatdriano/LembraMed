@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
-import Modal from 'react-native-modal';
-import Colors from '@/src/constants/colors';
-import { User2, Phone } from 'lucide-react-native';
-import { Formik, FormikHelpers } from 'formik';
 import CustomButton from '@/src/components/buttons/customButton';
 import CustomTextInput from '@/src/components/form/inputTextField';
-import { contactValidationSchema } from '@/src/validation/contactValidation';
+import Colors from '@/src/constants/colors';
 import contactService from '@/src/service/domains/contactService';
 import Formatters from '@/src/util/formatters';
+import { contactValidationSchema } from '@/src/validation/contactValidation';
+import { Feather } from '@expo/vector-icons';
+import { Formik, FormikHelpers } from 'formik';
+import { useState } from 'react';
+import { Alert, StyleSheet, Text, View } from 'react-native';
+import Modal from 'react-native-modal';
 
 interface ModalProps {
     isVisible: boolean;
@@ -100,7 +100,13 @@ export default function CreateContactModal({
                             onBlur={handleBlur('contactName')}
                             error={errors.contactName}
                             touched={touched.contactName}
-                            icon={<User2 color={Colors.light.text} />}
+                            icon={
+                                <Feather
+                                    name="user"
+                                    size={24}
+                                    color={Colors.light.text}
+                                />
+                            }
                             autoCapitalize="none"
                         />
 
@@ -116,7 +122,13 @@ export default function CreateContactModal({
                             onBlur={handleBlur('phoneNumber')}
                             error={errors.phoneNumber}
                             touched={touched.phoneNumber}
-                            icon={<Phone color={Colors.light.text} />}
+                            icon={
+                                <Feather
+                                    name="phone"
+                                    size={24}
+                                    color={Colors.light.text}
+                                />
+                            }
                             autoCapitalize="none"
                         />
 

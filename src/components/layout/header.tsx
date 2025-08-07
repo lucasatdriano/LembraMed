@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, TextInput } from 'react-native';
+import MenuAccount from '@/src/components/layout/menuAccount';
 import { View } from '@/src/components/ui/Themed';
 import Colors from '@/src/constants/colors';
-import { Search } from 'lucide-react-native';
-import MenuAccount from '@/src/components/layout/menuAccount';
-import { localStorageUtil } from '@/src/util/localStorageUtil';
-
+import { secureStorageUtil } from '@/src/util/secureStorageUtil';
+import { Feather } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
+import { StyleSheet, TextInput } from 'react-native';
 interface HeaderProps {
     placeholder: string;
     onSearch: (search: string) => void;
@@ -17,7 +16,7 @@ export default function Header({ placeholder, onSearch }: HeaderProps) {
 
     useEffect(() => {
         const fetchUserId = async () => {
-            const id = await localStorageUtil.get('userId');
+            const id = await secureStorageUtil.get('userId');
             setUserId(id);
         };
 
@@ -32,7 +31,12 @@ export default function Header({ placeholder, onSearch }: HeaderProps) {
     return (
         <View style={styles.headerContainer}>
             <View style={styles.inputContainer}>
-                <Search style={styles.iconInput} color={Colors.light.text} />
+                <Feather
+                    name="search"
+                    size={24}
+                    style={styles.iconInput}
+                    color={Colors.light.text}
+                />
                 <TextInput
                     style={styles.input}
                     placeholder={placeholder}
@@ -88,5 +92,6 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.light.input,
         color: Colors.light.text,
         paddingHorizontal: 40,
+        paddingVertical: 6,
     },
 });

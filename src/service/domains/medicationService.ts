@@ -1,35 +1,27 @@
-import { AxiosError } from 'axios';
-import API_ROUTES from '../api/routes';
+import { Medication } from '@/src/interfaces/medication';
 import api from '../api/index';
+import API_ROUTES from '../api/routes';
 
 const medicationService = {
     medications: async (userId: string, search: string = '') => {
         try {
-            const response = await api.get(
+            const response = await api.get<Medication[]>(
                 API_ROUTES.MEDICATIONS.MEDICATIONS({ userId }),
                 { params: { search } },
             );
             return response.data;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.data) {
-                const errorMessage = `${error.response.data.error} - ${error.response.data.details}`;
-                throw new Error(errorMessage);
-            }
-            throw new Error('Erro ao conectar ao servidor.');
+            throw error;
         }
     },
     medication: async (userId: string, medicationId: string) => {
         try {
-            const response = await api.get(
+            const response = await api.get<Medication>(
                 API_ROUTES.MEDICATIONS.MEDICATION({ userId, medicationId }),
             );
             return response.data;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.data) {
-                const errorMessage = `${error.response.data.error} - ${error.response.data.details}`;
-                throw new Error(errorMessage);
-            }
-            throw new Error('Erro ao conectar ao servidor.');
+            throw error;
         }
     },
     medicationHistory: async (userId: string, medicationId: string) => {
@@ -42,11 +34,7 @@ const medicationService = {
             );
             return response.data;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.data) {
-                const errorMessage = `${error.response.data.error} - ${error.response.data.details}`;
-                throw new Error(errorMessage);
-            }
-            throw new Error('Erro ao conectar ao servidor.');
+            throw error;
         }
     },
     createMedication: async (
@@ -60,7 +48,7 @@ const medicationService = {
         },
     ) => {
         try {
-            const response = await api.post(
+            const response = await api.post<Medication>(
                 API_ROUTES.MEDICATIONS.CREATE_MEDICATION({ userId }),
                 {
                     name: data.medicationName,
@@ -72,11 +60,7 @@ const medicationService = {
             );
             return response.data;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.data) {
-                const errorMessage = `${error.response.data.error} - ${error.response.data.details}`;
-                throw new Error(errorMessage);
-            }
-            throw new Error('Erro ao conectar ao servidor.');
+            throw error;
         }
     },
     registerMissedDose: async (userId: string, medicationId: string) => {
@@ -89,11 +73,7 @@ const medicationService = {
             );
             return response.data;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.data) {
-                const errorMessage = `${error.response.data.error} - ${error.response.data.details}`;
-                throw new Error(errorMessage);
-            }
-            throw new Error('Erro ao conectar ao servidor.');
+            throw error;
         }
     },
     updateMedication: async (
@@ -109,7 +89,7 @@ const medicationService = {
         },
     ) => {
         try {
-            const response = await api.put(
+            const response = await api.put<Medication>(
                 API_ROUTES.MEDICATIONS.UPDATE_MEDICATION({
                     userId,
                     medicationId,
@@ -125,11 +105,7 @@ const medicationService = {
             );
             return response.data;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.data) {
-                const errorMessage = `${error.response.data.error} - ${error.response.data.details}`;
-                throw new Error(errorMessage);
-            }
-            throw new Error('Erro ao conectar ao servidor.');
+            throw error;
         }
     },
     updateMedicationStatus: async (
@@ -151,11 +127,7 @@ const medicationService = {
             );
             return response.data;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.data) {
-                const errorMessage = `${error.response.data.error} - ${error.response.data.details}`;
-                throw new Error(errorMessage);
-            }
-            throw new Error('Erro ao conectar ao servidor.');
+            throw error;
         }
     },
     deleteMedication: async (userId: string, medicationId: string) => {
@@ -168,11 +140,7 @@ const medicationService = {
             );
             return response.data;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.data) {
-                const errorMessage = `${error.response.data.error} - ${error.response.data.details}`;
-                throw new Error(errorMessage);
-            }
-            throw new Error('Erro ao conectar ao servidor.');
+            throw error;
         }
     },
 };

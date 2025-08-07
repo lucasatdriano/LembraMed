@@ -1,14 +1,14 @@
-import { localStorageUtil } from '@/src/util/localStorageUtil';
-import authService from '../domains/authService';
 import api from '@/src/service/api/index';
+import { secureStorageUtil } from '@/src/util/secureStorageUtil';
 import { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import authService from '../domains/authService';
 
 let isRefreshing = false;
 let refreshQueue: ((token: string) => void)[] = [];
 
 api.interceptors.request.use(
     async (config: InternalAxiosRequestConfig) => {
-        const tokenAuthorization = await localStorageUtil.get('accessToken');
+        const tokenAuthorization = await secureStorageUtil.get('accessToken');
         if (tokenAuthorization) {
             config.headers = config.headers || {};
             if (!config.headers['Authorization']) {
@@ -38,7 +38,7 @@ api.interceptors.response.use(
         };
 
         if (error.response?.status === 401 && !originalRequest._retry) {
-            const refreshToken = await localStorageUtil.get('refreshToken');
+            const refreshToken = await secureStorageUtil.get('refreshToken');
 
             if (!refreshToken) {
                 return Promise.reject(error);
@@ -60,7 +60,7 @@ api.interceptors.response.use(
 
             try {
                 const data = await authService.refreshToken(refreshToken);
-                await localStorageUtil.set('accessToken', data.accessToken);
+                await secureStorageUtil.set('accessToken', data.accessToken);
 
                 api.defaults.headers.common[
                     'Authorization'
@@ -72,8 +72,8 @@ api.interceptors.response.use(
                 return api(originalRequest);
             } catch (refreshError) {
                 console.error('Erro ao renovar o token', refreshError);
-                await localStorageUtil.remove('accessToken');
-                await localStorageUtil.remove('refreshToken');
+                await secureStorageUtil.remove('accessToken');
+                await secureStorageUtil.remove('refreshToken');
                 return Promise.reject(refreshError);
             } finally {
                 isRefreshing = false;

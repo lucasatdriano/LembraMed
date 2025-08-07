@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import {
-    View,
-    TextInput,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Platform,
-} from 'react-native';
+import Colors from '@/src/constants/colors';
+import Formatters from '@/src/util/formatters';
+import { Feather } from '@expo/vector-icons';
 import DateTimePicker, {
     DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
-import Colors from '@/src/constants/colors';
-import Formatters from '@/src/util/formatters';
-import { CalendarDays } from 'lucide-react-native';
+import { useState } from 'react';
+import {
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 
 interface CustomDateInputProps {
     placeholder: string;
@@ -81,7 +81,9 @@ export default function CustomDateInput({
                 onPress={() => setShowStartPicker(true)}
                 style={styles.inputContainer}
             >
-                <CalendarDays
+                <Feather
+                    name="calendar"
+                    size={24}
                     style={styles.iconInput}
                     color={Colors.light.text}
                 />
