@@ -1,5 +1,8 @@
-import { Medication } from '@/interfaces/medication';
-import { MedicationHistory } from '@/interfaces/medicationHistory';
+import { Medication, MedicationsResponse } from '@/interfaces/medication';
+import {
+    MedicationHistory,
+    MedicationHistoryResponse,
+} from '@/interfaces/medicationHistory';
 import { api } from '../api';
 import API_ROUTES from '../api/routes';
 
@@ -20,12 +23,41 @@ export interface UpdateMedicationRequest {
     status?: boolean;
 }
 
+export interface MedicationHistoryFilters {
+    startDate?: string;
+    endDate?: string;
+    status?: 'taken' | 'missed' | 'all';
+    page?: number;
+    limit?: number;
+}
+
 const medicationService = {
-    searchMedications: async (userId: string, search: string = '') => {
+    searchMedications: async (
+        userId: string,
+        search: string = '',
+        page: number = 1,
+        limit: number = 12,
+    ): Promise<MedicationsResponse> => {
         try {
-            const response = await api.get<Medication[]>(
+            const response = await api.get<MedicationsResponse>(
                 API_ROUTES.MEDICATIONS.SEARCH_MEDICATIONS({ userId }),
-                { params: { search } },
+                { params: { search, page, limit } },
+            );
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    getUserMedications: async (
+        userId: string,
+        page: number = 1,
+        limit: number = 12,
+    ): Promise<MedicationsResponse> => {
+        try {
+            const response = await api.get<MedicationsResponse>(
+                API_ROUTES.MEDICATIONS.MEDICATION({ userId }),
+                { params: { page, limit } },
             );
             return response.data;
         } catch (error) {
@@ -44,13 +76,27 @@ const medicationService = {
         }
     },
 
-    getMedicationHistory: async (userId: string, medicationId: string) => {
+    getMedicationHistory: async (
+        userId: string,
+        medicationId: string,
+        filters?: MedicationHistoryFilters,
+    ): Promise<MedicationHistoryResponse> => {
         try {
-            const response = await api.get<MedicationHistory[]>(
+            const params: Record<string, string> = {};
+
+            if (filters?.startDate) params.startDate = filters.startDate;
+            if (filters?.endDate) params.endDate = filters.endDate;
+            if (filters?.status && filters.status !== 'all')
+                params.status = filters.status;
+            if (filters?.page) params.page = filters.page.toString();
+            if (filters?.limit) params.limit = filters.limit.toString();
+
+            const response = await api.get<MedicationHistoryResponse>(
                 API_ROUTES.MEDICATIONS.MEDICATION_HISTORY({
                     userId,
                     medicationId,
                 }),
+                { params },
             );
             return response.data;
         } catch (error) {

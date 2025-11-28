@@ -1,19 +1,41 @@
-import { Contact } from '@/interfaces/contact';
+import { Contact, ContactsResponse } from '@/interfaces/contact';
 import { api } from '../api';
 import API_ROUTES from '../api/routes';
 
 const contactService = {
-    searchContacts: async (userId: string, search: string = '') => {
+    searchContacts: async (
+        userId: string,
+        search: string = '',
+        page: number = 1,
+        limit: number = 12,
+    ): Promise<ContactsResponse> => {
         try {
-            const response = await api.get<Contact[]>(
+            const response = await api.get<ContactsResponse>(
                 API_ROUTES.CONTACTS.SEARCH_CONTACTS({ userId }),
-                { params: { search } },
+                { params: { search, page, limit } },
             );
             return response.data;
         } catch (error) {
             throw error;
         }
     },
+
+    getContacts: async (
+        userId: string,
+        page: number = 1,
+        limit: number = 12,
+    ): Promise<ContactsResponse> => {
+        try {
+            const response = await api.get<ContactsResponse>(
+                API_ROUTES.CONTACTS.CONTACT({ userId }),
+                { params: { page, limit } },
+            );
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
     getContact: async (userId: string, contactId: string) => {
         try {
             const response = await api.get<Contact>(
@@ -24,6 +46,7 @@ const contactService = {
             throw error;
         }
     },
+
     createContact: async (
         userId: string,
         data: {
@@ -44,6 +67,7 @@ const contactService = {
             throw error;
         }
     },
+
     updateContact: async (
         userId: string,
         contactId: string,
@@ -65,6 +89,7 @@ const contactService = {
             throw error;
         }
     },
+
     deleteContact: async (userId: string, contactId: string) => {
         try {
             const response = await api.delete(

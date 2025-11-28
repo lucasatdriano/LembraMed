@@ -132,6 +132,8 @@ export default function LoginPage() {
                                         </div>
                                     </div>
                                     <button
+                                        title={`Trocar para a conta ${account.name}`}
+                                        aria-label={`Trocar para a conta ${account.name}`}
                                         type="button"
                                         onClick={() => {
                                             accountManager.switchAccount(

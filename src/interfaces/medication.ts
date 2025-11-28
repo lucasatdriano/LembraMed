@@ -17,3 +17,14 @@ export interface Medication {
     };
     history?: MedicationHistory[];
 }
+
+export interface MedicationsResponse {
+    medications: Medication[];
+    pagination: {
+        currentPage: number;
+        totalPages: number;
+        totalRecords: number;
+        hasNext: boolean;
+        hasPrev: boolean;
+    };
+}

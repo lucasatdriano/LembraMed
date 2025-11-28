@@ -98,8 +98,8 @@ export default function SidebarNav() {
 
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-300">
                     <button
-                        title="Logout"
-                        aria-label="Logout"
+                        title="Deslogar"
+                        aria-label="Deslogar"
                         type="button"
                         onClick={handleLogout}
                         className="flex items-center w-full px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors mt-2"

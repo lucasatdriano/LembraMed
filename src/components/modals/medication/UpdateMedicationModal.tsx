@@ -17,6 +17,7 @@ import {
     updateMedicationValidationSchema,
 } from '@/validations';
 import { Medication } from '@/interfaces/medication';
+import MedicationHistoryModal from './HistoryMedicationModal';
 
 interface UpdateMedicationModalProps {
     visible: boolean;
@@ -34,7 +35,7 @@ export default function UpdateMedicationModal({
     onMedicationUpdated,
 }: UpdateMedicationModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isHistoryModalVisible, setIsHistoryModalVisible] = useState(false);
 
     const {
         handleSubmit,
@@ -249,18 +250,29 @@ export default function UpdateMedicationModal({
                                                 text="Atualizar Medicamento"
                                                 loading={isSubmitting}
                                                 disabled={isSubmitting}
-                                                className="w-full"
+                                                className="w-full bg-blue-200 hover:bg-blue-300 focus:ring-blue-300"
+                                            />
+
+                                            <CustomButton
+                                                title="Ver Histórico"
+                                                aria-label="Ver Histórico"
+                                                text="Ver Histórico"
+                                                onClick={() =>
+                                                    setIsHistoryModalVisible(
+                                                        true,
+                                                    )
+                                                }
+                                                className="w-full bg-blue-200 hover:bg-blue-300 focus:ring-blue-300"
                                             />
 
                                             <CustomButton
                                                 title="Remover Medicamento"
                                                 aria-label="Remover Medicamento"
-                                                type="button"
                                                 text="Remover Medicamento"
                                                 onClick={handleDeleteMedication}
                                                 loading={isSubmitting}
                                                 disabled={isSubmitting}
-                                                className="w-full bg-red-300 hover:bg-red-400 focus:ring-red-500"
+                                                className="w-full bg-red-300 hover:bg-red-400 focus:ring-red-400"
                                             />
                                         </div>
                                     </form>
@@ -269,6 +281,11 @@ export default function UpdateMedicationModal({
                         </Transition.Child>
                     </div>
                 </div>
+                <MedicationHistoryModal
+                    visible={isHistoryModalVisible}
+                    onClose={() => setIsHistoryModalVisible(false)}
+                    medicationData={medicationData}
+                />
             </Dialog>
         </Transition>
     );

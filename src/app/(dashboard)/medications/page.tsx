@@ -2,32 +2,51 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { parseCookies } from 'nookies';
-import { Medication } from '@/interfaces/medication';
+import { Medication, MedicationsResponse } from '@/interfaces/medication';
 import FloatingActionButton from '@/components/layouts/FabButton';
 import medicationService from '@/services/domains/medicationService';
 import CardMedication from '@/components/cards/CardMedication';
 import { useSearch } from '@/contexts/SearchContext';
+import Pagination from '@/components/layouts/Pagination';
 
 export default function MedicationScheduleScreen() {
     const [medications, setMedications] = useState<Medication[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const { searchValue } = useSearch();
+    const [pagination, setPagination] = useState({
+        currentPage: 1,
+        totalPages: 1,
+        totalRecords: 0,
+        hasNext: false,
+        hasPrev: false,
+    });
 
     const fetchMedications = useCallback(
-        async (search: string = '') => {
+        async (search: string = '', page: number = 1) => {
             if (!userId) return;
 
             setLoading(true);
             try {
-                const response = await medicationService.searchMedications(
-                    userId,
-                    search,
-                );
-                setMedications(response);
+                const response: MedicationsResponse =
+                    await medicationService.searchMedications(
+                        userId,
+                        search,
+                        page,
+                        10,
+                    );
+                setMedications(response.medications);
+                setPagination(response.pagination);
             } catch (error) {
                 console.error('Erro ao buscar medicamentos:', error);
                 setMedications([]);
+                setPagination({
+                    currentPage: 1,
+                    totalPages: 1,
+                    totalRecords: 0,
+                    hasNext: false,
+                    hasPrev: false,
+                });
             } finally {
                 setLoading(false);
             }
@@ -43,13 +62,17 @@ export default function MedicationScheduleScreen() {
 
     useEffect(() => {
         if (userId) {
-            fetchMedications(searchValue);
+            fetchMedications(searchValue, 1);
         }
     }, [userId, searchValue, fetchMedications]);
 
     const handleMedicationCreated = useCallback(() => {
-        fetchMedications(searchValue);
+        fetchMedications(searchValue, 1);
     }, [fetchMedications, searchValue]);
+
+    const handlePageChange = (page: number) => {
+        fetchMedications(searchValue, page);
+    };
 
     if (loading) {
         return (
@@ -62,7 +85,6 @@ export default function MedicationScheduleScreen() {
                         <div className="h-px w-full bg-gray-300" />
                     </div>
 
-                    {/* ✅ Loading skeletons centralizado no pai */}
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         {[...Array(6)].map((_, index) => (
                             <div
@@ -106,15 +128,33 @@ export default function MedicationScheduleScreen() {
                         </p>
                     </div>
                 ) : (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {medications.map((medication) => (
-                            <CardMedication
-                                key={medication.id}
-                                medicationData={medication}
-                                onUpdate={() => fetchMedications(searchValue)}
-                            />
-                        ))}
-                    </div>
+                    <>
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            {medications.map((medication) => (
+                                <CardMedication
+                                    key={medication.id}
+                                    medicationData={medication}
+                                    onUpdate={() =>
+                                        fetchMedications(
+                                            searchValue,
+                                            pagination.currentPage,
+                                        )
+                                    }
+                                />
+                            ))}
+                        </div>
+
+                        {pagination.totalPages > 1 && (
+                            <div className="mt-6">
+                                <Pagination
+                                    currentPage={pagination.currentPage}
+                                    totalPages={pagination.totalPages}
+                                    totalRecords={pagination.totalRecords}
+                                    onPageChange={handlePageChange}
+                                />
+                            </div>
+                        )}
+                    </>
                 )}
             </main>
 

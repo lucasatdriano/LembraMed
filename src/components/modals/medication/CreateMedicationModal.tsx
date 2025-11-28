@@ -110,7 +110,7 @@ export default function CreateMedicationModal({
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
+                            <Dialog.Panel className="w-full max-w-md transform overflow-visible rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
                                 <div className="flex justify-between items-center p-6 border-b border-gray-200 sticky top-0 bg-white">
                                     <Dialog.Title className="text-xl font-bold text-gray-900">
                                         Adicionar Novo Medicamento
@@ -155,21 +155,25 @@ export default function CreateMedicationModal({
                                         icon={<Clock className="w-5 h-5" />}
                                     />
 
-                                    <InputDropdownField
-                                        placeholder="Selecione o intervalo"
-                                        value={watch('interval') || ''}
-                                        onChange={(value) =>
-                                            setValue(
-                                                'interval',
-                                                value.toString(),
-                                            )
-                                        }
-                                        onBlur={() => {}}
-                                        touched={touchedFields.interval}
-                                        error={errors.interval?.message}
-                                        options={MEDICATION_INTERVALS}
-                                        icon={<Repeat className="w-5 h-5" />}
-                                    />
+                                    <div className="relative">
+                                        <InputDropdownField
+                                            placeholder="Selecione o intervalo"
+                                            value={watch('interval') || ''}
+                                            onChange={(value) =>
+                                                setValue(
+                                                    'interval',
+                                                    value.toString(),
+                                                )
+                                            }
+                                            onBlur={() => {}}
+                                            touched={touchedFields.interval}
+                                            error={errors.interval?.message}
+                                            options={MEDICATION_INTERVALS}
+                                            icon={
+                                                <Repeat className="w-5 h-5" />
+                                            }
+                                        />
+                                    </div>
 
                                     <InputDateField
                                         placeholder="Selecione o período destinado"

@@ -187,7 +187,7 @@ export default function UpdateContactModal({
                                                 text="Atualizar Contato"
                                                 loading={isSubmitting}
                                                 disabled={isSubmitting}
-                                                className="w-full"
+                                                className="w-full bg-blue-200 hover:bg-blue-300 focus:ring-blue-300"
                                             />
 
                                             <CustomButton
@@ -198,7 +198,7 @@ export default function UpdateContactModal({
                                                 onClick={handleDeleteContact}
                                                 loading={isSubmitting}
                                                 disabled={isSubmitting}
-                                                className="w-full bg-red-300 hover:bg-red-400 focus:ring-red-500"
+                                                className="w-full bg-red-300 hover:bg-red-400 focus:ring-red-400"
                                             />
                                         </div>
                                     </form>

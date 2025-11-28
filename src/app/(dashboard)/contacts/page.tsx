@@ -4,30 +4,49 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { parseCookies } from 'nookies';
 import FloatingActionButton from '@/components/layouts/FabButton';
 import contactService from '@/services/domains/contactService';
-import { Contact } from '@/interfaces/contact';
+import { Contact, ContactsResponse } from '@/interfaces/contact';
 import CardContact from '@/components/cards/CardContact';
 import { useSearch } from '@/contexts/SearchContext';
+import Pagination from '@/components/layouts/Pagination';
 
 export default function ContactScreen() {
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const { searchValue } = useSearch();
+    const [pagination, setPagination] = useState({
+        currentPage: 1,
+        totalPages: 1,
+        totalRecords: 0,
+        hasNext: false,
+        hasPrev: false,
+    });
 
     const fetchContacts = useCallback(
-        async (search: string = '') => {
+        async (search: string = '', page: number = 1) => {
             if (!userId) return;
 
             setLoading(true);
             try {
-                const response = await contactService.searchContacts(
-                    userId,
-                    search,
-                );
-                setContacts(response);
+                const response: ContactsResponse =
+                    await contactService.searchContacts(
+                        userId,
+                        search,
+                        page,
+                        12,
+                    );
+                setContacts(response.contacts);
+                setPagination(response.pagination);
             } catch (error) {
                 console.error('Erro ao buscar contatos:', error);
                 setContacts([]);
+                setPagination({
+                    currentPage: 1,
+                    totalPages: 1,
+                    totalRecords: 0,
+                    hasNext: false,
+                    hasPrev: false,
+                });
             } finally {
                 setLoading(false);
             }
@@ -43,13 +62,17 @@ export default function ContactScreen() {
 
     useEffect(() => {
         if (userId) {
-            fetchContacts(searchValue);
+            fetchContacts(searchValue, 1);
         }
     }, [userId, searchValue, fetchContacts]);
 
     const handleContactCreated = useCallback(() => {
-        fetchContacts(searchValue);
+        fetchContacts(searchValue, 1);
     }, [fetchContacts, searchValue]);
+
+    const handlePageChange = (page: number) => {
+        fetchContacts(searchValue, page);
+    };
 
     if (loading) {
         return (
@@ -102,15 +125,33 @@ export default function ContactScreen() {
                         </p>
                     </div>
                 ) : (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {contacts.map((contact) => (
-                            <CardContact
-                                key={contact.id}
-                                contactData={contact}
-                                onUpdate={() => fetchContacts(searchValue)}
-                            />
-                        ))}
-                    </div>
+                    <>
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            {contacts.map((contact) => (
+                                <CardContact
+                                    key={contact.id}
+                                    contactData={contact}
+                                    onUpdate={() =>
+                                        fetchContacts(
+                                            searchValue,
+                                            pagination.currentPage,
+                                        )
+                                    }
+                                />
+                            ))}
+                        </div>
+
+                        {pagination.totalPages > 1 && (
+                            <div className="mt-6">
+                                <Pagination
+                                    currentPage={pagination.currentPage}
+                                    totalPages={pagination.totalPages}
+                                    totalRecords={pagination.totalRecords}
+                                    onPageChange={handlePageChange}
+                                />
+                            </div>
+                        )}
+                    </>
                 )}
             </main>
 
