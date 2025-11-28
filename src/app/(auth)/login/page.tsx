@@ -13,11 +13,15 @@ import userService from '@/services/domains/userService';
 import { LoginFormData, loginValidationSchema } from '@/validations';
 import { toast } from 'sonner';
 import { accountManager } from '@/services/domains/accountManagerService';
+import { Account } from '@/interfaces/account';
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [deviceId, setDeviceId] = useState<string>('');
+    const [hasExistingAccounts, setHasExistingAccounts] = useState(false);
+    const [existingAccounts, setExistingAccounts] = useState<Account[]>([]);
+    const [currentAccount, setCurrentAccount] = useState<Account | null>(null);
     const router = useRouter();
 
     useEffect(() => {
@@ -27,6 +31,13 @@ export default function LoginPage() {
             localStorage.setItem('deviceId', storedDeviceId);
         }
         setDeviceId(storedDeviceId);
+
+        const accounts = accountManager.getAllAccounts();
+        const current = accountManager.getCurrentAccount();
+
+        setExistingAccounts(accounts);
+        setHasExistingAccounts(accounts.length > 0);
+        setCurrentAccount(current);
     }, []);
 
     const {
@@ -59,11 +70,9 @@ export default function LoginPage() {
             }
 
             accountManager.addAccount(response);
-
             accountManager.switchAccount(response.user.id);
 
             toast.success(`Bem-vindo, ${response.user.name}!`);
-
             router.replace('/contacts');
         } catch (error) {
             console.error('Erro no login:', error);
@@ -77,9 +86,6 @@ export default function LoginPage() {
         }
     };
 
-    const existingAccounts = accountManager.getAllAccounts();
-    const currentAccount = accountManager.getCurrentAccount();
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
@@ -88,13 +94,13 @@ export default function LoginPage() {
                         Login
                     </h1>
                     <p className="text-gray-600">
-                        {existingAccounts.length > 0
+                        {hasExistingAccounts
                             ? 'Adicione outra conta ou troque de usuário'
                             : 'Faça login na sua conta'}
                     </p>
                 </div>
 
-                {existingAccounts.length > 0 && (
+                {hasExistingAccounts && (
                     <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                         <h3 className="text-sm font-medium text-gray-700 mb-3">
                             Contas logadas:
@@ -146,7 +152,7 @@ export default function LoginPage() {
                     </div>
                 )}
 
-                {existingAccounts.length > 0 && (
+                {hasExistingAccounts && (
                     <div className="relative mb-6">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-gray-300" />
@@ -192,9 +198,7 @@ export default function LoginPage() {
                         aria-label="Entrar"
                         type="submit"
                         text={
-                            existingAccounts.length > 0
-                                ? 'Adicionar Conta'
-                                : 'Entrar'
+                            hasExistingAccounts ? 'Adicionar Conta' : 'Entrar'
                         }
                         loading={isLoading}
                         disabled={isLoading}
@@ -218,7 +222,7 @@ export default function LoginPage() {
                             aria-label="Cadastre-se"
                             type="button"
                             text={
-                                existingAccounts.length > 0
+                                hasExistingAccounts
                                     ? 'Cadastrar uma Nova Conta'
                                     : 'Cadastre-se'
                             }

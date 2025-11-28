@@ -50,21 +50,11 @@ export default function CreateMedicationModal({
     const handleFormSubmit = async (data: MedicationFormData) => {
         setIsSubmitting(true);
         try {
-            if (!data.period) {
-                alert('Por favor, selecione um período válido.');
-                return;
-            }
-
             const { start: periodStart, end: periodEnd } =
-                Formatters.splitPeriod(data.period);
+                Formatters.splitPeriod(data.period!);
 
             const formattedPeriodStart = Formatters.formatToISO(periodStart);
             const formattedPeriodEnd = Formatters.formatToISO(periodEnd);
-
-            if (!formattedPeriodStart || !formattedPeriodEnd) {
-                alert('Por favor, selecione um período válido.');
-                return;
-            }
 
             await medicationService.createMedication(userId, {
                 name: data.medicationName,

@@ -1,3 +1,5 @@
+import { MedicationHistory } from './medicationHistory';
+
 export interface Medication {
     id: string;
     name: string;
@@ -5,10 +7,13 @@ export interface Medication {
     hournextdose: string;
     periodstart: string | null;
     periodend: string | null;
+    status: boolean;
+    createdat: string;
     userid: string;
     doseintervalid: number;
-    status: boolean;
+    intervalinhours: number;
     doseinterval: {
         intervalinhours: number;
     };
+    history?: MedicationHistory[];
 }

@@ -1,14 +1,5 @@
+import { Account } from '@/interfaces/account';
 import { setCookie, destroyCookie } from 'nookies';
-
-export interface Account {
-    userId: string;
-    username: string;
-    name: string;
-    accessToken: string;
-    refreshToken: string;
-    deviceId: string;
-    lastUsed: Date;
-}
 
 export interface LoginResponse {
     success: boolean;
@@ -76,11 +67,11 @@ class AccountManager {
         }
 
         setCookie(null, 'accessToken', account.accessToken, {
-            maxAge: 60 * 60, // 1 hora
+            maxAge: 60 * 60, // 1h
             path: '/',
         });
         setCookie(null, 'refreshToken', account.refreshToken, {
-            maxAge: 60 * 24 * 60 * 60, // 60 dias
+            maxAge: 60 * 24 * 60 * 60, // 60d
             path: '/',
         });
         setCookie(null, 'userId', account.userId, {

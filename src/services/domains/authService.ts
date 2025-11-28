@@ -94,12 +94,12 @@ const authService: AuthService = {
             });
 
             setCookie(null, 'refreshToken', response.data.refreshToken, {
-                maxAge: 60 * 24 * 60 * 60, // 60 dias
+                maxAge: 60 * 24 * 60 * 60, // 60d
                 path: '/',
             });
 
             setCookie(null, 'deviceId', deviceId, {
-                maxAge: 60 * 24 * 60 * 60, // 60 dias
+                maxAge: 60 * 24 * 60 * 60, // 60d
                 path: '/',
             });
 

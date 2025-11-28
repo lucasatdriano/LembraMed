@@ -1,42 +1,14 @@
+import { Medication } from '@/interfaces/medication';
+import { MedicationHistory } from '@/interfaces/medicationHistory';
 import { api } from '../api';
 import API_ROUTES from '../api/routes';
-
-export interface Medication {
-    id: string;
-    name: string;
-    hourfirstdose: string;
-    hournextdose: string;
-    periodstart: string;
-    periodend: string;
-    status: boolean;
-    createdat: string;
-    userid: string;
-    doseintervalid: number;
-    intervalinhours: number;
-    doseinterval?: {
-        id: number;
-        intervalinhours: number;
-        description: string;
-    };
-    history?: MedicationHistory[];
-}
-
-export interface MedicationHistory {
-    id: string;
-    medicationid: string;
-    action: string;
-    details: string;
-    takendate: string;
-    taken: boolean;
-    createdat: string;
-}
 
 export interface CreateMedicationRequest {
     name: string;
     hourfirstdose: string;
-    periodstart: string;
-    periodend: string;
     intervalinhours: number;
+    periodstart?: string;
+    periodend?: string;
 }
 
 export interface UpdateMedicationRequest {
@@ -51,12 +23,10 @@ export interface UpdateMedicationRequest {
 const medicationService = {
     searchMedications: async (userId: string, search: string = '') => {
         try {
-            const response = await api.get<{
-                success: boolean;
-                medications: Medication[];
-            }>(API_ROUTES.MEDICATIONS.SEARCH_MEDICATIONS({ userId }), {
-                params: { search },
-            });
+            const response = await api.get<Medication[]>(
+                API_ROUTES.MEDICATIONS.SEARCH_MEDICATIONS({ userId }),
+                { params: { search } },
+            );
             return response.data;
         } catch (error) {
             throw error;
@@ -65,10 +35,9 @@ const medicationService = {
 
     getMedication: async (userId: string, medicationId: string) => {
         try {
-            const response = await api.get<{
-                success: boolean;
-                medication: Medication;
-            }>(API_ROUTES.MEDICATIONS.MEDICATION({ userId, medicationId }));
+            const response = await api.get<Medication>(
+                API_ROUTES.MEDICATIONS.MEDICATION({ userId, medicationId }),
+            );
             return response.data;
         } catch (error) {
             throw error;
@@ -77,10 +46,7 @@ const medicationService = {
 
     getMedicationHistory: async (userId: string, medicationId: string) => {
         try {
-            const response = await api.get<{
-                success: boolean;
-                history: MedicationHistory[];
-            }>(
+            const response = await api.get<MedicationHistory[]>(
                 API_ROUTES.MEDICATIONS.MEDICATION_HISTORY({
                     userId,
                     medicationId,
@@ -94,11 +60,10 @@ const medicationService = {
 
     createMedication: async (userId: string, data: CreateMedicationRequest) => {
         try {
-            const response = await api.post<{
-                success: boolean;
-                message: string;
-                medication: Medication;
-            }>(API_ROUTES.MEDICATIONS.CREATE_MEDICATION({ userId }), data);
+            const response = await api.post<Medication>(
+                API_ROUTES.MEDICATIONS.CREATE_MEDICATION({ userId }),
+                data,
+            );
             return response.data;
         } catch (error) {
             throw error;
@@ -108,9 +73,8 @@ const medicationService = {
     markAsTaken: async (userId: string, medicationId: string) => {
         try {
             const response = await api.post<{
-                success: boolean;
                 message: string;
-                medication: any;
+                medication: Medication;
             }>(API_ROUTES.MEDICATIONS.MARK_AS_TAKEN({ userId, medicationId }));
             return response.data;
         } catch (error) {
@@ -121,7 +85,6 @@ const medicationService = {
     registerMissedDose: async (userId: string, medicationId: string) => {
         try {
             const response = await api.post<{
-                success: boolean;
                 message: string;
             }>(
                 API_ROUTES.MEDICATIONS.REGISTER_MISSED_DOSE({
@@ -138,9 +101,8 @@ const medicationService = {
     forceDoseAdvance: async (medicationId: string, userid: string) => {
         try {
             const response = await api.post<{
-                success: boolean;
                 message: string;
-                medication: any;
+                medication: Medication;
             }>(API_ROUTES.MEDICATIONS.FORCE_DOSE_ADVANCE({ medicationId }), {
                 userid,
             });

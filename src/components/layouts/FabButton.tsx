@@ -10,7 +10,6 @@ interface FloatingActionButtonProps {
     screen: 'contactScreen' | 'medicationScreen';
     onContactCreated?: () => void;
     onMedicationCreated?: () => void;
-    position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
     className?: string;
 }
 
@@ -18,7 +17,6 @@ export default function FloatingActionButton({
     screen,
     onContactCreated,
     onMedicationCreated,
-    position = 'bottom-right',
     className = '',
 }: FloatingActionButtonProps) {
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -29,13 +27,6 @@ export default function FloatingActionButton({
         const id = cookies.userId;
         setUserId(id);
     }, []);
-
-    const positionClasses = {
-        'bottom-right': 'bottom-6 right-6',
-        'bottom-left': 'bottom-6 left-6',
-        'top-right': 'top-6 right-6',
-        'top-left': 'top-6 left-6',
-    };
 
     return (
         <>
@@ -59,7 +50,7 @@ export default function FloatingActionButton({
                     transition-all duration-200
                     hover:scale-105 active:scale-95
                     focus:outline-none focus:ring-2 focus:ring-blue-200 focus:ring-offset-2
-                    ${positionClasses[position]}
+                    md:bottom-6 right-6 bottom-20
                     ${className}
                 `}
             >

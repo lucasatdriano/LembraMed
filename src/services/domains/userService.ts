@@ -76,18 +76,18 @@ const userService = {
                     'refreshToken',
                     response.data.tokens.refreshToken,
                     {
-                        maxAge: 60 * 24 * 60 * 60, // 60 dias
+                        maxAge: 60 * 24 * 60 * 60, // 60d
                         path: '/',
                     },
                 );
 
                 setCookie(null, 'deviceId', response.data.deviceId, {
-                    maxAge: 60 * 24 * 60 * 60, // 60 dias
+                    maxAge: 60 * 24 * 60 * 60, // 60d
                     path: '/',
                 });
 
                 setCookie(null, 'userId', response.data.user.id, {
-                    maxAge: 60 * 24 * 60 * 60, // 60 dias
+                    maxAge: 60 * 24 * 60 * 60, // 60d
                     path: '/',
                 });
 
@@ -114,7 +114,6 @@ const userService = {
             const response = await api.get<User>(
                 API_ROUTES.USERS.PROFILE({ userId }),
             );
-            console.log(response);
             return response.data;
         } catch (error) {
             throw error;

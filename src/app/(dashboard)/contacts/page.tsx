@@ -20,7 +20,10 @@ export default function ContactScreen() {
 
             setLoading(true);
             try {
-                const response = await contactService.contacts(userId, search);
+                const response = await contactService.searchContacts(
+                    userId,
+                    search,
+                );
                 setContacts(response);
             } catch (error) {
                 console.error('Erro ao buscar contatos:', error);
@@ -48,6 +51,38 @@ export default function ContactScreen() {
         fetchContacts(searchValue);
     }, [fetchContacts, searchValue]);
 
+    if (loading) {
+        return (
+            <div className="min-h-full bg-gray-50">
+                <main className="mx-auto px-2 md:px-12 pb-24">
+                    <div className="mb-8">
+                        <h1 className="text-2xl mb-4 font-bold text-gray-900 text-center">
+                            Lista de Contatos
+                        </h1>
+                        <div className="h-px w-full bg-gray-300" />
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {[...Array(6)].map((_, index) => (
+                            <div
+                                key={index}
+                                className="bg-white rounded-lg shadow-md p-4 border border-gray-200 animate-pulse"
+                            >
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1 space-y-2">
+                                        <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-2/4"></div>
+                                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </main>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-full bg-gray-50">
             <main className="mx-auto px-2 md:px-12 pb-24">
@@ -55,14 +90,10 @@ export default function ContactScreen() {
                     <h1 className="text-2xl mb-4 font-bold text-gray-900 text-center">
                         Lista de Contatos
                     </h1>
-                    <div className="h-px w-full bg-gray-300 " />
+                    <div className="h-px w-full bg-gray-300" />
                 </div>
 
-                {loading ? (
-                    <div className="flex justify-center items-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-button"></div>
-                    </div>
-                ) : contacts.length === 0 ? (
+                {contacts.length === 0 ? (
                     <div className="text-center py-12">
                         <p className="text-gray-500 text-lg">
                             {searchValue
@@ -75,8 +106,8 @@ export default function ContactScreen() {
                         {contacts.map((contact) => (
                             <CardContact
                                 key={contact.id}
-                                contactId={contact.id}
-                                onUpdate={fetchContacts}
+                                contactData={contact}
+                                onUpdate={() => fetchContacts(searchValue)}
                             />
                         ))}
                     </div>

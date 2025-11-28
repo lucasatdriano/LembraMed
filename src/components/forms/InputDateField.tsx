@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import { Calendar } from 'lucide-react';
 import { ptBR } from 'date-fns/locale';
@@ -30,15 +30,53 @@ export default function InputDateField({
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
 
+    useEffect(() => {
+        if (value && value !== 'Período indefinido' && value.includes(' - ')) {
+            try {
+                const parts = value.split(' - ');
+                if (parts.length === 2) {
+                    const [startStr, endStr] = parts;
+
+                    const parseDate = (dateStr: string) => {
+                        const [day, month, year] = dateStr.trim().split('/');
+                        if (!day || !month || !year) return null;
+
+                        const date = new Date(
+                            Number(year),
+                            Number(month) - 1,
+                            Number(day),
+                        );
+                        return isNaN(date.getTime()) ? null : date;
+                    };
+
+                    const startDateObj = parseDate(startStr);
+                    const endDateObj = parseDate(endStr);
+
+                    setStartDate(startDateObj);
+                    setEndDate(endDateObj);
+                    return;
+                }
+            } catch (error) {
+                console.error('Erro ao parsear datas:', error);
+            }
+        }
+
+        setStartDate(null);
+        setEndDate(null);
+    }, [value]);
+
     const handleDateChange = (dates: [Date | null, Date | null]) => {
         const [start, end] = dates;
         setStartDate(start);
         setEndDate(end);
 
-        const formattedValue = Formatters.formatPeriod(
-            start ? Formatters.formatDate(start) : null,
-            end ? Formatters.formatDate(end) : null,
-        );
+        const formattedValue =
+            start && end
+                ? `${Formatters.formatDate(start)} - ${Formatters.formatDate(
+                      end,
+                  )}`
+                : '';
+
         onChange(formattedValue);
     };
 
@@ -71,6 +109,7 @@ export default function InputDateField({
                     locale="pt-BR"
                     dateFormat="dd/MM/yyyy"
                     shouldCloseOnSelect={false}
+                    isClearable
                 />
             </div>
 

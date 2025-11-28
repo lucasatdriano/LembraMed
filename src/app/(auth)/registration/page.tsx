@@ -10,6 +10,7 @@ import userService from '@/services/domains/userService';
 import { RegisterFormData, registerValidationSchema } from '@/validations';
 import InputAuthField from '@/components/forms/InputAuthField';
 import { toast } from 'sonner';
+import { datacatalog } from 'googleapis/build/src/apis/datacatalog';
 
 export default function RegistrationPage() {
     const [showPassword, setShowPassword] = useState(false);
@@ -32,11 +33,9 @@ export default function RegistrationPage() {
     });
 
     const handleFormSubmit = async (data: RegisterFormData) => {
-        console.log('apertou');
         setIsLoading(true);
         try {
-            console.log(data);
-            await userService.register(data.name, data.password);
+            await userService.register(data);
 
             reset();
             toast.success(

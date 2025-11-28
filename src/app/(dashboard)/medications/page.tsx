@@ -6,12 +6,13 @@ import { Medication } from '@/interfaces/medication';
 import FloatingActionButton from '@/components/layouts/FabButton';
 import medicationService from '@/services/domains/medicationService';
 import CardMedication from '@/components/cards/CardMedication';
+import { useSearch } from '@/contexts/SearchContext';
 
 export default function MedicationScheduleScreen() {
     const [medications, setMedications] = useState<Medication[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
-    const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
+    const { searchValue } = useSearch();
 
     const fetchMedications = useCallback(
         async (search: string = '') => {
@@ -19,13 +20,14 @@ export default function MedicationScheduleScreen() {
 
             setLoading(true);
             try {
-                const response = await medicationService.medications(
+                const response = await medicationService.searchMedications(
                     userId,
                     search,
                 );
                 setMedications(response);
             } catch (error) {
                 console.error('Erro ao buscar medicamentos:', error);
+                setMedications([]);
             } finally {
                 setLoading(false);
             }
@@ -41,17 +43,49 @@ export default function MedicationScheduleScreen() {
 
     useEffect(() => {
         if (userId) {
-            fetchMedications(searchQuery);
+            fetchMedications(searchValue);
         }
-    }, [userId, searchQuery, fetchMedications]);
+    }, [userId, searchValue, fetchMedications]);
 
     const handleMedicationCreated = useCallback(() => {
-        fetchMedications(searchQuery);
-    }, [fetchMedications, searchQuery]);
+        fetchMedications(searchValue);
+    }, [fetchMedications, searchValue]);
 
-    const handleSearchChange = (search: string) => {
-        setSearchQuery(search);
-    };
+    if (loading) {
+        return (
+            <div className="min-h-full bg-gray-50">
+                <main className="mx-auto px-2 md:px-12 pb-24">
+                    <div className="mb-8">
+                        <h1 className="text-2xl mb-4 font-bold text-gray-900 text-center">
+                            Lista de Medicamentos
+                        </h1>
+                        <div className="h-px w-full bg-gray-300" />
+                    </div>
+
+                    {/* ✅ Loading skeletons centralizado no pai */}
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {[...Array(6)].map((_, index) => (
+                            <div
+                                key={index}
+                                className="bg-white rounded-lg shadow-md p-4 border border-gray-200 animate-pulse"
+                            >
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1 space-y-2">
+                                        <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                                        <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-full bg-gray-50">
@@ -60,18 +94,14 @@ export default function MedicationScheduleScreen() {
                     <h1 className="text-2xl mb-4 font-bold text-gray-900 text-center">
                         Lista de Medicamentos
                     </h1>
-                    <div className="h-px w-full bg-gray-300 " />
+                    <div className="h-px w-full bg-gray-300" />
                 </div>
 
-                {loading ? (
-                    <div className="flex justify-center items-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-button"></div>
-                    </div>
-                ) : medications.length === 0 ? (
+                {medications.length === 0 ? (
                     <div className="text-center py-12">
                         <p className="text-gray-500 text-lg">
-                            {searchQuery
-                                ? `Nenhum medicamento encontrado para "${searchQuery}"`
+                            {searchValue
+                                ? `Nenhum medicamento encontrado para "${searchValue}"`
                                 : 'Nenhum medicamento cadastrado.'}
                         </p>
                     </div>
@@ -80,8 +110,8 @@ export default function MedicationScheduleScreen() {
                         {medications.map((medication) => (
                             <CardMedication
                                 key={medication.id}
-                                medicationId={medication.id}
-                                onUpdate={fetchMedications}
+                                medicationData={medication}
+                                onUpdate={() => fetchMedications(searchValue)}
                             />
                         ))}
                     </div>

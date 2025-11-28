@@ -3,11 +3,21 @@ import { api } from '../api';
 import API_ROUTES from '../api/routes';
 
 const contactService = {
-    contacts: async (userId: string, search: string = '') => {
+    searchContacts: async (userId: string, search: string = '') => {
         try {
             const response = await api.get<Contact[]>(
-                API_ROUTES.CONTACTS.CONTACTS({ userId }),
+                API_ROUTES.CONTACTS.SEARCH_CONTACTS({ userId }),
                 { params: { search } },
+            );
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+    getContact: async (userId: string, contactId: string) => {
+        try {
+            const response = await api.get<Contact>(
+                API_ROUTES.CONTACTS.CONTACT({ userId, contactId }),
             );
             return response.data;
         } catch (error) {
@@ -28,16 +38,6 @@ const contactService = {
                     name: data.contactName,
                     numberphone: data.numberPhone,
                 },
-            );
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
-    },
-    contact: async (userId: string, contactId: string) => {
-        try {
-            const response = await api.get<Contact>(
-                API_ROUTES.CONTACTS.CONTACT({ userId, contactId }),
             );
             return response.data;
         } catch (error) {

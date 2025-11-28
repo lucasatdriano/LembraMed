@@ -10,12 +10,13 @@ import contactService from '@/services/domains/contactService';
 import Masks from '@/utils/masks';
 import { ContactFormData, contactValidationSchema } from '@/validations';
 import InputTextField from '@/components/forms/InputTextField';
+import { Contact } from '@/interfaces/contact';
 
 interface UpdateContactModalProps {
     visible: boolean;
     onClose: () => void;
     userId: string;
-    contactId: string;
+    contactData: Contact;
     onContactUpdated?: () => void;
 }
 
@@ -23,11 +24,10 @@ export default function UpdateContactModal({
     visible,
     onClose,
     userId,
-    contactId,
+    contactData,
     onContactUpdated,
 }: UpdateContactModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
 
     const {
         register,
@@ -40,34 +40,24 @@ export default function UpdateContactModal({
         resolver: zodResolver(contactValidationSchema),
     });
 
-    const fetchContactData = useCallback(async () => {
-        setIsLoading(true);
-        try {
-            const response = await contactService.contact(userId, contactId);
-
-            setValue('contactName', response.name);
-            setValue('phoneNumber', Masks.phone(response.numberphone));
-        } catch (error) {
-            console.error('Erro ao carregar contato:', error);
-            alert('Erro ao carregar os dados do contato.');
-        } finally {
-            setIsLoading(false);
+    useEffect(() => {
+        if (contactData) {
+            setValue('contactName', contactData.name);
+            setValue('phoneNumber', Masks.phone(contactData.numberphone));
         }
-    }, [userId, contactId, setValue]);
+    }, [contactData, setValue]);
 
     useEffect(() => {
-        if (visible && contactId) {
-            fetchContactData();
-        } else {
-            reset();
-            setIsLoading(false);
+        if (visible && contactData) {
+            setValue('contactName', contactData.name);
+            setValue('phoneNumber', Masks.phone(contactData.numberphone));
         }
-    }, [visible, contactId, fetchContactData, reset]);
+    }, [visible, contactData, setValue]);
 
     const handleFormSubmit = async (data: ContactFormData) => {
         setIsSubmitting(true);
         try {
-            await contactService.updateContact(userId, contactId, {
+            await contactService.updateContact(userId, contactData.id, {
                 contactName: data.contactName,
                 numberPhone: Masks.unmask(data.phoneNumber),
             });
@@ -94,7 +84,7 @@ export default function UpdateContactModal({
 
         setIsSubmitting(true);
         try {
-            await contactService.deleteContact(userId, contactId);
+            await contactService.deleteContact(userId, contactData.id);
             onClose();
             onContactUpdated?.();
         } catch (error) {
@@ -153,88 +143,65 @@ export default function UpdateContactModal({
                                 </div>
 
                                 <div className="p-6">
-                                    {isLoading ? (
-                                        <div className="flex justify-center items-center py-8">
-                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-button"></div>
+                                    <form
+                                        onSubmit={handleSubmit(
+                                            handleFormSubmit,
+                                        )}
+                                        className="space-y-4"
+                                    >
+                                        <InputTextField
+                                            placeholder="Nome do contato"
+                                            value={watch('contactName') || ''}
+                                            onChange={(value) =>
+                                                setValue('contactName', value)
+                                            }
+                                            onBlur={() => {}}
+                                            touched={touchedFields.contactName}
+                                            error={errors.contactName?.message}
+                                            icon={User}
+                                        />
+
+                                        <InputTextField
+                                            placeholder="Número de telefone"
+                                            value={watch('phoneNumber') || ''}
+                                            onChange={(value) => {
+                                                const formattedValue =
+                                                    Masks.phone(value);
+                                                setValue(
+                                                    'phoneNumber',
+                                                    formattedValue,
+                                                );
+                                            }}
+                                            onBlur={() => {}}
+                                            touched={touchedFields.phoneNumber}
+                                            error={errors.phoneNumber?.message}
+                                            icon={Phone}
+                                            maxLength={15}
+                                        />
+
+                                        <div className="flex flex-col gap-3 pt-4">
+                                            <CustomButton
+                                                title="Atualizar Contato"
+                                                aria-label="Atualizar Contato"
+                                                type="submit"
+                                                text="Atualizar Contato"
+                                                loading={isSubmitting}
+                                                disabled={isSubmitting}
+                                                className="w-full"
+                                            />
+
+                                            <CustomButton
+                                                title="Remover Contato"
+                                                aria-label="Remover Contato"
+                                                type="button"
+                                                text="Remover Contato"
+                                                onClick={handleDeleteContact}
+                                                loading={isSubmitting}
+                                                disabled={isSubmitting}
+                                                className="w-full bg-red-300 hover:bg-red-400 focus:ring-red-500"
+                                            />
                                         </div>
-                                    ) : (
-                                        <form
-                                            onSubmit={handleSubmit(
-                                                handleFormSubmit,
-                                            )}
-                                            className="space-y-4"
-                                        >
-                                            <InputTextField
-                                                placeholder="Nome do contato"
-                                                value={
-                                                    watch('contactName') || ''
-                                                }
-                                                onChange={(value) =>
-                                                    setValue(
-                                                        'contactName',
-                                                        value,
-                                                    )
-                                                }
-                                                onBlur={() => {}}
-                                                touched={
-                                                    touchedFields.contactName
-                                                }
-                                                error={
-                                                    errors.contactName?.message
-                                                }
-                                                icon={User}
-                                            />
-
-                                            <InputTextField
-                                                placeholder="Número de telefone"
-                                                value={
-                                                    watch('phoneNumber') || ''
-                                                }
-                                                onChange={(value) => {
-                                                    const formattedValue =
-                                                        Masks.phone(value);
-                                                    setValue(
-                                                        'phoneNumber',
-                                                        formattedValue,
-                                                    );
-                                                }}
-                                                onBlur={() => {}}
-                                                touched={
-                                                    touchedFields.phoneNumber
-                                                }
-                                                error={
-                                                    errors.phoneNumber?.message
-                                                }
-                                                icon={Phone}
-                                                maxLength={15}
-                                            />
-
-                                            <div className="flex flex-col gap-3 pt-4">
-                                                <CustomButton
-                                                    title="Atualizar Contato"
-                                                    aria-label="Atualizar Contato"
-                                                    type="submit"
-                                                    text="Atualizar Contato"
-                                                    loading={isSubmitting}
-                                                    disabled={isSubmitting}
-                                                    className="w-full"
-                                                />
-
-                                                <CustomButton
-                                                    title="Remover Contato"
-                                                    aria-label="Remover Contato"
-                                                    type="button"
-                                                    text="Remover Contato"
-                                                    onClick={
-                                                        handleDeleteContact
-                                                    }
-                                                    loading={isSubmitting}
-                                                    disabled={isSubmitting}
-                                                    className="w-full bg-red-300 hover:bg-red-400 focus:ring-red-500"
-                                                />
-                                            </div>
-                                        </form>
-                                    )}
+                                    </form>
                                 </div>
                             </Dialog.Panel>
                         </Transition.Child>

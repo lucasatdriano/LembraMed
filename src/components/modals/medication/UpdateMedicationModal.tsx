@@ -16,12 +16,13 @@ import {
     UpdateMedicationFormData,
     updateMedicationValidationSchema,
 } from '@/validations';
+import { Medication } from '@/interfaces/medication';
 
 interface UpdateMedicationModalProps {
     visible: boolean;
     onClose: () => void;
     userId: string;
-    medicationId: string;
+    medicationData: Medication;
     onMedicationUpdated?: () => void;
 }
 
@@ -29,14 +30,13 @@ export default function UpdateMedicationModal({
     visible,
     onClose,
     userId,
-    medicationId,
+    medicationData,
     onMedicationUpdated,
 }: UpdateMedicationModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
     const {
-        register,
         handleSubmit,
         formState: { errors, touchedFields },
         setValue,
@@ -46,70 +46,63 @@ export default function UpdateMedicationModal({
         resolver: zodResolver(updateMedicationValidationSchema),
     });
 
-    const fetchMedicationData = useCallback(async () => {
-        setIsLoading(true);
-        try {
-            const response = await medicationService.getMedication(
-                userId,
-                medicationId,
-            );
-
+    useEffect(() => {
+        if (medicationData) {
             const formattedPeriod = Formatters.formatPeriod(
-                response.medication.periodstart,
-                response.medication.periodend,
+                medicationData.periodstart,
+                medicationData.periodend,
             );
 
-            setValue('medicationName', response.medication.name);
+            setValue('medicationName', medicationData.name);
             setValue(
                 'interval',
                 String(
-                    response.medication.doseinterval?.intervalinhours ||
-                        response.medication.intervalinhours,
+                    medicationData.doseinterval?.intervalinhours ||
+                        medicationData.intervalinhours,
                 ),
             );
             setValue('period', formattedPeriod);
-        } catch (error) {
-            console.error('Erro ao carregar medicamento:', error);
-            alert('Erro ao carregar os dados do medicamento.');
-        } finally {
-            setIsLoading(false);
         }
-    }, [userId, medicationId, setValue]);
+    }, [medicationData, setValue]);
 
     useEffect(() => {
-        if (visible && medicationId) {
-            fetchMedicationData();
-        } else {
-            reset();
-            setIsLoading(false);
+        if (visible && medicationData) {
+            const formattedPeriod = Formatters.formatPeriod(
+                medicationData.periodstart,
+                medicationData.periodend,
+            );
+
+            setValue('medicationName', medicationData.name);
+            setValue(
+                'interval',
+                String(
+                    medicationData.doseinterval?.intervalinhours ||
+                        medicationData.intervalinhours,
+                ),
+            );
+            setValue('period', formattedPeriod);
         }
-    }, [visible, medicationId, fetchMedicationData, reset]);
+    }, [visible, medicationData, setValue]);
 
     const handleFormSubmit = async (data: UpdateMedicationFormData) => {
         setIsSubmitting(true);
         try {
-            if (!data.period) {
-                alert('Por favor, selecione um período válido.');
-                return;
-            }
-
             const { start: periodStart, end: periodEnd } =
-                Formatters.splitPeriod(data.period);
+                Formatters.splitPeriod(data.period!);
 
             const formattedPeriodStart = Formatters.formatToISO(periodStart);
             const formattedPeriodEnd = Formatters.formatToISO(periodEnd);
 
-            if (!formattedPeriodStart || !formattedPeriodEnd) {
-                alert('Por favor, selecione um período válido.');
-                return;
-            }
-
-            await medicationService.updateMedication(userId, medicationId, {
-                name: data.medicationName,
-                intervalinhours: Number(data.interval),
-                periodstart: formattedPeriodStart,
-                periodend: formattedPeriodEnd,
-            });
+            await medicationService.updateMedication(
+                userId,
+                medicationData.id,
+                {
+                    name: data.medicationName,
+                    intervalinhours: Number(data.interval),
+                    periodstart: formattedPeriodStart,
+                    periodend: formattedPeriodEnd,
+                },
+            );
 
             reset();
             onClose();
@@ -133,7 +126,7 @@ export default function UpdateMedicationModal({
 
         setIsSubmitting(true);
         try {
-            await medicationService.deleteMedication(userId, medicationId);
+            await medicationService.deleteMedication(userId, medicationData.id);
             onClose();
             onMedicationUpdated?.();
         } catch (error) {
@@ -192,95 +185,85 @@ export default function UpdateMedicationModal({
                                 </div>
 
                                 <div className="p-6">
-                                    {isLoading ? (
-                                        <div className="flex justify-center items-center py-8">
-                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-button"></div>
+                                    <form
+                                        onSubmit={handleSubmit(
+                                            handleFormSubmit,
+                                        )}
+                                        className="space-y-4"
+                                    >
+                                        <InputTextField
+                                            placeholder="Nome do medicamento"
+                                            value={
+                                                watch('medicationName') || ''
+                                            }
+                                            onChange={(value) =>
+                                                setValue(
+                                                    'medicationName',
+                                                    value,
+                                                )
+                                            }
+                                            onBlur={() => {}}
+                                            touched={
+                                                touchedFields.medicationName
+                                            }
+                                            error={
+                                                errors.medicationName?.message
+                                            }
+                                            icon={Pill}
+                                        />
+
+                                        <InputDropdownField
+                                            placeholder="Selecione o intervalo"
+                                            value={watch('interval') || ''}
+                                            onChange={(value) =>
+                                                setValue(
+                                                    'interval',
+                                                    value.toString(),
+                                                )
+                                            }
+                                            onBlur={() => {}}
+                                            touched={touchedFields.interval}
+                                            error={errors.interval?.message}
+                                            options={MEDICATION_INTERVALS}
+                                            icon={
+                                                <Repeat className="w-5 h-5" />
+                                            }
+                                        />
+
+                                        <InputDateField
+                                            placeholder="Selecione o período destinado"
+                                            value={watch('period') || ''}
+                                            onChange={(value) =>
+                                                setValue('period', value)
+                                            }
+                                            onBlur={() => {}}
+                                            touched={touchedFields.period}
+                                            error={errors.period?.message}
+                                        />
+
+                                        <div className="flex flex-col gap-3 pt-4">
+                                            <CustomButton
+                                                title="Atualizar Medicamento"
+                                                aria-label="Atualizar Medicamento"
+                                                type="submit"
+                                                text="Atualizar Medicamento"
+                                                loading={isSubmitting}
+                                                disabled={isSubmitting}
+                                                className="w-full"
+                                            />
+
+                                            <CustomButton
+                                                title="Remover Medicamento"
+                                                aria-label="Remover Medicamento"
+                                                type="button"
+                                                text="Remover Medicamento"
+                                                onClick={handleDeleteMedication}
+                                                loading={isSubmitting}
+                                                disabled={isSubmitting}
+                                                className="w-full bg-red-300 hover:bg-red-400 focus:ring-red-500"
+                                            />
                                         </div>
-                                    ) : (
-                                        <form
-                                            onSubmit={handleSubmit(
-                                                handleFormSubmit,
-                                            )}
-                                            className="space-y-4"
-                                        >
-                                            <InputTextField
-                                                placeholder="Nome do medicamento"
-                                                value={
-                                                    watch('medicationName') ||
-                                                    ''
-                                                }
-                                                onChange={(value) =>
-                                                    setValue(
-                                                        'medicationName',
-                                                        value,
-                                                    )
-                                                }
-                                                onBlur={() => {}}
-                                                touched={
-                                                    touchedFields.medicationName
-                                                }
-                                                error={
-                                                    errors.medicationName
-                                                        ?.message
-                                                }
-                                                icon={Pill}
-                                            />
-
-                                            <InputDropdownField
-                                                placeholder="Selecione o intervalo"
-                                                value={watch('interval') || ''}
-                                                onChange={(value) =>
-                                                    setValue(
-                                                        'interval',
-                                                        value.toString(),
-                                                    )
-                                                }
-                                                onBlur={() => {}}
-                                                touched={touchedFields.interval}
-                                                error={errors.interval?.message}
-                                                options={MEDICATION_INTERVALS}
-                                                icon={
-                                                    <Repeat className="w-5 h-5" />
-                                                }
-                                            />
-
-                                            <InputDateField
-                                                placeholder="Selecione o período destinado"
-                                                value={watch('period') || ''}
-                                                onChange={(value) =>
-                                                    setValue('period', value)
-                                                }
-                                                onBlur={() => {}}
-                                                touched={touchedFields.period}
-                                                error={errors.period?.message}
-                                            />
-
-                                            <div className="flex flex-col gap-3 pt-4">
-                                                <CustomButton
-                                                    title="Atualizar Medicamento"
-                                                    aria-label="Atualizar Medicamento"
-                                                    type="submit"
-                                                    text="Atualizar Medicamento"
-                                                    loading={isSubmitting}
-                                                    disabled={isSubmitting}
-                                                    className="w-full"
-                                                />
-
-                                                <CustomButton
-                                                    title="Remover Medicamento"
-                                                    aria-label="Remover Medicamento"
-                                                    type="button"
-                                                    text="Remover Medicamento"
-                                                    onClick={
-                                                        handleDeleteMedication
-                                                    }
-                                                    loading={isSubmitting}
-                                                    disabled={isSubmitting}
-                                                    className="w-full bg-red-300 hover:bg-red-400 focus:ring-red-500"
-                                                />
-                                            </div>
-                                        </form>
-                                    )}
+                                    </form>
                                 </div>
                             </Dialog.Panel>
                         </Transition.Child>

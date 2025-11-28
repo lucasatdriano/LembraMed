@@ -5,8 +5,6 @@ import {
     Pill,
     Clock,
     Calendar,
-    Edit,
-    Trash2,
     Check,
     AlertCircle,
     Repeat,
@@ -19,21 +17,20 @@ import Formatters from '@/utils/formatters';
 import UpdateMedicationModal from '../modals/medication/UpdateMedicationModal';
 
 interface CardMedicationProps {
-    medicationId: string;
+    medicationData: Medication;
     onUpdate?: () => void;
 }
 
 export default function CardMedication({
-    medicationId,
+    medicationData: initialMedicationData,
     onUpdate,
 }: CardMedicationProps) {
-    const [medicationData, setMedicationData] = useState<Medication | null>(
-        null,
+    const [medicationData, setMedicationData] = useState<Medication>(
+        initialMedicationData,
     );
     const [nextDoseCountdown, setNextDoseCountdown] = useState<string>('');
     const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isFetching, setIsFetching] = useState(true);
+    const [isActionLoading, setIsActionLoading] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [confirmationCountdown, setConfirmationCountdown] = useState(10);
 
@@ -46,49 +43,12 @@ export default function CardMedication({
     const cookies = parseCookies();
     const userId = cookies.userId;
 
-    const interval = medicationData?.doseinterval.intervalinhours || 0;
+    const interval = medicationData?.doseinterval?.intervalinhours || 0;
     const label = interval === 1 ? 'hora' : 'horas';
 
-    const fetchMedication = useCallback(async () => {
-        if (!userId) return;
-
-        setIsFetching(true);
-        try {
-            const response = await medicationService.medication(
-                userId,
-                medicationId,
-            );
-
-            const formattedResponse = {
-                ...response,
-                hournextdose: response.hournextdose
-                    .split(':')
-                    .slice(0, 2)
-                    .join(':'),
-            };
-
-            setMedicationData(formattedResponse);
-        } catch (error) {
-            console.error('Erro ao carregar medicamento:', error);
-        } finally {
-            setIsFetching(false);
-        }
-    }, [userId, medicationId]);
-
     useEffect(() => {
-        if (userId) {
-            fetchMedication();
-        }
-    }, [userId, fetchMedication]);
-
-    useEffect(() => {
-        return () => {
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            if (syncIntervalRef.current) clearInterval(syncIntervalRef.current);
-            if (confirmationRef.current) clearTimeout(confirmationRef.current);
-            if (countdownRef.current) clearInterval(countdownRef.current);
-        };
-    }, []);
+        setMedicationData(initialMedicationData);
+    }, [initialMedicationData]);
 
     useEffect(() => {
         if (!medicationData?.hournextdose) return;
@@ -126,110 +86,24 @@ export default function CardMedication({
         if (!medicationData?.status) return;
 
         syncIntervalRef.current = setInterval(() => {
-            fetchMedication();
-        }, 60 * 1000);
+            onUpdate?.();
+        }, 2 * 60 * 1000);
 
         return () => {
             if (syncIntervalRef.current) {
                 clearInterval(syncIntervalRef.current);
             }
         };
-    }, [medicationData?.status, fetchMedication]);
-
-    const updateNextDose = useCallback(
-        async (markedAsTaken: boolean = false) => {
-            try {
-                if (!userId || !medicationData) return;
-
-                const now = new Date();
-                const [hours, minutes] = medicationData.hournextdose
-                    .split(':')
-                    .map(Number);
-
-                const nextDose = new Date(
-                    now.getFullYear(),
-                    now.getMonth(),
-                    now.getDate(),
-                    hours,
-                    minutes,
-                    0,
-                    0,
-                );
-
-                if (now > nextDose) {
-                    const diffHours =
-                        (now.getTime() - nextDose.getTime()) / (1000 * 60 * 60);
-                    const intervalsPassed = Math.ceil(
-                        diffHours / medicationData.doseinterval.intervalinhours,
-                    );
-
-                    nextDose.setHours(
-                        nextDose.getHours() +
-                            intervalsPassed *
-                                medicationData.doseinterval.intervalinhours,
-                    );
-                } else {
-                    nextDose.setHours(
-                        nextDose.getHours() +
-                            medicationData.doseinterval.intervalinhours,
-                    );
-                }
-
-                const formattedNextDose = `${String(
-                    nextDose.getHours(),
-                ).padStart(2, '0')}:${String(nextDose.getMinutes()).padStart(
-                    2,
-                    '0',
-                )}`;
-
-                await medicationService.updateMedication(userId, medicationId, {
-                    hournextdose: formattedNextDose,
-                    status: false,
-                });
-
-                if (!markedAsTaken) {
-                    await medicationService.registerMissedDose(
-                        userId,
-                        medicationId,
-                    );
-                }
-
-                fetchMedication();
-            } catch (error) {
-                console.error('Erro ao atualizar próxima dose:', error);
-            }
-        },
-        [userId, medicationId, medicationData, fetchMedication],
-    );
-
-    const checkMissedDoses = useCallback(async () => {
-        if (!medicationData) return;
-
-        const now = new Date();
-        const [hours, minutes] = medicationData.hournextdose
-            .split(':')
-            .map(Number);
-        const doseTime = new Date();
-        doseTime.setHours(hours, minutes, 0, 0);
-
-        const diffMs = now.getTime() - doseTime.getTime();
-        const diffMinutes = diffMs / (1000 * 60);
-
-        if (diffMinutes >= 25 && !medicationData.status) {
-            await medicationService.updateMedicationStatus(
-                userId,
-                medicationId,
-                { status: true },
-            );
-            fetchMedication();
-        }
-    }, [medicationData, updateNextDose]);
+    }, [medicationData?.status, onUpdate]);
 
     useEffect(() => {
-        const interval = setInterval(checkMissedDoses, 60 * 1000);
-        checkMissedDoses();
-        return () => clearInterval(interval);
-    }, [checkMissedDoses]);
+        return () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            if (syncIntervalRef.current) clearInterval(syncIntervalRef.current);
+            if (confirmationRef.current) clearTimeout(confirmationRef.current);
+            if (countdownRef.current) clearInterval(countdownRef.current);
+        };
+    }, []);
 
     const startConfirmationCountdown = () => {
         setShowConfirmation(true);
@@ -258,19 +132,24 @@ export default function CardMedication({
         try {
             if (!userId || !medicationData) return;
 
-            await medicationService.updateMedicationStatus(
+            await medicationService.updateMedication(
                 userId,
-                medicationId,
+                medicationData.id,
                 {
                     status: !medicationData.status,
                 },
             );
 
-            fetchMedication();
+            setMedicationData((prev) => ({
+                ...prev,
+                status: !prev.status,
+            }));
 
             setShowConfirmation(false);
             clearTimeout(confirmationRef.current!);
             clearInterval(countdownRef.current!);
+
+            onUpdate?.();
         } catch (error) {
             console.error('Erro ao atualizar status:', error);
             alert('Falha ao atualizar status do medicamento.');
@@ -313,20 +192,19 @@ export default function CardMedication({
             return;
         }
 
-        setIsLoading(true);
+        setIsActionLoading(true);
         try {
-            await medicationService.deleteMedication(userId, medicationId);
+            await medicationService.deleteMedication(userId, medicationData.id);
             onUpdate?.();
         } catch (error) {
             console.error('Erro ao excluir medicamento:', error);
             alert('Erro ao excluir medicamento.');
         } finally {
-            setIsLoading(false);
+            setIsActionLoading(false);
         }
     };
 
     const handleMedicationUpdated = () => {
-        fetchMedication();
         onUpdate?.();
     };
 
@@ -338,24 +216,6 @@ export default function CardMedication({
             new Date(medicationData.periodstart!),
         )} - ${Formatters.formatDate(new Date(medicationData.periodend!))}`;
     };
-
-    if (isFetching) {
-        return (
-            <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200 animate-pulse">
-                <div className="flex items-start justify-between">
-                    <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                        <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    if (!medicationData) {
-        return <div className="hidden"></div>;
-    }
 
     return (
         <>
@@ -448,16 +308,16 @@ export default function CardMedication({
                                 </span>
                             </div>
                             <div className="flex items-center text-sm">
-                                <Calendar className="w-4 h-4 text-gray-500 mr-2" />
-                                <span className="text-gray-600">
-                                    <strong>Período:</strong> {formatPeriod()}
-                                </span>
-                            </div>
-                            <div className="flex items-center text-sm">
                                 <Repeat className="w-4 h-4 text-gray-500 mr-2" />
                                 <span className="text-gray-600">
                                     <strong>Intervalo:</strong> {interval}{' '}
                                     {label}
+                                </span>
+                            </div>
+                            <div className="flex items-center text-sm">
+                                <Calendar className="w-4 h-4 text-gray-500 mr-2" />
+                                <span className="text-gray-600">
+                                    <strong>Período:</strong> {formatPeriod()}
                                 </span>
                             </div>
                         </div>
@@ -469,35 +329,6 @@ export default function CardMedication({
                                 : 'marcar como tomado'}
                         </div>
                     </div>
-
-                    <div className="flex gap-2 ml-4">
-                        <button
-                            title="Editar medicamento"
-                            aria-label="Editar medicamento"
-                            type="button"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setIsUpdateModalVisible(true);
-                            }}
-                            disabled={isLoading || showConfirmation}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
-                        >
-                            <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                            title="Excluir medicamento"
-                            aria-label="Excluir medicamento"
-                            type="button"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete();
-                            }}
-                            disabled={isLoading || showConfirmation}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                        >
-                            <Trash2 className="w-4 h-4" />
-                        </button>
-                    </div>
                 </div>
             </div>
 
@@ -505,7 +336,7 @@ export default function CardMedication({
                 visible={isUpdateModalVisible}
                 onClose={() => setIsUpdateModalVisible(false)}
                 userId={userId}
-                medicationId={medicationId}
+                medicationData={medicationData}
                 onMedicationUpdated={handleMedicationUpdated}
             />
         </>

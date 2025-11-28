@@ -19,15 +19,14 @@ const API_ROUTES = {
         LOGOUT: '/users/logout',
     },
     CONTACTS: {
-        CONTACTS: ({ userId }: Params) => `/contacts/${userId}`,
-        CREATE_CONTACT: ({ userId }: Params) => `/contacts/${userId}`,
+        SEARCH_CONTACTS: ({ userId }: Params) => `/contacts/${userId}/search`,
         CONTACT: ({ userId, contactId }: Params) =>
             `/contacts/${userId}/${contactId}`,
+        CREATE_CONTACT: ({ userId }: Params) => `/contacts/${userId}`,
         UPDATE_CONTACT: ({ userId, contactId }: Params) =>
             `/contacts/${userId}/${contactId}`,
         DELETE_CONTACT: ({ userId, contactId }: Params) =>
             `/contacts/${userId}/${contactId}`,
-        SEARCH_CONTACTS: ({ userId }: Params) => `/contacts/${userId}`,
     },
     MEDICATIONS: {
         SEARCH_MEDICATIONS: ({ userId }: Params) =>

@@ -23,7 +23,7 @@ const pwaConfig = withPWA({
                 cacheName: 'images',
                 expiration: {
                     maxEntries: 100,
-                    maxAgeSeconds: 30 * 24 * 60 * 60, // 30 dias
+                    maxAgeSeconds: 30 * 24 * 60 * 60, // 30d
                 },
             },
         },

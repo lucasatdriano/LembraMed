@@ -6,8 +6,24 @@ const Formatters = {
         const [start, end] = period.split(' - ');
         return { start, end };
     },
-    formatPeriod: (start: string | null, end: string | null) => {
-        return `${start} - ${end}`;
+    formatPeriod: (periodstart: string | null, periodend: string | null) => {
+        const hasPeriodStart =
+            periodstart && periodstart !== 'null' && periodstart.trim() !== '';
+
+        const hasPeriodEnd =
+            periodend && periodend !== 'null' && periodend.trim() !== '';
+        if (!hasPeriodStart && !hasPeriodEnd) {
+            return 'Período indefinido';
+        }
+
+        const startDate = hasPeriodStart
+            ? Formatters.formatDate(new Date(periodstart!))
+            : 'Data indefinida';
+        const endDate = hasPeriodEnd
+            ? Formatters.formatDate(new Date(periodend!))
+            : 'Data indefinida';
+
+        return `${startDate} - ${endDate}`;
     },
     formatHour: (input: string) => {
         const numbers = input.replace(/\D/g, '');
