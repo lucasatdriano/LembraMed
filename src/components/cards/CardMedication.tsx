@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Pill,
     Clock,
@@ -25,24 +25,22 @@ export default function CardMedication({
     medicationData: initialMedicationData,
     onUpdate,
 }: CardMedicationProps) {
-    const [medicationData, setMedicationData] = useState<Medication>(
-        initialMedicationData,
-    );
-    const [nextDoseCountdown, setNextDoseCountdown] = useState<string>('');
+    const [medicationData, setMedicationData] = useState(initialMedicationData);
+    const [nextDoseCountdown, setNextDoseCountdown] = useState('');
     const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
     const [isActionLoading, setIsActionLoading] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
-    const [confirmationCountdown, setConfirmationCountdown] = useState(10);
+    const [isProcessingDose, setIsProcessingDose] = useState(false);
 
     const lastTap = useRef(0);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
-    const confirmationRef = useRef<NodeJS.Timeout | null>(null);
-    const countdownRef = useRef<NodeJS.Timeout | null>(null);
+    const timersRef = useRef({
+        minTimer: null as NodeJS.Timeout | null,
+        maxTimer: null as NodeJS.Timeout | null,
+    });
 
     const cookies = parseCookies();
     const userId = cookies.userId;
-
     const interval = medicationData?.doseinterval?.intervalinhours || 0;
     const label = interval === 1 ? 'hora' : 'horas';
 
@@ -51,13 +49,13 @@ export default function CardMedication({
     }, [initialMedicationData]);
 
     useEffect(() => {
-        if (!medicationData?.hournextdose) return;
+        if (!medicationData?.hournextdose || isProcessingDose) return;
 
-        const interval = setInterval(() => {
+        const updateCountdown = () => {
             const [hours, minutes] = medicationData.hournextdose
                 .split(':')
                 .map(Number);
-            const nextDose = new Date();
+            let nextDose = new Date();
             nextDose.setHours(hours, minutes, 0, 0);
 
             let diffInSeconds = Math.floor(
@@ -65,7 +63,14 @@ export default function CardMedication({
             );
 
             if (diffInSeconds < 0) {
-                diffInSeconds = 0;
+                const intervalHours =
+                    medicationData?.doseinterval?.intervalinhours || 0;
+                while (nextDose < new Date()) {
+                    nextDose.setHours(nextDose.getHours() + intervalHours);
+                }
+                diffInSeconds = Math.floor(
+                    (nextDose.getTime() - Date.now()) / 1000,
+                );
             }
 
             const hoursLeft = Math.floor(diffInSeconds / 3600);
@@ -77,135 +82,127 @@ export default function CardMedication({
                     minutesLeft,
                 ).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`,
             );
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [medicationData?.hournextdose]);
-
-    useEffect(() => {
-        if (!medicationData?.status) return;
-
-        syncIntervalRef.current = setInterval(() => {
-            onUpdate?.();
-        }, 2 * 60 * 1000);
-
-        return () => {
-            if (syncIntervalRef.current) {
-                clearInterval(syncIntervalRef.current);
-            }
         };
-    }, [medicationData?.status, onUpdate]);
+
+        updateCountdown();
+        const intervalId = setInterval(updateCountdown, 1000);
+        return () => clearInterval(intervalId);
+    }, [medicationData?.hournextdose, isProcessingDose]);
+
+    useEffect(() => {
+        if (
+            !medicationData ||
+            !userId ||
+            nextDoseCountdown !== '00:00:00' ||
+            isProcessingDose
+        )
+            return;
+
+        setIsProcessingDose(true);
+
+        const MIN_DELAY = 5 * 60 * 1000; // 5 minutos
+        const MAX_DELAY = 40 * 60 * 1000; // 40 minutos
+
+        const currentMedicationData = { ...medicationData };
+
+        if (timersRef.current.minTimer)
+            clearTimeout(timersRef.current.minTimer);
+        if (timersRef.current.maxTimer)
+            clearTimeout(timersRef.current.maxTimer);
+
+        timersRef.current.minTimer = setTimeout(async () => {
+            if (currentMedicationData.status) {
+                try {
+                    const response = await medicationService.markAsTaken(
+                        userId,
+                        currentMedicationData.id,
+                    );
+                    setMedicationData((prev) => ({
+                        ...prev,
+                        status: response.medication.status,
+                        hournextdose: response.medication.hournextdose,
+                    }));
+                    setIsProcessingDose(false);
+                    onUpdate?.();
+                } catch {
+                    setIsProcessingDose(false);
+                }
+            }
+        }, MIN_DELAY);
+
+        timersRef.current.maxTimer = setTimeout(async () => {
+            try {
+                const response = currentMedicationData.status
+                    ? await medicationService.markAsTaken(
+                          userId,
+                          currentMedicationData.id,
+                      )
+                    : await medicationService.registerMissedDose(
+                          userId,
+                          currentMedicationData.id,
+                      );
+
+                setMedicationData((prev) => ({
+                    ...prev,
+                    status: response.medication.status,
+                    hournextdose: response.medication.hournextdose,
+                }));
+                setIsProcessingDose(false);
+                onUpdate?.();
+            } catch {
+                setIsProcessingDose(false);
+            }
+        }, MAX_DELAY);
+    }, [nextDoseCountdown, medicationData, userId, isProcessingDose]);
 
     useEffect(() => {
         return () => {
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            if (syncIntervalRef.current) clearInterval(syncIntervalRef.current);
-            if (confirmationRef.current) clearTimeout(confirmationRef.current);
-            if (countdownRef.current) clearInterval(countdownRef.current);
+            if (timersRef.current.minTimer)
+                clearTimeout(timersRef.current.minTimer);
+            if (timersRef.current.maxTimer)
+                clearTimeout(timersRef.current.maxTimer);
         };
     }, []);
 
-    const startConfirmationCountdown = () => {
-        setShowConfirmation(true);
-        setConfirmationCountdown(10);
+    const updateMedicationStatus = async (status: boolean) => {
+        if (!userId || !medicationData) return;
 
-        countdownRef.current = setInterval(() => {
-            setConfirmationCountdown((prev) => {
-                if (prev <= 1) {
-                    clearInterval(countdownRef.current!);
-                    confirmMedicationTaken();
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-
-        confirmationRef.current = setTimeout(() => {
-            setShowConfirmation(false);
-            if (countdownRef.current) {
-                clearInterval(countdownRef.current);
-            }
-        }, 10000);
-    };
-
-    const confirmMedicationTaken = async () => {
+        setIsActionLoading(true);
         try {
-            if (!userId || !medicationData) return;
-
-            await medicationService.updateMedication(
+            const response = await medicationService.updateMedication(
                 userId,
                 medicationData.id,
-                {
-                    status: !medicationData.status,
-                },
+                { status },
             );
-
             setMedicationData((prev) => ({
                 ...prev,
-                status: !prev.status,
+                status: response.medication.status,
+                hournextdose: response.medication.hournextdose,
             }));
-
             setShowConfirmation(false);
-            clearTimeout(confirmationRef.current!);
-            clearInterval(countdownRef.current!);
-
             onUpdate?.();
-        } catch (error) {
-            console.error('Erro ao atualizar status:', error);
+        } catch {
             alert('Falha ao atualizar status do medicamento.');
+        } finally {
+            setIsActionLoading(false);
         }
-    };
-
-    const cancelConfirmation = () => {
-        setShowConfirmation(false);
-        if (confirmationRef.current) {
-            clearTimeout(confirmationRef.current);
-        }
-        if (countdownRef.current) {
-            clearInterval(countdownRef.current);
-        }
-    };
-
-    const handleUpdateStatus = () => {
-        startConfirmationCountdown();
     };
 
     const handlePress = () => {
+        if (showConfirmation) return;
+
         const now = Date.now();
         const DOUBLE_PRESS_DELAY = 300;
 
         if (lastTap.current && now - lastTap.current < DOUBLE_PRESS_DELAY) {
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
-            handleUpdateStatus();
+            timeoutRef.current && clearTimeout(timeoutRef.current);
+            setShowConfirmation(true);
         } else {
             lastTap.current = now;
             timeoutRef.current = setTimeout(() => {
                 setIsUpdateModalVisible(true);
             }, DOUBLE_PRESS_DELAY);
         }
-    };
-
-    const handleDelete = async () => {
-        if (!confirm('Tem certeza que deseja excluir este medicamento?')) {
-            return;
-        }
-
-        setIsActionLoading(true);
-        try {
-            await medicationService.deleteMedication(userId, medicationData.id);
-            onUpdate?.();
-        } catch (error) {
-            console.error('Erro ao excluir medicamento:', error);
-            alert('Erro ao excluir medicamento.');
-        } finally {
-            setIsActionLoading(false);
-        }
-    };
-
-    const handleMedicationUpdated = () => {
-        onUpdate?.();
     };
 
     const formatPeriod = () => {
@@ -239,31 +236,34 @@ export default function CardMedication({
                                     ? 'Deseja marcar como NÃO TOMADO?'
                                     : 'Deseja marcar como TOMADO?'}
                             </p>
-                            <div className="text-2xl font-bold text-yellow-600 mb-4">
-                                {confirmationCountdown}s
-                            </div>
                             <div className="flex gap-3 justify-center">
                                 <button
-                                    title="Confirmar"
-                                    aria-label="Confirmar"
+                                    title="Confirmar ação"
+                                    aria-label="Confirmar ação"
                                     type="button"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        confirmMedicationTaken();
+                                        updateMedicationStatus(
+                                            !medicationData.status,
+                                        );
                                     }}
                                     className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                                    disabled={isActionLoading}
                                 >
-                                    Confirmar
+                                    {isActionLoading
+                                        ? 'Processando...'
+                                        : 'Confirmar'}
                                 </button>
                                 <button
-                                    title="Cancelar"
-                                    aria-label="Cancelar"
+                                    title="Cancelar confirmação"
+                                    aria-label="Cancelar confirmação"
                                     type="button"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        cancelConfirmation();
+                                        setShowConfirmation(false);
                                     }}
                                     className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                                    disabled={isActionLoading}
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
@@ -325,7 +325,7 @@ export default function CardMedication({
                         <div className="mt-3 text-xs text-gray-400">
                             Clique para editar • Clique duas vezes para{' '}
                             {medicationData.status
-                                ? 'desmarcar'
+                                ? 'marcar como não tomado'
                                 : 'marcar como tomado'}
                         </div>
                     </div>
@@ -337,7 +337,7 @@ export default function CardMedication({
                 onClose={() => setIsUpdateModalVisible(false)}
                 userId={userId}
                 medicationData={medicationData}
-                onMedicationUpdated={handleMedicationUpdated}
+                onMedicationUpdated={() => onUpdate?.()}
             />
         </>
     );

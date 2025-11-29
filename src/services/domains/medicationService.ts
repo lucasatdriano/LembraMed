@@ -5,6 +5,7 @@ import {
 } from '@/interfaces/medicationHistory';
 import { api } from '../api';
 import API_ROUTES from '../api/routes';
+import { resolve } from 'path';
 
 export interface CreateMedicationRequest {
     name: string;
@@ -132,26 +133,13 @@ const medicationService = {
         try {
             const response = await api.post<{
                 message: string;
+                medication: Medication;
             }>(
                 API_ROUTES.MEDICATIONS.REGISTER_MISSED_DOSE({
                     userId,
                     medicationId,
                 }),
             );
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
-    },
-
-    forceDoseAdvance: async (medicationId: string, userid: string) => {
-        try {
-            const response = await api.post<{
-                message: string;
-                medication: Medication;
-            }>(API_ROUTES.MEDICATIONS.FORCE_DOSE_ADVANCE({ medicationId }), {
-                userid,
-            });
             return response.data;
         } catch (error) {
             throw error;

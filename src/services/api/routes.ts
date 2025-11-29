@@ -41,8 +41,6 @@ const API_ROUTES = {
             `/medications/${userId}/${medicationId}/taken`,
         REGISTER_MISSED_DOSE: ({ userId, medicationId }: Params) =>
             `/medications/${userId}/${medicationId}/missed`,
-        FORCE_DOSE_ADVANCE: ({ medicationId }: Params) =>
-            `/medications/${medicationId}/advance`,
         UPDATE_MEDICATION: ({ userId, medicationId }: Params) =>
             `/medications/${userId}/${medicationId}`,
         DELETE_MEDICATION: ({ userId, medicationId }: Params) =>
