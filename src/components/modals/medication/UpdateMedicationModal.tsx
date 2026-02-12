@@ -22,7 +22,6 @@ import MedicationHistoryModal from './HistoryMedicationModal';
 interface UpdateMedicationModalProps {
     visible: boolean;
     onClose: () => void;
-    userId: string;
     medicationData: Medication;
     onMedicationUpdated?: () => void;
 }
@@ -30,7 +29,6 @@ interface UpdateMedicationModalProps {
 export default function UpdateMedicationModal({
     visible,
     onClose,
-    userId,
     medicationData,
     onMedicationUpdated,
 }: UpdateMedicationModalProps) {
@@ -88,22 +86,28 @@ export default function UpdateMedicationModal({
     const handleFormSubmit = async (data: UpdateMedicationFormData) => {
         setIsSubmitting(true);
         try {
-            const { start: periodStart, end: periodEnd } =
-                Formatters.splitPeriod(data.period!);
+            let formattedPeriodStart: string | undefined;
+            let formattedPeriodEnd: string | undefined;
 
-            const formattedPeriodStart = Formatters.formatToISO(periodStart);
-            const formattedPeriodEnd = Formatters.formatToISO(periodEnd);
+            // Verifica se o período não é "Período indefinido" antes de processar
+            if (data.period && data.period !== 'Período indefinido') {
+                const { start: periodStart, end: periodEnd } =
+                    Formatters.splitPeriod(data.period);
 
-            await medicationService.updateMedication(
-                userId,
-                medicationData.id,
-                {
-                    name: data.medicationName,
-                    intervalinhours: Number(data.interval),
-                    periodstart: formattedPeriodStart,
-                    periodend: formattedPeriodEnd,
-                },
-            );
+                formattedPeriodStart = periodStart
+                    ? Formatters.formatToISO(periodStart)
+                    : undefined;
+                formattedPeriodEnd = periodEnd
+                    ? Formatters.formatToISO(periodEnd)
+                    : undefined;
+            }
+
+            await medicationService.updateMedication(medicationData.id, {
+                name: data.medicationName,
+                intervalinhours: Number(data.interval),
+                periodstart: formattedPeriodStart,
+                periodend: formattedPeriodEnd,
+            });
 
             reset();
             onClose();
@@ -127,7 +131,7 @@ export default function UpdateMedicationModal({
 
         setIsSubmitting(true);
         try {
-            await medicationService.deleteMedication(userId, medicationData.id);
+            await medicationService.deleteMedication(medicationData.id);
             onClose();
             onMedicationUpdated?.();
         } catch (error) {

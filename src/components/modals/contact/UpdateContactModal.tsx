@@ -15,7 +15,6 @@ import { Contact } from '@/interfaces/contact';
 interface UpdateContactModalProps {
     visible: boolean;
     onClose: () => void;
-    userId: string;
     contactData: Contact;
     onContactUpdated?: () => void;
 }
@@ -23,7 +22,6 @@ interface UpdateContactModalProps {
 export default function UpdateContactModal({
     visible,
     onClose,
-    userId,
     contactData,
     onContactUpdated,
 }: UpdateContactModalProps) {
@@ -57,7 +55,7 @@ export default function UpdateContactModal({
     const handleFormSubmit = async (data: ContactFormData) => {
         setIsSubmitting(true);
         try {
-            await contactService.updateContact(userId, contactData.id, {
+            await contactService.updateContact(contactData.id, {
                 contactName: data.contactName,
                 numberPhone: Masks.unmask(data.phoneNumber),
             });
@@ -84,7 +82,7 @@ export default function UpdateContactModal({
 
         setIsSubmitting(true);
         try {
-            await contactService.deleteContact(userId, contactData.id);
+            await contactService.deleteContact(contactData.id);
             onClose();
             onContactUpdated?.();
         } catch (error) {

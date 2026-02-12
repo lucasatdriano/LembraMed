@@ -4,14 +4,13 @@ import API_ROUTES from '../api/routes';
 
 const contactService = {
     searchContacts: async (
-        userId: string,
         search: string = '',
         page: number = 1,
         limit: number = 12,
     ): Promise<ContactsResponse> => {
         try {
             const response = await api.get<ContactsResponse>(
-                API_ROUTES.CONTACTS.SEARCH_CONTACTS({ userId }),
+                API_ROUTES.CONTACTS.SEARCH_CONTACTS,
                 { params: { search, page, limit } },
             );
             return response.data;
@@ -20,26 +19,10 @@ const contactService = {
         }
     },
 
-    getContacts: async (
-        userId: string,
-        page: number = 1,
-        limit: number = 12,
-    ): Promise<ContactsResponse> => {
-        try {
-            const response = await api.get<ContactsResponse>(
-                API_ROUTES.CONTACTS.CONTACT({ userId }),
-                { params: { page, limit } },
-            );
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
-    },
-
-    getContact: async (userId: string, contactId: string) => {
+    getContact: async (contactId: string) => {
         try {
             const response = await api.get<Contact>(
-                API_ROUTES.CONTACTS.CONTACT({ userId, contactId }),
+                API_ROUTES.CONTACTS.CONTACT({ contactId }),
             );
             return response.data;
         } catch (error) {
@@ -47,16 +30,13 @@ const contactService = {
         }
     },
 
-    createContact: async (
-        userId: string,
-        data: {
-            contactName: string;
-            numberPhone: string;
-        },
-    ) => {
+    createContact: async (data: {
+        contactName: string;
+        numberPhone: string;
+    }) => {
         try {
             const response = await api.post<Contact>(
-                API_ROUTES.CONTACTS.CREATE_CONTACT({ userId }),
+                API_ROUTES.CONTACTS.CREATE_CONTACT,
                 {
                     name: data.contactName,
                     numberphone: data.numberPhone,
@@ -69,7 +49,6 @@ const contactService = {
     },
 
     updateContact: async (
-        userId: string,
         contactId: string,
         data: {
             contactName?: string;
@@ -78,7 +57,7 @@ const contactService = {
     ) => {
         try {
             const response = await api.put<Contact>(
-                API_ROUTES.CONTACTS.UPDATE_CONTACT({ userId, contactId }),
+                API_ROUTES.CONTACTS.UPDATE_CONTACT({ contactId }),
                 {
                     name: data.contactName,
                     numberphone: data.numberPhone,
@@ -90,10 +69,10 @@ const contactService = {
         }
     },
 
-    deleteContact: async (userId: string, contactId: string) => {
+    deleteContact: async (contactId: string) => {
         try {
             const response = await api.delete(
-                API_ROUTES.CONTACTS.DELETE_CONTACT({ userId, contactId }),
+                API_ROUTES.CONTACTS.DELETE_CONTACT({ contactId }),
             );
             return response.data;
         } catch (error) {

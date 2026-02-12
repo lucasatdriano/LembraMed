@@ -50,7 +50,14 @@ export default function LoginPage() {
         resolver: zodResolver(loginValidationSchema),
     });
 
-    const handleFormSubmit = async (data: LoginFormData) => {
+    const handleFormSubmit = async (
+        data: LoginFormData,
+        event?: React.BaseSyntheticEvent,
+    ) => {
+        if (event) {
+            event.preventDefault();
+        }
+
         if (!deviceId) {
             toast.error('Erro de dispositivo. Recarregue a página.');
             return;
@@ -168,7 +175,10 @@ export default function LoginPage() {
                 )}
 
                 <form
-                    onSubmit={handleSubmit(handleFormSubmit)}
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSubmit((data) => handleFormSubmit(data, e))();
+                    }}
                     className="space-y-6"
                 >
                     <InputAuthField

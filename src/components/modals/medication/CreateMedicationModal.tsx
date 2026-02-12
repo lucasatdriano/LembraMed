@@ -18,14 +18,12 @@ import { MedicationFormData, medicationValidationSchema } from '@/validations';
 interface CreateMedicationModalProps {
     visible: boolean;
     onClose: () => void;
-    userId: string;
     onMedicationCreated?: () => void;
 }
 
 export default function CreateMedicationModal({
     visible,
     onClose,
-    userId,
     onMedicationCreated,
 }: CreateMedicationModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,7 +54,7 @@ export default function CreateMedicationModal({
             const formattedPeriodStart = Formatters.formatToISO(periodStart);
             const formattedPeriodEnd = Formatters.formatToISO(periodEnd);
 
-            await medicationService.createMedication(userId, {
+            await medicationService.createMedication({
                 name: data.medicationName,
                 hourfirstdose: data.hour,
                 intervalinhours: Number(data.interval),

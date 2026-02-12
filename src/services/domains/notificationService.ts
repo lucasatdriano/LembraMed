@@ -45,14 +45,10 @@ const notificationService = {
         }
     },
 
-    getUserNotifications: async (
-        userId: string,
-        limit: number = 50,
-        offset: number = 0,
-    ) => {
+    getUserNotifications: async (limit: number = 50, offset: number = 0) => {
         try {
             const response = await api.get<NotificationsResponse>(
-                API_ROUTES.NOTIFICATIONS.GET_USER_NOTIFICATIONS({ userId }),
+                API_ROUTES.NOTIFICATIONS.GET_USER_NOTIFICATIONS,
                 { params: { limit, offset } },
             );
             return response.data;

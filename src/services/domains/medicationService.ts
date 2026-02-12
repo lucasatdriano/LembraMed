@@ -5,7 +5,6 @@ import {
 } from '@/interfaces/medicationHistory';
 import { api } from '../api';
 import API_ROUTES from '../api/routes';
-import { resolve } from 'path';
 
 export interface CreateMedicationRequest {
     name: string;
@@ -21,7 +20,8 @@ export interface UpdateMedicationRequest {
     periodstart?: string;
     periodend?: string;
     intervalinhours?: number;
-    status?: boolean;
+    // ⚠️ REMOVIDO: status não pode ser atualizado diretamente!
+    // Use registerPendingConfirmation ou cancelPendingDose
 }
 
 export interface MedicationHistoryFilters {
@@ -32,16 +32,29 @@ export interface MedicationHistoryFilters {
     limit?: number;
 }
 
+// 🟢 NOVOS TIPOS PARA O FLUXO DE CONFIRMAÇÃO
+export interface PendingConfirmationResponse {
+    message: string;
+    medication: Medication & {
+        pendingConfirmation: boolean;
+        pendingUntil: string;
+    };
+}
+
+export interface ConfirmDoseResponse {
+    message: string;
+    medication: Medication;
+}
+
 const medicationService = {
     searchMedications: async (
-        userId: string,
         search: string = '',
         page: number = 1,
         limit: number = 12,
     ): Promise<MedicationsResponse> => {
         try {
             const response = await api.get<MedicationsResponse>(
-                API_ROUTES.MEDICATIONS.SEARCH_MEDICATIONS({ userId }),
+                API_ROUTES.MEDICATIONS.SEARCH_MEDICATIONS,
                 { params: { search, page, limit } },
             );
             return response.data;
@@ -50,26 +63,13 @@ const medicationService = {
         }
     },
 
-    getUserMedications: async (
-        userId: string,
-        page: number = 1,
-        limit: number = 12,
-    ): Promise<MedicationsResponse> => {
+    getMedication: async (medicationId: string) => {
         try {
-            const response = await api.get<MedicationsResponse>(
-                API_ROUTES.MEDICATIONS.MEDICATION({ userId }),
-                { params: { page, limit } },
-            );
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
-    },
+            // ⚠️ REMOVER CHECK_AND_UPDATE - isso é responsabilidade do scheduler!
+            // await api.post(API_ROUTES.MEDICATIONS.CHECK_AND_UPDATE({ medicationId }));
 
-    getMedication: async (userId: string, medicationId: string) => {
-        try {
             const response = await api.get<Medication>(
-                API_ROUTES.MEDICATIONS.MEDICATION({ userId, medicationId }),
+                API_ROUTES.MEDICATIONS.MEDICATION({ medicationId }),
             );
             return response.data;
         } catch (error) {
@@ -78,7 +78,6 @@ const medicationService = {
     },
 
     getMedicationHistory: async (
-        userId: string,
         medicationId: string,
         filters?: MedicationHistoryFilters,
     ): Promise<MedicationHistoryResponse> => {
@@ -94,7 +93,6 @@ const medicationService = {
 
             const response = await api.get<MedicationHistoryResponse>(
                 API_ROUTES.MEDICATIONS.MEDICATION_HISTORY({
-                    userId,
                     medicationId,
                 }),
                 { params },
@@ -105,10 +103,10 @@ const medicationService = {
         }
     },
 
-    createMedication: async (userId: string, data: CreateMedicationRequest) => {
+    createMedication: async (data: CreateMedicationRequest) => {
         try {
             const response = await api.post<Medication>(
-                API_ROUTES.MEDICATIONS.CREATE_MEDICATION({ userId }),
+                API_ROUTES.MEDICATIONS.CREATE_MEDICATION,
                 data,
             );
             return response.data;
@@ -117,37 +115,35 @@ const medicationService = {
         }
     },
 
-    markAsTaken: async (userId: string, medicationId: string) => {
+    // ✅ NOVO: Iniciar confirmação de 3 minutos
+    registerPendingConfirmation: async (medicationId: string) => {
         try {
-            const response = await api.post<{
-                message: string;
-                medication: Medication;
-            }>(API_ROUTES.MEDICATIONS.MARK_AS_TAKEN({ userId, medicationId }));
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
-    },
-
-    registerMissedDose: async (userId: string, medicationId: string) => {
-        try {
-            const response = await api.post<{
-                message: string;
-                medication: Medication;
-            }>(
-                API_ROUTES.MEDICATIONS.REGISTER_MISSED_DOSE({
-                    userId,
+            const response = await api.post<PendingConfirmationResponse>(
+                API_ROUTES.MEDICATIONS.REGISTER_PENDING_CONFIRMATION({
                     medicationId,
                 }),
             );
             return response.data;
         } catch (error) {
+            console.error('Erro ao registrar confirmação pendente:', error);
+            throw error;
+        }
+    },
+
+    // ✅ NOVO: Cancelar confirmação pendente
+    cancelPendingDose: async (medicationId: string) => {
+        try {
+            const response = await api.post<ConfirmDoseResponse>(
+                API_ROUTES.MEDICATIONS.CANCEL_PENDING_DOSE({ medicationId }),
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao cancelar confirmação:', error);
             throw error;
         }
     },
 
     updateMedication: async (
-        userId: string,
         medicationId: string,
         data: UpdateMedicationRequest,
     ) => {
@@ -158,7 +154,6 @@ const medicationService = {
                 medication: Medication;
             }>(
                 API_ROUTES.MEDICATIONS.UPDATE_MEDICATION({
-                    userId,
                     medicationId,
                 }),
                 data,
@@ -169,14 +164,13 @@ const medicationService = {
         }
     },
 
-    deleteMedication: async (userId: string, medicationId: string) => {
+    deleteMedication: async (medicationId: string) => {
         try {
             const response = await api.delete<{
                 success: boolean;
                 message: string;
             }>(
                 API_ROUTES.MEDICATIONS.DELETE_MEDICATION({
-                    userId,
                     medicationId,
                 }),
             );

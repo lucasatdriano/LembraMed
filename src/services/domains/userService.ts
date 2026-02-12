@@ -36,7 +36,6 @@ export interface LoginResponse {
 }
 
 export interface LogoutRequest {
-    userid: string;
     deviceId: string;
 }
 
@@ -86,11 +85,6 @@ const userService = {
                     path: '/',
                 });
 
-                setCookie(null, 'userId', response.data.user.id, {
-                    maxAge: 60 * 24 * 60 * 60, // 60d
-                    path: '/',
-                });
-
                 if (typeof window !== 'undefined') {
                     localStorage.setItem(
                         'currentAccount',
@@ -109,11 +103,9 @@ const userService = {
         }
     },
 
-    getProfile: async (userId: string): Promise<User> => {
+    getProfile: async (): Promise<User> => {
         try {
-            const response = await api.get<User>(
-                API_ROUTES.USERS.PROFILE({ userId }),
-            );
+            const response = await api.get<User>(API_ROUTES.USERS.PROFILE);
             return response.data;
         } catch (error) {
             throw error;

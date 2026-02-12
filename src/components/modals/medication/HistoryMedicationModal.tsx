@@ -33,16 +33,12 @@ export default function MedicationHistoryModal({
         hasPrev: false,
     });
 
-    const cookies = parseCookies();
-    const userId = cookies.userId;
-
     const fetchMedicationHistory = async (filters: any = {}) => {
-        if (!userId || !medicationData) return;
+        if (!medicationData) return;
 
         setLoading(true);
         try {
             const response = await medicationService.getMedicationHistory(
-                userId,
                 medicationData.id,
                 {
                     status: statusFilter !== 'all' ? statusFilter : undefined,

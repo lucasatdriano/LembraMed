@@ -27,10 +27,6 @@ export default function Header({
         setMounted(true);
     }, []);
 
-    const cookies = mounted ? parseCookies() : {};
-    const userId = cookies.userId;
-    const userName = cookies.userName;
-
     const handleAccountSwitched = () => {
         setSwitchAccountModalVisible(false);
         window.location.reload();
@@ -46,7 +42,7 @@ export default function Header({
             <div className="flex items-center justify-between px-4 py-3 md:px-6">
                 <div
                     className={`${
-                        mounted && showMenu && userId ? 'opacity-0' : 'hidden'
+                        mounted && showMenu ? 'opacity-0' : 'hidden'
                     }`}
                 ></div>
 
@@ -58,7 +54,7 @@ export default function Header({
                     />
                 </div>
 
-                {mounted && showMenu && userId && (
+                {mounted && showMenu && (
                     <div className="ml-4">
                         <button
                             title="Trocar de conta"

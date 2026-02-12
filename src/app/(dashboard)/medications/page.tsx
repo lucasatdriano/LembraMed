@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { parseCookies } from 'nookies';
 import { Medication, MedicationsResponse } from '@/interfaces/medication';
 import FloatingActionButton from '@/components/layouts/FabButton';
 import medicationService from '@/services/domains/medicationService';
@@ -11,7 +10,6 @@ import Pagination from '@/components/layouts/Pagination';
 
 export default function MedicationScheduleScreen() {
     const [medications, setMedications] = useState<Medication[]>([]);
-    const [userId, setUserId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const { searchValue } = useSearch();
     const [pagination, setPagination] = useState({
@@ -24,17 +22,10 @@ export default function MedicationScheduleScreen() {
 
     const fetchMedications = useCallback(
         async (search: string = '', page: number = 1) => {
-            if (!userId) return;
-
             setLoading(true);
             try {
                 const response: MedicationsResponse =
-                    await medicationService.searchMedications(
-                        userId,
-                        search,
-                        page,
-                        10,
-                    );
+                    await medicationService.searchMedications(search, page, 10);
                 setMedications(response.medications);
                 setPagination(response.pagination);
             } catch (error) {
@@ -51,20 +42,12 @@ export default function MedicationScheduleScreen() {
                 setLoading(false);
             }
         },
-        [userId],
+        [],
     );
 
     useEffect(() => {
-        const cookies = parseCookies();
-        const id = cookies.userId;
-        setUserId(id);
-    }, []);
-
-    useEffect(() => {
-        if (userId) {
-            fetchMedications(searchValue, 1);
-        }
-    }, [userId, searchValue, fetchMedications]);
+        fetchMedications(searchValue, 1);
+    }, [searchValue, fetchMedications]);
 
     const handleMedicationCreated = useCallback(() => {
         fetchMedications(searchValue, 1);

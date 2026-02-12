@@ -8,8 +8,9 @@ export interface Medication {
     periodstart: string | null;
     periodend: string | null;
     status: boolean;
+    pendingConfirmation: boolean;
+    pendingUntil: Date | null;
     createdat: string;
-    userid: string;
     doseintervalid: number;
     intervalinhours: number;
     doseinterval: {

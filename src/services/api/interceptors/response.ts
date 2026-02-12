@@ -8,6 +8,7 @@ import {
 } from 'axios';
 import { parseCookies, setCookie, destroyCookie } from 'nookies';
 import authService from '@/services/domains/authService';
+import { accountManager } from '@/services/domains/accountManagerService';
 
 let isRefreshing = false;
 let refreshQueue: ((token: string) => void)[] = [];
@@ -109,41 +110,61 @@ export const setupResponseInterceptor = (api: AxiosInstance) => {
                     originalRequest._retry = true;
                     isRefreshing = true;
 
+                    // No bloco do try do refresh token, adicione:
                     try {
                         const tokens = await authService.refreshToken(
                             refreshToken,
                             deviceId,
                         );
 
+                        // ATUALIZA O HEADER GLOBAL
                         api.defaults.headers.common[
                             'Authorization'
                         ] = `Bearer ${tokens.accessToken}`;
 
+                        // PROCESSAR FILA DE REQUISIÇÕES PENDENTES
                         refreshQueue.forEach((callback) =>
                             callback(tokens.accessToken),
                         );
                         refreshQueue = [];
 
+                        // ATUALIZA A REQUISIÇÃO ORIGINAL
                         originalRequest.headers = originalRequest.headers || {};
                         originalRequest.headers[
                             'Authorization'
                         ] = `Bearer ${tokens.accessToken}`;
 
                         console.log(
-                            'Token renovado com sucesso, reenviando requisição...',
+                            '✅ [Interceptor] Token renovado com sucesso, reenviando requisição...',
                         );
                         console.groupEnd();
 
                         return api(originalRequest);
                     } catch (refreshError) {
-                        console.error('Erro ao renovar token:', refreshError);
+                        console.error(
+                            '❌ [Interceptor] Erro ao renovar token:',
+                            refreshError,
+                        );
 
+                        // LIMPA A FILA COM ERRO
                         refreshQueue.forEach((callback) => callback(''));
                         refreshQueue = [];
 
-                        authService.logout();
+                        // LOGOUT APENAS DA CONTA ATUAL
+                        const currentAccount =
+                            accountManager.getAccountByDeviceId(deviceId);
+                        if (currentAccount) {
+                            accountManager.logoutAccount(currentAccount.userId);
+                        } else {
+                            authService.logout();
+                        }
 
-                        if (typeof window !== 'undefined') {
+                        // REDIRECIONA PARA LOGIN APENAS SE FOR A CONTA ATUAL
+                        if (
+                            typeof window !== 'undefined' &&
+                            currentAccount?.userId ===
+                                accountManager.getCurrentAccount()?.userId
+                        ) {
                             window.location.href = '/login';
                         }
 

@@ -1,6 +1,10 @@
 const Formatters = {
     splitPeriod: (period: string) => {
-        if (!period || period.trim() === '') {
+        if (
+            !period ||
+            period.trim() === '' ||
+            period === 'Período indefinido'
+        ) {
             return { start: undefined, end: undefined };
         }
         const [start, end] = period.split(' - ');
@@ -12,6 +16,7 @@ const Formatters = {
 
         const hasPeriodEnd =
             periodend && periodend !== 'null' && periodend.trim() !== '';
+
         if (!hasPeriodStart && !hasPeriodEnd) {
             return 'Período indefinido';
         }

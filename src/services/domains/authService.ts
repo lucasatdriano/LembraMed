@@ -1,6 +1,7 @@
 import { setCookie, destroyCookie } from 'nookies';
 import API_ROUTES from '../api/routes';
 import { api } from '../api';
+import { accountManager } from './accountManagerService';
 
 export interface TokenResponse {
     accessToken: string;
@@ -65,11 +66,6 @@ const authService: AuthService = {
             throw new Error('Sessão expirada. Faça login novamente.');
         }
 
-        if (!authService.isTokenValid(refreshToken)) {
-            authService.logout();
-            throw new Error('Sessão expirada. Faça login novamente.');
-        }
-
         try {
             const response = await api.post<TokenResponse>(
                 API_ROUTES.AUTH.REFRESH_TOKEN,
@@ -79,40 +75,56 @@ const authService: AuthService = {
                 },
             );
 
-            if (!response.data?.accessToken) {
+            if (!response.data?.accessToken || !response.data?.refreshToken) {
                 throw new Error('Resposta inválida do servidor');
             }
 
-            console.log('Tokens renovados com sucesso:', {
+            console.log('✅ [AuthService] Tokens renovados com sucesso:', {
                 access: response.data.accessToken?.slice(0, 10) + '...',
                 refresh: response.data.refreshToken?.slice(0, 10) + '...',
             });
 
-            setCookie(null, 'accessToken', response.data.accessToken, {
-                maxAge: 60 * 60, // 1h
-                path: '/',
-            });
+            const currentAccount =
+                accountManager.getAccountByDeviceId(deviceId);
+            if (currentAccount) {
+                accountManager.updateAccountTokens(
+                    currentAccount.userId,
+                    response.data.accessToken,
+                    response.data.refreshToken,
+                );
+            } else {
+                setCookie(null, 'accessToken', response.data.accessToken, {
+                    maxAge: 24 * 60 * 60, // 1d
+                    path: '/',
+                });
 
-            setCookie(null, 'refreshToken', response.data.refreshToken, {
-                maxAge: 60 * 24 * 60 * 60, // 60d
-                path: '/',
-            });
+                setCookie(null, 'refreshToken', response.data.refreshToken, {
+                    maxAge: 7 * 24 * 60 * 60, // 7d
+                    path: '/',
+                });
 
-            setCookie(null, 'deviceId', deviceId, {
-                maxAge: 60 * 24 * 60 * 60, // 60d
-                path: '/',
-            });
+                setCookie(null, 'deviceId', deviceId, {
+                    maxAge: 7 * 24 * 60 * 60, // 7d
+                    path: '/',
+                });
+            }
 
             return {
                 accessToken: response.data.accessToken,
                 refreshToken: response.data.refreshToken,
             };
         } catch (error) {
-            console.error('Falha no refresh token:', error);
+            console.error('❌ [AuthService] Falha no refresh token:', error);
 
-            authService.logout();
+            const currentAccount =
+                accountManager.getAccountByDeviceId(deviceId);
+            if (currentAccount) {
+                accountManager.logoutAccount(currentAccount.userId);
+            } else {
+                authService.logout();
+            }
 
-            throw new Error('Falha ao renovar sessão');
+            throw new Error('Falha ao renovar sessão. Faça login novamente.');
         }
     },
 
@@ -151,16 +163,16 @@ const authService: AuthService = {
             destroyCookie(null, 'accessToken');
             destroyCookie(null, 'refreshToken');
             destroyCookie(null, 'deviceId');
-            destroyCookie(null, 'userId');
 
             if (typeof window !== 'undefined') {
+                localStorage.removeItem('accounts');
                 localStorage.removeItem('currentAccount');
                 sessionStorage.clear();
             }
 
-            console.log('Logout realizado com sucesso');
+            console.log('✅ [AuthService] Logout realizado com sucesso');
         } catch (error) {
-            console.error('Erro durante logout:', error);
+            console.error('❌ [AuthService] Erro durante logout:', error);
         }
     },
 };

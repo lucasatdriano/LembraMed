@@ -1,5 +1,4 @@
 type Params = {
-    userId?: string;
     contactId?: string;
     medicationId?: string;
     deviceId?: string;
@@ -8,43 +7,39 @@ type Params = {
 
 const API_ROUTES = {
     AUTH: {
+        REFRESH_TOKEN: '/auth/refreshtoken',
+        TOKEN_STATUS: '/auth/tokenstatus',
         FORGOT_PASSWORD: '/auth/forgotpassword',
         RESET_PASSWORD: '/auth/resetpassword',
-        REFRESH_TOKEN: '/auth/refreshtoken',
     },
     USERS: {
         REGISTER: '/users/register',
         LOGIN_MULTI: '/users/login',
-        PROFILE: ({ userId }: Params) => `/users/${userId}`,
+        PROFILE: `/users`,
         LOGOUT: '/users/logout',
     },
     CONTACTS: {
-        SEARCH_CONTACTS: ({ userId }: Params) => `/contacts/${userId}/search`,
-        CONTACT: ({ userId, contactId }: Params) =>
-            `/contacts/${userId}/${contactId}`,
-        CREATE_CONTACT: ({ userId }: Params) => `/contacts/${userId}`,
-        UPDATE_CONTACT: ({ userId, contactId }: Params) =>
-            `/contacts/${userId}/${contactId}`,
-        DELETE_CONTACT: ({ userId, contactId }: Params) =>
-            `/contacts/${userId}/${contactId}`,
+        SEARCH_CONTACTS: `/contacts/search`,
+        CONTACT: ({ contactId }: Params) => `/contacts/${contactId}`,
+        CREATE_CONTACT: `/contacts/`,
+        UPDATE_CONTACT: ({ contactId }: Params) => `/contacts/${contactId}`,
+        DELETE_CONTACT: ({ contactId }: Params) => `/contacts/${contactId}`,
     },
     MEDICATIONS: {
-        SEARCH_MEDICATIONS: ({ userId }: Params) =>
-            `/medications/${userId}/search`,
-        MEDICATION: ({ userId, medicationId }: Params) =>
-            `/medications/${userId}/${medicationId}`,
-        MEDICATION_HISTORY: ({ userId, medicationId }: Params) =>
-            `/medications/${userId}/${medicationId}/history`,
-        CREATE_MEDICATION: ({ userId }: Params) =>
-            `/medications/${userId}/create`,
-        MARK_AS_TAKEN: ({ userId, medicationId }: Params) =>
-            `/medications/${userId}/${medicationId}/taken`,
-        REGISTER_MISSED_DOSE: ({ userId, medicationId }: Params) =>
-            `/medications/${userId}/${medicationId}/missed`,
-        UPDATE_MEDICATION: ({ userId, medicationId }: Params) =>
-            `/medications/${userId}/${medicationId}`,
-        DELETE_MEDICATION: ({ userId, medicationId }: Params) =>
-            `/medications/${userId}/${medicationId}`,
+        SEARCH_MEDICATIONS: `/medications/search`,
+        MEDICATION: ({ medicationId }: Params) =>
+            `/medications/${medicationId}`,
+        MEDICATION_HISTORY: ({ medicationId }: Params) =>
+            `/medications/${medicationId}/history`,
+        CREATE_MEDICATION: `/medications/create`,
+        REGISTER_PENDING_CONFIRMATION: ({ medicationId }: Params) =>
+            `/medications/${medicationId}/pending`,
+        CANCEL_PENDING_DOSE: ({ medicationId }: Params) =>
+            `/medications/${medicationId}/cancel`,
+        UPDATE_MEDICATION: ({ medicationId }: Params) =>
+            `/medications/${medicationId}`,
+        DELETE_MEDICATION: ({ medicationId }: Params) =>
+            `/medications/${medicationId}`,
     },
     DEVICES: {
         GET_ACCOUNTS: ({ deviceId }: Params) => `/devices/${deviceId}/accounts`,
@@ -53,8 +48,7 @@ const API_ROUTES = {
     },
     NOTIFICATIONS: {
         SEND_NOTIFICATION: '/notifications/send',
-        GET_USER_NOTIFICATIONS: ({ userId }: Params) =>
-            `/notifications/user/${userId}`,
+        GET_USER_NOTIFICATIONS: '/notifications/user/',
         MARK_AS_READ: ({ notificationId }: Params) =>
             `/notifications/${notificationId}/read`,
     },

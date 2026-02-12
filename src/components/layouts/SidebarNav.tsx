@@ -41,7 +41,6 @@ export default function SidebarNav() {
 
     const handleLogout = () => {
         destroyCookie(null, 'accessToken');
-        destroyCookie(null, 'userId');
         destroyCookie(null, 'refreshToken');
         router.push('/login');
     };

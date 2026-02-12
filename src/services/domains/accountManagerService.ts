@@ -57,7 +57,52 @@ class AccountManager {
         this.accounts[account.userId] = account;
         this.saveToStorage();
 
+        // Configura cookies com tempos alinhados ao backend
+        this.setAuthCookies(account);
+
+        this.currentAccountId = account.userId;
+        this.saveToStorage();
+
         return account;
+    }
+
+    updateAccountTokens(
+        userId: string,
+        accessToken: string,
+        refreshToken: string,
+    ) {
+        const account = this.accounts[userId];
+        if (account) {
+            account.accessToken = accessToken;
+            account.refreshToken = refreshToken;
+            account.lastUsed = new Date();
+            this.accounts[userId] = account;
+            this.saveToStorage();
+
+            this.setAuthCookies(account);
+
+            console.log(
+                '✅ [AccountManager] Tokens atualizados para conta:',
+                userId,
+            );
+        }
+    }
+
+    private setAuthCookies(account: Account) {
+        setCookie(null, 'accessToken', account.accessToken, {
+            maxAge: 24 * 60 * 60, // 1d
+            path: '/',
+        });
+
+        setCookie(null, 'refreshToken', account.refreshToken, {
+            maxAge: 7 * 24 * 60 * 60, // 7d
+            path: '/',
+        });
+
+        setCookie(null, 'deviceId', account.deviceId, {
+            maxAge: 7 * 24 * 60 * 60, // 7d
+            path: '/',
+        });
     }
 
     switchAccount(userId: string): Account {
@@ -66,22 +111,7 @@ class AccountManager {
             throw new Error('Conta não encontrada');
         }
 
-        setCookie(null, 'accessToken', account.accessToken, {
-            maxAge: 60 * 60, // 1h
-            path: '/',
-        });
-        setCookie(null, 'refreshToken', account.refreshToken, {
-            maxAge: 60 * 24 * 60 * 60, // 60d
-            path: '/',
-        });
-        setCookie(null, 'userId', account.userId, {
-            maxAge: 60 * 24 * 60 * 60,
-            path: '/',
-        });
-        setCookie(null, 'deviceId', account.deviceId, {
-            maxAge: 60 * 24 * 60 * 60,
-            path: '/',
-        });
+        this.setAuthCookies(account);
 
         this.currentAccountId = userId;
         account.lastUsed = new Date();
@@ -108,12 +138,19 @@ class AccountManager {
         if (userId === this.currentAccountId) {
             destroyCookie(null, 'accessToken');
             destroyCookie(null, 'refreshToken');
-            destroyCookie(null, 'userId');
             destroyCookie(null, 'deviceId');
             this.currentAccountId = null;
         }
         delete this.accounts[userId];
         this.saveToStorage();
+    }
+
+    getAccountByDeviceId(deviceId: string): Account | null {
+        return (
+            Object.values(this.accounts).find(
+                (account) => account.deviceId === deviceId,
+            ) || null
+        );
     }
 }
 

@@ -11,7 +11,6 @@ import Pagination from '@/components/layouts/Pagination';
 
 export default function ContactScreen() {
     const [contacts, setContacts] = useState<Contact[]>([]);
-    const [userId, setUserId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const { searchValue } = useSearch();
     const [pagination, setPagination] = useState({
@@ -24,17 +23,10 @@ export default function ContactScreen() {
 
     const fetchContacts = useCallback(
         async (search: string = '', page: number = 1) => {
-            if (!userId) return;
-
             setLoading(true);
             try {
                 const response: ContactsResponse =
-                    await contactService.searchContacts(
-                        userId,
-                        search,
-                        page,
-                        12,
-                    );
+                    await contactService.searchContacts(search, page, 12);
                 setContacts(response.contacts);
                 setPagination(response.pagination);
             } catch (error) {
@@ -51,20 +43,12 @@ export default function ContactScreen() {
                 setLoading(false);
             }
         },
-        [userId],
+        [],
     );
 
     useEffect(() => {
-        const cookies = parseCookies();
-        const id = cookies.userId;
-        setUserId(id);
-    }, []);
-
-    useEffect(() => {
-        if (userId) {
-            fetchContacts(searchValue, 1);
-        }
-    }, [userId, searchValue, fetchContacts]);
+        fetchContacts(searchValue, 1);
+    }, [searchValue, fetchContacts]);
 
     const handleContactCreated = useCallback(() => {
         fetchContacts(searchValue, 1);

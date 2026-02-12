@@ -22,9 +22,6 @@ export default function CardContact({
     const [isLoading, setIsLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(true);
 
-    const cookies = parseCookies();
-    const userId = cookies.userId;
-
     const handleCall = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (contactData?.numberphone) {
@@ -92,7 +89,6 @@ export default function CardContact({
             <UpdateContactModal
                 visible={isUpdateModalVisible}
                 onClose={() => setIsUpdateModalVisible(false)}
-                userId={userId}
                 contactData={contactData}
                 onContactUpdated={handleContactUpdated}
             />

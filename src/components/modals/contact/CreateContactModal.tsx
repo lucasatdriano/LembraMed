@@ -14,14 +14,12 @@ import InputTextField from '@/components/forms/InputTextField';
 interface CreateContactModalProps {
     visible: boolean;
     onClose: () => void;
-    userId: string;
     onContactCreated?: () => void;
 }
 
 export default function CreateContactModal({
     visible,
     onClose,
-    userId,
     onContactCreated,
 }: CreateContactModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,7 +38,7 @@ export default function CreateContactModal({
     const handleFormSubmit = async (data: ContactFormData) => {
         setIsSubmitting(true);
         try {
-            await contactService.createContact(userId, {
+            await contactService.createContact({
                 contactName: data.contactName,
                 numberPhone: Masks.unmask(data.phoneNumber),
             });

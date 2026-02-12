@@ -20,13 +20,6 @@ export default function FloatingActionButton({
     className = '',
 }: FloatingActionButtonProps) {
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [userId, setUserId] = useState<string | null>(null);
-
-    useEffect(() => {
-        const cookies = parseCookies();
-        const id = cookies.userId;
-        setUserId(id);
-    }, []);
 
     return (
         <>
@@ -61,7 +54,6 @@ export default function FloatingActionButton({
                 <CreateContactModal
                     visible={isModalVisible}
                     onClose={() => setIsModalVisible(false)}
-                    userId={userId || ''}
                     onContactCreated={() => {
                         setIsModalVisible(false);
                         onContactCreated?.();
@@ -71,7 +63,6 @@ export default function FloatingActionButton({
                 <CreateMedicationModal
                     visible={isModalVisible}
                     onClose={() => setIsModalVisible(false)}
-                    userId={userId || ''}
                     onMedicationCreated={() => {
                         setIsModalVisible(false);
                         onMedicationCreated?.();
