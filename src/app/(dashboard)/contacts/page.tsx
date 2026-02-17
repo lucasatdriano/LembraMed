@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { parseCookies } from 'nookies';
 import FloatingActionButton from '@/components/layouts/FabButton';
 import contactService from '@/services/domains/contactService';
 import { Contact, ContactsResponse } from '@/interfaces/contact';

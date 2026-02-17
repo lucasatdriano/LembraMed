@@ -5,6 +5,7 @@ import {
 } from '@/interfaces/medicationHistory';
 import { api } from '../api';
 import API_ROUTES from '../api/routes';
+import { toast } from 'sonner';
 
 export interface CreateMedicationRequest {
     name: string;
@@ -20,8 +21,6 @@ export interface UpdateMedicationRequest {
     periodstart?: string;
     periodend?: string;
     intervalinhours?: number;
-    // ⚠️ REMOVIDO: status não pode ser atualizado diretamente!
-    // Use registerPendingConfirmation ou cancelPendingDose
 }
 
 export interface MedicationHistoryFilters {
@@ -32,7 +31,6 @@ export interface MedicationHistoryFilters {
     limit?: number;
 }
 
-// 🟢 NOVOS TIPOS PARA O FLUXO DE CONFIRMAÇÃO
 export interface PendingConfirmationResponse {
     message: string;
     medication: Medication & {
@@ -58,21 +56,28 @@ const medicationService = {
                 { params: { search, page, limit } },
             );
             return response.data;
-        } catch (error) {
+        } catch (error: any) {
+            if (error.response?.status === 404) {
+                toast.info('Nenhum medicamento encontrado');
+            } else {
+                toast.error('Erro ao buscar medicamentos');
+            }
             throw error;
         }
     },
 
     getMedication: async (medicationId: string) => {
         try {
-            // ⚠️ REMOVER CHECK_AND_UPDATE - isso é responsabilidade do scheduler!
-            // await api.post(API_ROUTES.MEDICATIONS.CHECK_AND_UPDATE({ medicationId }));
-
             const response = await api.get<Medication>(
                 API_ROUTES.MEDICATIONS.MEDICATION({ medicationId }),
             );
             return response.data;
-        } catch (error) {
+        } catch (error: any) {
+            if (error.response?.status === 404) {
+                toast.error('Medicamento não encontrado');
+            } else {
+                toast.error('Erro ao buscar medicamento');
+            }
             throw error;
         }
     },
@@ -98,7 +103,12 @@ const medicationService = {
                 { params },
             );
             return response.data;
-        } catch (error) {
+        } catch (error: any) {
+            if (error.response?.status === 404) {
+                toast.info('Nenhum histórico encontrado');
+            } else {
+                toast.error('Erro ao buscar histórico');
+            }
             throw error;
         }
     },
@@ -109,13 +119,29 @@ const medicationService = {
                 API_ROUTES.MEDICATIONS.CREATE_MEDICATION,
                 data,
             );
+
+            toast.success('Medicamento criado com sucesso!');
             return response.data;
-        } catch (error) {
+        } catch (error: any) {
+            if (error.response?.status === 400) {
+                const errorData = error.response.data;
+
+                if (Array.isArray(errorData.details)) {
+                    errorData.details.forEach((err: string) => {
+                        toast.error(err);
+                    });
+                } else if (errorData.details) {
+                    toast.error(errorData.details);
+                } else {
+                    toast.error(errorData.error || 'Erro ao criar medicamento');
+                }
+            } else {
+                toast.error('Erro ao criar medicamento. Tente novamente.');
+            }
             throw error;
         }
     },
 
-    // ✅ NOVO: Iniciar confirmação de 3 minutos
     registerPendingConfirmation: async (medicationId: string) => {
         try {
             const response = await api.post<PendingConfirmationResponse>(
@@ -123,22 +149,49 @@ const medicationService = {
                     medicationId,
                 }),
             );
+
+            toast.success(response.data.message);
             return response.data;
-        } catch (error) {
+        } catch (error: any) {
             console.error('Erro ao registrar confirmação pendente:', error);
+
+            if (error.response?.status === 400) {
+                const errorData = error.response.data;
+
+                if (errorData.error) {
+                    toast.error(errorData.error);
+                } else if (Array.isArray(errorData.details)) {
+                    errorData.details.forEach((err: string) => {
+                        toast.error(err);
+                    });
+                } else {
+                    toast.error('Não foi possível marcar como tomado');
+                }
+            } else if (error.response?.status === 404) {
+                toast.error('Medicamento não encontrado');
+            } else {
+                toast.error('Erro ao registrar confirmação');
+            }
             throw error;
         }
     },
 
-    // ✅ NOVO: Cancelar confirmação pendente
     cancelPendingDose: async (medicationId: string) => {
         try {
             const response = await api.post<ConfirmDoseResponse>(
                 API_ROUTES.MEDICATIONS.CANCEL_PENDING_DOSE({ medicationId }),
             );
+
+            toast.info('Confirmação da dose cancelada');
             return response.data;
-        } catch (error) {
+        } catch (error: any) {
             console.error('Erro ao cancelar confirmação:', error);
+
+            if (error.response?.status === 404) {
+                toast.error('Medicamento não encontrado');
+            } else {
+                toast.error('Erro ao cancelar confirmação');
+            }
             throw error;
         }
     },
@@ -158,8 +211,29 @@ const medicationService = {
                 }),
                 data,
             );
+
+            toast.success('Medicamento atualizado com sucesso!');
             return response.data;
-        } catch (error) {
+        } catch (error: any) {
+            if (error.response?.status === 400) {
+                const errorData = error.response.data;
+
+                if (Array.isArray(errorData.details)) {
+                    errorData.details.forEach((err: string) => {
+                        toast.error(err);
+                    });
+                } else if (errorData.details) {
+                    toast.error(errorData.details);
+                } else {
+                    toast.error(
+                        errorData.error || 'Erro ao atualizar medicamento',
+                    );
+                }
+            } else if (error.response?.status === 404) {
+                toast.error('Medicamento não encontrado');
+            } else {
+                toast.error('Erro ao atualizar medicamento. Tente novamente.');
+            }
             throw error;
         }
     },
@@ -174,8 +248,20 @@ const medicationService = {
                     medicationId,
                 }),
             );
+
+            toast.success(
+                response.data.message || 'Medicamento removido com sucesso!',
+            );
             return response.data;
-        } catch (error) {
+        } catch (error: any) {
+            if (error.response?.status === 404) {
+                toast.error('Medicamento não encontrado');
+            } else if (error.response?.status === 400) {
+                const errorData = error.response.data;
+                toast.error(errorData.error || 'Erro ao remover medicamento');
+            } else {
+                toast.error('Erro ao remover medicamento. Tente novamente.');
+            }
             throw error;
         }
     },

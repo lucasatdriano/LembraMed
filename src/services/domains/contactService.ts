@@ -1,6 +1,7 @@
 import { Contact, ContactsResponse } from '@/interfaces/contact';
 import { api } from '../api';
 import API_ROUTES from '../api/routes';
+import { toast } from 'sonner';
 
 const contactService = {
     searchContacts: async (
@@ -42,8 +43,25 @@ const contactService = {
                     numberphone: data.numberPhone,
                 },
             );
+
+            toast.success('Contato criado com sucesso!');
             return response.data;
-        } catch (error) {
+        } catch (error: any) {
+            if (error.response?.status === 400) {
+                const errorData = error.response.data;
+
+                if (Array.isArray(errorData.details)) {
+                    errorData.details.forEach((err: string) => {
+                        toast.error(err);
+                    });
+                } else if (errorData.details) {
+                    toast.error(errorData.details);
+                } else {
+                    toast.error(errorData.error || 'Erro ao criar contato');
+                }
+            } else {
+                toast.error('Erro ao criar contato. Tente novamente.');
+            }
             throw error;
         }
     },
@@ -63,8 +81,25 @@ const contactService = {
                     numberphone: data.numberPhone,
                 },
             );
+
+            toast.success('Contato atualizado com sucesso!');
             return response.data;
-        } catch (error) {
+        } catch (error: any) {
+            if (error.response?.status === 400) {
+                const errorData = error.response.data;
+
+                if (Array.isArray(errorData.details)) {
+                    errorData.details.forEach((err: string) => {
+                        toast.error(err);
+                    });
+                } else if (errorData.details) {
+                    toast.error(errorData.details);
+                } else {
+                    toast.error(errorData.error || 'Erro ao atualizar contato');
+                }
+            } else {
+                toast.error('Erro ao atualizar contato. Tente novamente.');
+            }
             throw error;
         }
     },
@@ -74,8 +109,15 @@ const contactService = {
             const response = await api.delete(
                 API_ROUTES.CONTACTS.DELETE_CONTACT({ contactId }),
             );
+
+            toast.success('Contato removido com sucesso!');
             return response.data;
-        } catch (error) {
+        } catch (error: any) {
+            if (error.response?.status === 404) {
+                toast.error('Contato não encontrado');
+            } else {
+                toast.error('Erro ao remover contato. Tente novamente.');
+            }
             throw error;
         }
     },

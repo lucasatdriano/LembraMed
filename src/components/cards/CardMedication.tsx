@@ -27,6 +27,7 @@ export default function CardMedication({
 }: CardMedicationProps) {
     const [medicationData, setMedicationData] = useState(initialMedicationData);
     const [nextDoseCountdown, setNextDoseCountdown] = useState('');
+    const [showConfirmation, setShowConfirmation] = useState(false);
     const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -39,30 +40,30 @@ export default function CardMedication({
 
     const interval = medicationData?.doseinterval?.intervalinhours || 0;
     const label = interval === 1 ? 'hora' : 'horas';
-    useEffect(() => {
-        if (!medicationData.status || !medicationData.pendingUntil) {
-            return;
-        }
 
-        const pollInterval = setInterval(async () => {
-            try {
-                const freshData = await medicationService.getMedication(
-                    medicationData.id,
-                );
-                setMedicationData(freshData);
-            } catch (error) {
-                console.error('Erro ao buscar dados atualizados:', error);
-            }
-        }, 3000);
+    // useEffect(() => {
+    //     if (!medicationData.status || !medicationData.pendingUntil) {
+    //         return;
+    //     }
 
-        return () => clearInterval(pollInterval);
-    }, [medicationData.id, medicationData.status, medicationData.pendingUntil]);
+    //     const pollInterval = setInterval(async () => {
+    //         try {
+    //             const freshData = await medicationService.getMedication(
+    //                 medicationData.id,
+    //             );
+    //             setMedicationData(freshData);
+    //         } catch (error) {
+    //             console.error('Erro ao buscar dados atualizados:', error);
+    //         }
+    //     }, 3000);
+
+    //     return () => clearInterval(pollInterval);
+    // }, [medicationData.id, medicationData.status, medicationData.pendingUntil]);
 
     useEffect(() => {
         setMedicationData(initialMedicationData);
     }, [initialMedicationData]);
 
-    // ✅ APENAS COUNTDOWN VISUAL - SEM LÓGICA DE NEGÓCIO
     useEffect(() => {
         if (!medicationData?.hournextdose) return;
 
@@ -137,7 +138,6 @@ export default function CardMedication({
         return () => clearInterval(intervalId);
     }, [medicationData.status, medicationData.pendingUntil]);
 
-    // ✅ ÚNICA AÇÃO: Marcar como tomado (inicia confirmação de 3 minutos)
     const handleMarkAsTaken = async () => {
         if (isLoading) return;
 
@@ -161,13 +161,11 @@ export default function CardMedication({
             onUpdate?.();
         } catch (error) {
             console.error('Erro ao marcar como tomado:', error);
-            alert('Erro ao registrar dose. Tente novamente.');
         } finally {
             setIsLoading(false);
         }
     };
 
-    // ✅ NOVO MÉTODO: Marcar como NÃO TOMADO (CANCELAR)
     const handleMarkAsNotTaken = async (e: React.MouseEvent) => {
         e.stopPropagation();
 
@@ -186,12 +184,9 @@ export default function CardMedication({
             onUpdate?.();
         } catch (error) {
             console.error('Erro ao cancelar dose:', error);
-            alert('Erro ao cancelar dose. Tente novamente.');
         }
     };
 
-    // ✅ Cancelar confirmação
-    // ✅ CORRIGIDO - não usar prev.pendingUntil
     const handleCancelConfirmation = async (e: React.MouseEvent) => {
         e.stopPropagation();
 
@@ -203,7 +198,7 @@ export default function CardMedication({
                 ...prev,
                 status: response.medication.status,
                 pendingConfirmation: false,
-                pendingUntil: null, // ✅ SEMPRE null após cancelar!
+                pendingUntil: null,
                 hournextdose: response.medication.hournextdose,
             }));
             setShowConfirmation(false);
@@ -213,28 +208,13 @@ export default function CardMedication({
         }
     };
 
-    // ✅ Duplo clique = marcar como tomado
-    // const handleDoubleClick = () => {
-    //     handleMarkAsTaken();
-    // };
-
-    // ✅ Clique simples = editar
-    const handleClick = () => {
-        if (medicationData.pendingConfirmation) return; // Não abre edição se estiver em confirmação
-        setIsUpdateModalVisible(true);
-    };
-
-    // ✅ Estado local para controle do modal de confirmação (só UI)
-    const [showConfirmation, setShowConfirmation] = useState(false);
-
     const handlePress = () => {
-        // ✅ SEMPRE abre o modal no duplo clique
         const now = Date.now();
         const DOUBLE_PRESS_DELAY = 300;
 
         if (lastTap.current && now - lastTap.current < DOUBLE_PRESS_DELAY) {
             timeoutRef.current && clearTimeout(timeoutRef.current);
-            setShowConfirmation(true); // ✅ SEMPRE abre o modal
+            setShowConfirmation(true);
         } else {
             lastTap.current = now;
             timeoutRef.current = setTimeout(() => {
@@ -291,12 +271,7 @@ export default function CardMedication({
 
     return (
         <>
-            <div
-                className={getCardStyles()}
-                onClick={handlePress}
-                // onDoubleClick={handleDoubleClick}
-            >
-                {/* Feedback de sucesso */}
+            <div className={getCardStyles()} onClick={handlePress}>
                 {showSuccess && (
                     <div className="absolute inset-0 bg-green-100 bg-opacity-90 rounded-lg flex items-center justify-center z-10">
                         <div className="text-center">
@@ -316,7 +291,7 @@ export default function CardMedication({
                         <div className="text-center">
                             <AlertCircle className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
                             <h3 className="text-lg font-semibold text-yellow-800 mb-2">
-                                {medicationData.status // ✅ USA status, não pendingConfirmation!
+                                {medicationData.status
                                     ? 'Cancelar dose?'
                                     : 'Confirmar ação'}
                             </h3>
@@ -327,7 +302,6 @@ export default function CardMedication({
                             </p>
                             <div className="flex gap-3 justify-center">
                                 {medicationData.status ? (
-                                    // ✅ MODO CANCELAR (status true)
                                     <>
                                         <button
                                             title="Cancelar dose"
@@ -355,7 +329,6 @@ export default function CardMedication({
                                         </button>
                                     </>
                                 ) : (
-                                    // ✅ MODO CONFIRMAR (status false)
                                     <>
                                         <button
                                             title="Confirmar dose"
@@ -392,8 +365,8 @@ export default function CardMedication({
                     </div>
                 )}
 
-                <div className="flex items-start justify-between">
-                    <div className="flex-1">
+                <div className="h-full flex items-start justify-between">
+                    <div className="h-full flex flex-col justify-between">
                         <div className="flex items-center mb-3">
                             {getStatusIcon()}
                             <Pill className="w-4 h-4 text-gray-500 mr-2" />
@@ -401,7 +374,8 @@ export default function CardMedication({
                                 {Formatters.formatName(medicationData.name)}
                             </h3>
                         </div>
-                        <div className="space-y-2 ml-7">
+
+                        <div className="h-full space-y-2 ml-5">
                             <div className="flex items-center text-sm">
                                 <Clock className="w-4 h-4 text-gray-500 mr-2" />
                                 <span className="text-gray-600">
@@ -427,17 +401,18 @@ export default function CardMedication({
                                     {label}
                                 </span>
                             </div>
-
-                            <div className="flex items-center text-sm">
-                                <Calendar className="w-4 h-4 text-gray-500 mr-2" />
-                                <span className="text-gray-600">
-                                    <strong>Período:</strong>{' '}
-                                    {Formatters.formatPeriod(
-                                        medicationData.periodstart,
-                                        medicationData.periodend,
-                                    )}
-                                </span>
-                            </div>
+                            {medicationData.periodstart && (
+                                <div className="flex items-center text-sm">
+                                    <Calendar className="w-4 h-4 text-gray-500 mr-2" />
+                                    <span className="text-gray-600">
+                                        <strong>Período:</strong>{' '}
+                                        {Formatters.formatPeriod(
+                                            medicationData.periodstart,
+                                            medicationData.periodend,
+                                        )}
+                                    </span>
+                                </div>
+                            )}
 
                             {/* ✅ AVISO DOS 3 MINUTOS - ADICIONADO AQUI! */}
                             {medicationData.status && confirmationTimer && (
@@ -461,7 +436,7 @@ export default function CardMedication({
                         </div>
 
                         <div className="mt-3 text-xs text-gray-400">
-                            {medicationData.status // ✅ USA status, não pendingConfirmation!
+                            {medicationData.status
                                 ? 'Clique para editar • Duplo clique para marcar como não tomado'
                                 : 'Clique para editar • Duplo clique para marcar como tomado'}
                         </div>

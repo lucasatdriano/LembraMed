@@ -29,7 +29,6 @@ export default function CreateMedicationModal({
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const {
-        register,
         handleSubmit,
         formState: { errors, touchedFields },
         setValue,
@@ -67,11 +66,6 @@ export default function CreateMedicationModal({
             onMedicationCreated?.();
         } catch (error) {
             console.error('Erro ao criar medicamento:', error);
-            if (error instanceof Error) {
-                alert(error.message);
-            } else {
-                alert('Ocorreu um erro inesperado ao criar o medicamento.');
-            }
         } finally {
             setIsSubmitting(false);
         }
@@ -129,7 +123,7 @@ export default function CreateMedicationModal({
                                     className="p-6 space-y-4"
                                 >
                                     <InputTextField
-                                        placeholder="Nome do medicamento"
+                                        placeholder="Nome do medicamento*"
                                         value={watch('medicationName') || ''}
                                         onChange={(value) =>
                                             setValue('medicationName', value)
@@ -142,7 +136,7 @@ export default function CreateMedicationModal({
                                     />
 
                                     <InputHourField
-                                        placeholder="HH:MM"
+                                        placeholder="Horário da dose (HH:MM)*"
                                         value={watch('hour') || ''}
                                         onChange={(value) =>
                                             setValue('hour', value)
@@ -155,7 +149,7 @@ export default function CreateMedicationModal({
 
                                     <div className="relative">
                                         <InputDropdownField
-                                            placeholder="Selecione o intervalo"
+                                            placeholder="Selecione o intervalo*"
                                             value={watch('interval') || ''}
                                             onChange={(value) =>
                                                 setValue(

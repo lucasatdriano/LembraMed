@@ -22,10 +22,10 @@ const Formatters = {
         }
 
         const startDate = hasPeriodStart
-            ? Formatters.formatDate(new Date(periodstart!))
+            ? Formatters.formatDate(periodstart!)
             : 'Data indefinida';
         const endDate = hasPeriodEnd
-            ? Formatters.formatDate(new Date(periodend!))
+            ? Formatters.formatDate(periodend!)
             : 'Data indefinida';
 
         return `${startDate} - ${endDate}`;
@@ -55,31 +55,62 @@ const Formatters = {
     formatDate: (date: Date | string | null) => {
         if (!date) return '';
 
-        const dateObj = typeof date === 'string' ? new Date(date) : date;
+        if (typeof date === 'string') {
+            if (date.includes('T') && date.includes('Z')) {
+                const [datePart] = date.split('T');
+                const [year, month, day] = datePart.split('-');
+                return `${day}/${month}/${year}`;
+            }
+            if (date.includes('-')) {
+                const [year, month, day] = date.split('-');
+                return `${day}/${month}/${year}`;
+            }
+        }
 
-        return `${dateObj.getDate().toString().padStart(2, '0')}/${(
-            dateObj.getMonth() + 1
-        )
-            .toString()
-            .padStart(2, '0')}/${dateObj.getFullYear()}`;
+        const dateObj = typeof date === 'string' ? new Date(date) : date;
+        const year = dateObj.getFullYear();
+        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+        const day = dateObj.getDate().toString().padStart(2, '0');
+
+        return `${day}/${month}/${year}`;
     },
     formatDateTime: (date: Date | string | null) => {
         if (!date) return '';
 
-        const dateObj = typeof date === 'string' ? new Date(date) : date;
+        if (
+            typeof date === 'string' &&
+            date.includes('T') &&
+            date.includes('Z')
+        ) {
+            const [datePart, timePart] = date.split('T');
+            const [year, month, day] = datePart.split('-');
+            const [hours, minutes] = timePart.split(':');
 
-        return `${dateObj.getDate().toString().padStart(2, '0')}/${(
-            dateObj.getMonth() + 1
-        )
-            .toString()
-            .padStart(2, '0')}/${dateObj.getFullYear()} ${dateObj
-            .getHours()
-            .toString()
-            .padStart(2, '0')}:${dateObj
-            .getMinutes()
-            .toString()
+            return `${day}/${month}/${year} ${hours}:${minutes}`;
+        }
 
-            .padStart(2, '0')}`;
+        if (typeof date === 'string') {
+            const dateObj = new Date(date);
+            return `${dateObj.getDate().toString().padStart(2, '0')}/${(
+                dateObj.getMonth() + 1
+            )
+                .toString()
+                .padStart(2, '0')}/${dateObj.getFullYear()} ${dateObj
+                .getHours()
+                .toString()
+                .padStart(2, '0')}:${dateObj
+                .getMinutes()
+                .toString()
+                .padStart(2, '0')}`;
+        }
+
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+
+        return `${day}/${month}/${year} ${hours}:${minutes}`;
     },
     formatToISO: (dateString: string | undefined) => {
         if (!dateString) return undefined;

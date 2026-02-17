@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect, Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { X, Check, XCircle, Calendar, Filter, Pill } from 'lucide-react';
-import { parseCookies } from 'nookies';
+import { Check, XCircle, Calendar, Filter, Pill } from 'lucide-react';
 import medicationService from '@/services/domains/medicationService';
 import Formatters from '@/utils/formatters';
 import { Medication } from '@/interfaces/medication';
@@ -305,10 +304,8 @@ export default function MedicationHistoryModal({
                                                         <div>
                                                             <p className="font-medium text-gray-900">
                                                                 {Formatters.formatDateTime(
-                                                                    new Date(
-                                                                        record.takendate,
-                                                                    ),
-                                                                )}
+                                                                    record.takendate,
+                                                                )}{' '}
                                                             </p>
                                                             <p
                                                                 className={`text-sm px-2 py-1 rounded-full border ${getStatusColor(
@@ -366,7 +363,7 @@ export default function MedicationHistoryModal({
                                             aria-label="Fechar histórico de medicação"
                                             type="button"
                                             onClick={handleClose}
-                                            className="px-4 py-2 bg-blue-200 hover:bg-blue-300 rounded-md transition-colors"
+                                            className="px-4 py-2 cursor-pointer bg-blue-200 hover:bg-blue-300 rounded-md transition-colors"
                                         >
                                             Fechar
                                         </button>

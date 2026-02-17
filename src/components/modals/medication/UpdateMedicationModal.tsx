@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Pill, Repeat, X } from 'lucide-react';
@@ -89,7 +89,6 @@ export default function UpdateMedicationModal({
             let formattedPeriodStart: string | undefined;
             let formattedPeriodEnd: string | undefined;
 
-            // Verifica se o período não é "Período indefinido" antes de processar
             if (data.period && data.period !== 'Período indefinido') {
                 const { start: periodStart, end: periodEnd } =
                     Formatters.splitPeriod(data.period);
@@ -114,11 +113,6 @@ export default function UpdateMedicationModal({
             onMedicationUpdated?.();
         } catch (error) {
             console.error('Erro ao atualizar medicamento:', error);
-            if (error instanceof Error) {
-                alert(error.message);
-            } else {
-                alert('Ocorreu um erro inesperado ao atualizar o medicamento.');
-            }
         } finally {
             setIsSubmitting(false);
         }
@@ -136,7 +130,6 @@ export default function UpdateMedicationModal({
             onMedicationUpdated?.();
         } catch (error) {
             console.error('Erro ao excluir medicamento:', error);
-            alert('Erro ao excluir medicamento.');
         } finally {
             setIsSubmitting(false);
         }
@@ -197,7 +190,7 @@ export default function UpdateMedicationModal({
                                         className="space-y-4"
                                     >
                                         <InputTextField
-                                            placeholder="Nome do medicamento"
+                                            placeholder="Nome do medicamento*"
                                             value={
                                                 watch('medicationName') || ''
                                             }
@@ -218,7 +211,7 @@ export default function UpdateMedicationModal({
                                         />
 
                                         <InputDropdownField
-                                            placeholder="Selecione o intervalo"
+                                            placeholder="Selecione o intervalo*"
                                             value={watch('interval') || ''}
                                             onChange={(value) =>
                                                 setValue(

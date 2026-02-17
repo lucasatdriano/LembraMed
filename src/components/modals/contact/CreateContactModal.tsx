@@ -25,7 +25,6 @@ export default function CreateContactModal({
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const {
-        register,
         handleSubmit,
         formState: { errors, touchedFields },
         setValue,
@@ -48,11 +47,6 @@ export default function CreateContactModal({
             onContactCreated?.();
         } catch (error) {
             console.error('Erro ao criar contato:', error);
-            if (error instanceof Error) {
-                alert(error.message);
-            } else {
-                alert('Ocorreu um erro inesperado ao adicionar o contato.');
-            }
         } finally {
             setIsSubmitting(false);
         }
@@ -113,7 +107,7 @@ export default function CreateContactModal({
                                     className="space-y-4"
                                 >
                                     <InputTextField
-                                        placeholder="Nome do contato"
+                                        placeholder="Nome do contato*"
                                         value={watch('contactName') || ''}
                                         onChange={(value) =>
                                             setValue('contactName', value)
@@ -125,7 +119,7 @@ export default function CreateContactModal({
                                     />
 
                                     <InputTextField
-                                        placeholder="Número de telefone"
+                                        placeholder="Número de telefone*"
                                         value={watch('phoneNumber') || ''}
                                         onChange={(value) => {
                                             const formattedValue =

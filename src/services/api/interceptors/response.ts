@@ -96,9 +96,8 @@ export const setupResponseInterceptor = (api: AxiosInstance) => {
                                 if (token) {
                                     originalRequest.headers =
                                         originalRequest.headers || {};
-                                    originalRequest.headers[
-                                        'Authorization'
-                                    ] = `Bearer ${token}`;
+                                    originalRequest.headers['Authorization'] =
+                                        `Bearer ${token}`;
                                     resolve(api(originalRequest));
                                 } else {
                                     reject(new Error('Falha no refresh token'));
@@ -110,29 +109,23 @@ export const setupResponseInterceptor = (api: AxiosInstance) => {
                     originalRequest._retry = true;
                     isRefreshing = true;
 
-                    // No bloco do try do refresh token, adicione:
                     try {
                         const tokens = await authService.refreshToken(
                             refreshToken,
                             deviceId,
                         );
 
-                        // ATUALIZA O HEADER GLOBAL
-                        api.defaults.headers.common[
-                            'Authorization'
-                        ] = `Bearer ${tokens.accessToken}`;
+                        api.defaults.headers.common['Authorization'] =
+                            `Bearer ${tokens.accessToken}`;
 
-                        // PROCESSAR FILA DE REQUISIÇÕES PENDENTES
                         refreshQueue.forEach((callback) =>
                             callback(tokens.accessToken),
                         );
                         refreshQueue = [];
 
-                        // ATUALIZA A REQUISIÇÃO ORIGINAL
                         originalRequest.headers = originalRequest.headers || {};
-                        originalRequest.headers[
-                            'Authorization'
-                        ] = `Bearer ${tokens.accessToken}`;
+                        originalRequest.headers['Authorization'] =
+                            `Bearer ${tokens.accessToken}`;
 
                         console.log(
                             '✅ [Interceptor] Token renovado com sucesso, reenviando requisição...',
@@ -146,11 +139,9 @@ export const setupResponseInterceptor = (api: AxiosInstance) => {
                             refreshError,
                         );
 
-                        // LIMPA A FILA COM ERRO
                         refreshQueue.forEach((callback) => callback(''));
                         refreshQueue = [];
 
-                        // LOGOUT APENAS DA CONTA ATUAL
                         const currentAccount =
                             accountManager.getAccountByDeviceId(deviceId);
                         if (currentAccount) {
@@ -159,7 +150,6 @@ export const setupResponseInterceptor = (api: AxiosInstance) => {
                             authService.logout();
                         }
 
-                        // REDIRECIONA PARA LOGIN APENAS SE FOR A CONTA ATUAL
                         if (
                             typeof window !== 'undefined' &&
                             currentAccount?.userId ===

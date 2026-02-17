@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { User, Phone, X } from 'lucide-react';
@@ -28,7 +28,6 @@ export default function UpdateContactModal({
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const {
-        register,
         handleSubmit,
         formState: { errors, touchedFields },
         setValue,
@@ -65,11 +64,6 @@ export default function UpdateContactModal({
             onContactUpdated?.();
         } catch (error) {
             console.error('Erro ao atualizar contato:', error);
-            if (error instanceof Error) {
-                alert(error.message);
-            } else {
-                alert('Ocorreu um erro inesperado ao atualizar o contato.');
-            }
         } finally {
             setIsSubmitting(false);
         }
@@ -87,7 +81,6 @@ export default function UpdateContactModal({
             onContactUpdated?.();
         } catch (error) {
             console.error('Erro ao excluir contato:', error);
-            alert('Erro ao excluir contato.');
         } finally {
             setIsSubmitting(false);
         }
@@ -148,7 +141,7 @@ export default function UpdateContactModal({
                                         className="space-y-4"
                                     >
                                         <InputTextField
-                                            placeholder="Nome do contato"
+                                            placeholder="Nome do contato*"
                                             value={watch('contactName') || ''}
                                             onChange={(value) =>
                                                 setValue('contactName', value)
@@ -160,7 +153,7 @@ export default function UpdateContactModal({
                                         />
 
                                         <InputTextField
-                                            placeholder="Número de telefone"
+                                            placeholder="Número de telefone*"
                                             value={watch('phoneNumber') || ''}
                                             onChange={(value) => {
                                                 const formattedValue =

@@ -1,6 +1,7 @@
 import { setCookie } from 'nookies';
 import { api } from '../api';
 import API_ROUTES from '../api/routes';
+import { toast } from 'sonner';
 
 export interface User {
     id: string;
@@ -46,8 +47,27 @@ const userService = {
                 API_ROUTES.USERS.REGISTER,
                 data,
             );
+
+            toast.success('Cadastro realizado com sucesso!');
             return response.data;
-        } catch (error) {
+        } catch (error: any) {
+            if (error.response?.status === 400) {
+                const errorData = error.response.data;
+
+                if (Array.isArray(errorData.details)) {
+                    errorData.details.forEach((err: string) => {
+                        toast.error(err);
+                    });
+                } else if (errorData.details) {
+                    toast.error(errorData.details);
+                } else {
+                    toast.error(errorData.error || 'Erro ao cadastrar');
+                }
+            } else if (error.response?.status === 409) {
+                toast.error('Este nome de usuário já está em uso');
+            } else {
+                toast.error('Erro ao cadastrar. Tente novamente.');
+            }
             throw error;
         }
     },
@@ -95,10 +115,29 @@ const userService = {
                         }),
                     );
                 }
+
+                toast.success(`Bem-vindo, ${response.data.user.name}!`);
             }
 
             return response.data;
-        } catch (error) {
+        } catch (error: any) {
+            if (error.response?.status === 400) {
+                const errorData = error.response.data;
+
+                if (Array.isArray(errorData.details)) {
+                    errorData.details.forEach((err: string) => {
+                        toast.error(err);
+                    });
+                } else if (errorData.details) {
+                    toast.error(errorData.details);
+                } else {
+                    toast.error(errorData.error || 'Erro ao fazer login');
+                }
+            } else if (error.response?.status === 401) {
+                toast.error('Usuário ou senha inválidos');
+            } else {
+                toast.error('Erro ao fazer login. Tente novamente.');
+            }
             throw error;
         }
     },
@@ -115,8 +154,23 @@ const userService = {
     logout: async (data: LogoutRequest) => {
         try {
             const response = await api.post(API_ROUTES.USERS.LOGOUT, data);
+
+            setCookie(null, 'accessToken', '', { maxAge: -1, path: '/' });
+            setCookie(null, 'refreshToken', '', { maxAge: -1, path: '/' });
+            setCookie(null, 'deviceId', '', { maxAge: -1, path: '/' });
+
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('currentAccount');
+            }
+
+            toast.success('Logout realizado com sucesso!');
             return response.data;
-        } catch (error) {
+        } catch (error: any) {
+            if (error.response?.status === 400) {
+                toast.error('Erro ao fazer logout');
+            } else {
+                toast.error('Erro ao fazer logout. Tente novamente.');
+            }
             throw error;
         }
     },

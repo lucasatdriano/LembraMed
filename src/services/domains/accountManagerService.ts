@@ -57,7 +57,6 @@ class AccountManager {
         this.accounts[account.userId] = account;
         this.saveToStorage();
 
-        // Configura cookies com tempos alinhados ao backend
         this.setAuthCookies(account);
 
         this.currentAccountId = account.userId;

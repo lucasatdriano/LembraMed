@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { setCookie } from 'nookies';
 import Link from 'next/link';
 import { v4 as uuidv4 } from 'uuid';
 import InputAuthField from '@/components/forms/InputAuthField';
@@ -41,7 +40,6 @@ export default function LoginPage() {
     }, []);
 
     const {
-        register,
         handleSubmit,
         formState: { errors, touchedFields },
         setValue,
@@ -79,15 +77,9 @@ export default function LoginPage() {
             accountManager.addAccount(response);
             accountManager.switchAccount(response.user.id);
 
-            toast.success(`Bem-vindo, ${response.user.name}!`);
             router.replace('/contacts');
         } catch (error) {
             console.error('Erro no login:', error);
-            if (error instanceof Error) {
-                toast.error(error.message);
-            } else {
-                toast.error('Credenciais inválidas ou erro de conexão.');
-            }
         } finally {
             setIsLoading(false);
         }

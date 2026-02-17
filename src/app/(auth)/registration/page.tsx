@@ -9,8 +9,6 @@ import CustomButton from '@/components/buttons/CustomButton';
 import userService from '@/services/domains/userService';
 import { RegisterFormData, registerValidationSchema } from '@/validations';
 import InputAuthField from '@/components/forms/InputAuthField';
-import { toast } from 'sonner';
-import { datacatalog } from 'googleapis/build/src/apis/datacatalog';
 
 export default function RegistrationPage() {
     const [showPassword, setShowPassword] = useState(false);
@@ -19,14 +17,12 @@ export default function RegistrationPage() {
     const router = useRouter();
 
     const {
-        register,
         handleSubmit,
         formState: { errors, touchedFields },
         setValue,
         watch,
         reset,
         trigger,
-        setFocus,
     } = useForm<RegisterFormData>({
         resolver: zodResolver(registerValidationSchema),
         mode: 'onChange',
@@ -38,17 +34,9 @@ export default function RegistrationPage() {
             await userService.register(data);
 
             reset();
-            toast.success(
-                'Cadastro realizado com sucesso! Faça login para continuar.',
-            );
             router.replace('/login');
         } catch (error) {
             console.error('Erro no cadastro:', error);
-            if (error instanceof Error) {
-                toast.error(error.message);
-            } else {
-                toast.error('Ocorreu um erro ao se cadastrar.');
-            }
         } finally {
             setIsLoading(false);
         }
