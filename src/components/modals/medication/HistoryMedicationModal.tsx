@@ -8,6 +8,7 @@ import Formatters from '@/utils/formatters';
 import { Medication } from '@/interfaces/medication';
 import Pagination from '@/components/layouts/Pagination';
 import { MedicationHistory } from '@/interfaces/medicationHistory';
+import InputDropdownField from '@/components/forms/InputDropdownField';
 
 interface MedicationHistoryModalProps {
     visible: boolean;
@@ -221,58 +222,68 @@ export default function MedicationHistoryModal({
                                 <div className="p-6 border-b border-gray-200">
                                     <div className="flex flex-col md:flex-row gap-4">
                                         <div className="flex-1">
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                <Calendar className="w-4 h-4 inline mr-2" />
-                                                Período
-                                            </label>
-                                            <select
+                                            <InputDropdownField
+                                                placeholder="Selecione o período"
+                                                icon={
+                                                    <Calendar className="w-5 h-5" />
+                                                }
                                                 value={dateFilter}
-                                                onChange={(e) =>
+                                                onChange={(newValue) =>
                                                     handleDateFilterChange(
-                                                        e.target.value,
+                                                        newValue as string,
                                                     )
                                                 }
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            >
-                                                <option value="all">
-                                                    Todo o período
-                                                </option>
-                                                <option value="today">
-                                                    Hoje
-                                                </option>
-                                                <option value="week">
-                                                    Última semana
-                                                </option>
-                                                <option value="month">
-                                                    Último mês
-                                                </option>
-                                            </select>
+                                                onBlur={() => {}}
+                                                options={[
+                                                    {
+                                                        label: 'Todo o período',
+                                                        value: 'all',
+                                                    },
+                                                    {
+                                                        label: 'Hoje',
+                                                        value: 'today',
+                                                    },
+                                                    {
+                                                        label: 'Última semana',
+                                                        value: 'week',
+                                                    },
+                                                    {
+                                                        label: 'Último mês',
+                                                        value: 'month',
+                                                    },
+                                                ]}
+                                            />
                                         </div>
 
+                                        {/* Substitua o select de status */}
                                         <div className="flex-1">
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                <Filter className="w-4 h-4 inline mr-2" />
-                                                Status
-                                            </label>
-                                            <select
+                                            <InputDropdownField
+                                                placeholder="Selecione o status"
+                                                icon={
+                                                    <Filter className="w-5 h-5" />
+                                                }
                                                 value={statusFilter}
-                                                onChange={(e) =>
+                                                onChange={(newValue) =>
                                                     handleStatusFilterChange(
-                                                        e.target.value,
+                                                        newValue as string,
                                                     )
                                                 }
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            >
-                                                <option value="all">
-                                                    Todos os status
-                                                </option>
-                                                <option value="taken">
-                                                    Apenas tomados
-                                                </option>
-                                                <option value="missed">
-                                                    Apenas não tomados
-                                                </option>
-                                            </select>
+                                                onBlur={() => {}}
+                                                options={[
+                                                    {
+                                                        label: 'Todos os status',
+                                                        value: 'all',
+                                                    },
+                                                    {
+                                                        label: 'Apenas tomados',
+                                                        value: 'taken',
+                                                    },
+                                                    {
+                                                        label: 'Apenas não tomados',
+                                                        value: 'missed',
+                                                    },
+                                                ]}
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -318,17 +329,6 @@ export default function MedicationHistoryModal({
                                                             </p>
                                                         </div>
                                                     </div>
-
-                                                    <div className="text-right text-sm text-gray-500">
-                                                        <p>Registrado em</p>
-                                                        <p>
-                                                            {Formatters.formatDate(
-                                                                new Date(
-                                                                    record.createdat,
-                                                                ),
-                                                            )}
-                                                        </p>
-                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -345,9 +345,6 @@ export default function MedicationHistoryModal({
                                                 totalPages={
                                                     pagination.totalPages
                                                 }
-                                                totalRecords={
-                                                    pagination.totalRecords
-                                                }
                                                 onPageChange={handlePageChange}
                                             />
                                         </div>
@@ -355,15 +352,17 @@ export default function MedicationHistoryModal({
 
                                     <div className="flex justify-between items-center text-sm text-gray-600">
                                         <span>
-                                            Mostrando {history.length} de
+                                            Mostrando {history.length} de{' '}
                                             {pagination.totalRecords} registros
                                         </span>
                                         <button
-                                            title="Fechar histórico de medicação"
-                                            aria-label="Fechar histórico de medicação"
+                                            title="Fechar histórico do medicamento"
+                                            aria-label="Fechar histórico do medicamento"
                                             type="button"
                                             onClick={handleClose}
-                                            className="px-4 py-2 cursor-pointer bg-blue-200 hover:bg-blue-300 rounded-md transition-colors"
+                                            className="text-foreground px-4 py-2 bg-primary hover:bg-blue-200 rounded-md 
+                                            font-medium cursor-pointer shadow-sm hover:shadow-md transition-all duration-200 
+                                            focus:outline-none focus:ring-2 focus:ring-blue-200"
                                         >
                                             Fechar
                                         </button>

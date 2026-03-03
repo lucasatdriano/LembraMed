@@ -167,8 +167,8 @@ export default function UpdateMedicationModal({
                             leaveTo="opacity-0 scale-95"
                         >
                             <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
-                                <div className="flex justify-between items-center p-6 border-b border-gray-200">
-                                    <Dialog.Title className="text-xl font-bold text-gray-900">
+                                <div className="flex justify-between rounded-t-2xl items-center p-4 border-b border-gray-200">
+                                    <Dialog.Title className="text-lg font-bold text-gray-900">
                                         Atualizar Medicamento
                                     </Dialog.Title>
                                     <button
@@ -176,7 +176,7 @@ export default function UpdateMedicationModal({
                                         aria-label="Fechar"
                                         type="button"
                                         onClick={handleClose}
-                                        className="p-2 hover:bg-black/15 rounded-full transition-colors"
+                                        className="p-2 hover:bg-black/15 cursor-pointer rounded-full transition-colors"
                                     >
                                         <X className="w-5 h-5 text-gray-600" />
                                     </button>

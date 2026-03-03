@@ -48,9 +48,12 @@ const API_ROUTES = {
     },
     NOTIFICATIONS: {
         SEND_NOTIFICATION: '/notifications/send',
-        GET_USER_NOTIFICATIONS: '/notifications/user/',
+        GET_USER_NOTIFICATIONS: '/notifications/',
         MARK_AS_READ: ({ notificationId }: Params) =>
             `/notifications/${notificationId}/read`,
+        VAPID_PUBLIC_KEY: '/notifications/vapid-public-key',
+        SUBSCRIBE: '/notifications/subscribe',
+        UNSUBSCRIBE: '/notifications/unsubscribe',
     },
 };
 

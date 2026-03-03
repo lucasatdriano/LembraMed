@@ -1,20 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { parseCookies } from 'nookies';
 import { MoreVertical } from 'lucide-react';
 import InputSearchField from '../forms/InputSearchField';
 import UserSwitcherModal from '../modals/user/SwitchAccountModal';
+import { useSearch } from '@/contexts/SearchContext';
 
 interface HeaderProps {
-    placeholder?: string;
     onSearch?: (search: string) => void;
     hasSidebar?: boolean;
     showMenu?: boolean;
 }
 
 export default function Header({
-    placeholder = 'Buscar...',
     onSearch,
     hasSidebar = false,
     showMenu = true,
@@ -22,6 +20,8 @@ export default function Header({
     const [mounted, setMounted] = useState(false);
     const [switchAccountModalVisible, setSwitchAccountModalVisible] =
         useState(false);
+
+    const { placeholder, setSearchValue } = useSearch();
 
     useEffect(() => {
         setMounted(true);
@@ -32,13 +32,13 @@ export default function Header({
         window.location.reload();
     };
 
+    const handleSearch = (value: string) => {
+        setSearchValue(value);
+        onSearch?.(value);
+    };
+
     return (
-        <header
-            className={`
-            bg-secondary border-b border-gray-200 shadow-sm
-            ${hasSidebar ? 'md:ml-32' : ''}
-        `}
-        >
+        <header className={'bg-secondary border-b border-gray-200 shadow-sm'}>
             <div className="flex items-center justify-between px-4 py-3 md:px-6">
                 <div
                     className={`${
@@ -49,7 +49,7 @@ export default function Header({
                 <div className="flex-1 max-w-7xl">
                     <InputSearchField
                         placeholder={placeholder}
-                        onSearch={onSearch || (() => {})}
+                        onSearch={handleSearch}
                         delay={400}
                     />
                 </div>

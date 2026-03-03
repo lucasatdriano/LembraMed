@@ -73,7 +73,7 @@ export default function CreateContactModal({
                 </Transition.Child>
 
                 <div className="fixed inset-0 overflow-y-auto">
-                    <div className="flex min-h-full items-center justify-center p-4 text-center">
+                    <div className="flex min-h-full items-center justify-center text-center">
                         <Transition.Child
                             as={Fragment}
                             enter="ease-out duration-300"
@@ -83,14 +83,11 @@ export default function CreateContactModal({
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                                <Dialog.Title
-                                    as="div"
-                                    className="flex justify-between items-center mb-4"
-                                >
-                                    <h3 className="text-xl font-bold text-gray-900">
+                            <Dialog.Panel className="w-full max-w-md transform overflow-visible rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
+                                <div className="flex justify-between rounded-t-2xl items-center p-4 border-b border-gray-200">
+                                    <Dialog.Title className="text-lg font-bold text-gray-900">
                                         Adicionar Novo Contato
-                                    </h3>
+                                    </Dialog.Title>
                                     <button
                                         title="Fechar"
                                         aria-label="Fechar"
@@ -100,11 +97,11 @@ export default function CreateContactModal({
                                     >
                                         <X className="w-6 h-6 text-gray-600" />
                                     </button>
-                                </Dialog.Title>
+                                </div>
 
                                 <form
                                     onSubmit={handleSubmit(handleFormSubmit)}
-                                    className="space-y-4"
+                                    className="p-6 space-y-4"
                                 >
                                     <InputTextField
                                         placeholder="Nome do contato*"

@@ -15,7 +15,6 @@ export default function MedicationScheduleScreen() {
     const [pagination, setPagination] = useState({
         currentPage: 1,
         totalPages: 1,
-        totalRecords: 0,
         hasNext: false,
         hasPrev: false,
     });
@@ -34,7 +33,6 @@ export default function MedicationScheduleScreen() {
                 setPagination({
                     currentPage: 1,
                     totalPages: 1,
-                    totalRecords: 0,
                     hasNext: false,
                     hasPrev: false,
                 });
@@ -60,7 +58,7 @@ export default function MedicationScheduleScreen() {
     if (loading) {
         return (
             <div className="min-h-full bg-gray-50">
-                <main className="mx-auto px-2 md:px-12 pb-24">
+                <div className="mx-auto lg:px-8">
                     <div className="mb-8">
                         <h1 className="text-2xl mb-4 font-bold text-gray-900 text-center">
                             Lista de Medicamentos
@@ -87,14 +85,14 @@ export default function MedicationScheduleScreen() {
                             </div>
                         ))}
                     </div>
-                </main>
+                </div>
             </div>
         );
     }
 
     return (
         <div className="min-h-full bg-gray-50">
-            <main className="mx-auto px-2 md:px-12 pb-24">
+            <div className="mx-auto lg:px-8 pb-24">
                 <div className="mb-8">
                     <h1 className="text-2xl mb-4 font-bold text-gray-900 text-center">
                         Lista de Medicamentos
@@ -128,18 +126,17 @@ export default function MedicationScheduleScreen() {
                         </div>
 
                         {pagination.totalPages > 1 && (
-                            <div className="mt-6">
+                            <div className="mt-6 flex justify-center">
                                 <Pagination
                                     currentPage={pagination.currentPage}
                                     totalPages={pagination.totalPages}
-                                    totalRecords={pagination.totalRecords}
                                     onPageChange={handlePageChange}
                                 />
                             </div>
                         )}
                     </>
                 )}
-            </main>
+            </div>
 
             <FloatingActionButton
                 screen="medicationScreen"

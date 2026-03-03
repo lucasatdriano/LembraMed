@@ -92,7 +92,7 @@ export default function CreateMedicationModal({
                 </Transition.Child>
 
                 <div className="fixed inset-0 overflow-y-auto">
-                    <div className="flex min-h-full items-center justify-center p-4 text-center">
+                    <div className="flex rounded-2xl min-h-full items-center justify-center p-4 text-center">
                         <Transition.Child
                             as={Fragment}
                             enter="ease-out duration-300"
@@ -103,8 +103,8 @@ export default function CreateMedicationModal({
                             leaveTo="opacity-0 scale-95"
                         >
                             <Dialog.Panel className="w-full max-w-md transform overflow-visible rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
-                                <div className="flex justify-between items-center p-6 border-b border-gray-200 sticky top-0 bg-white">
-                                    <Dialog.Title className="text-xl font-bold text-gray-900">
+                                <div className="flex justify-between rounded-t-2xl items-center p-4 border-b border-gray-200">
+                                    <Dialog.Title className="text-lg font-bold text-gray-900">
                                         Adicionar Novo Medicamento
                                     </Dialog.Title>
                                     <button
@@ -112,7 +112,7 @@ export default function CreateMedicationModal({
                                         aria-label="Fechar"
                                         type="button"
                                         onClick={handleClose}
-                                        className="p-2 hover:bg-black/15 rounded-full transition-colors"
+                                        className="p-2 hover:bg-black/15 cursor-pointer rounded-full transition-colors"
                                     >
                                         <X className="w-5 h-5 text-gray-600" />
                                     </button>

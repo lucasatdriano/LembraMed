@@ -27,11 +27,11 @@ const navigation = [
         href: '/medications',
         icon: Pill,
     },
-    {
-        name: 'Cronograma',
-        href: '/schedule',
-        icon: Calendar,
-    },
+    // {
+    //     name: 'Cronograma',
+    //     href: '/schedule',
+    //     icon: Calendar,
+    // },
 ];
 
 export default function SidebarNav() {

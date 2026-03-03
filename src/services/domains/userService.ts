@@ -64,7 +64,9 @@ const userService = {
                     toast.error(errorData.error || 'Erro ao cadastrar');
                 }
             } else if (error.response?.status === 409) {
-                toast.error('Este nome de usuário já está em uso');
+                toast.error(
+                    'Este nome de usuário já está em uso. Tente outro.',
+                );
             } else {
                 toast.error('Erro ao cadastrar. Tente novamente.');
             }
@@ -134,7 +136,7 @@ const userService = {
                     toast.error(errorData.error || 'Erro ao fazer login');
                 }
             } else if (error.response?.status === 401) {
-                toast.error('Usuário ou senha inválidos');
+                toast.error('Credenciais inválidas');
             } else {
                 toast.error('Erro ao fazer login. Tente novamente.');
             }

@@ -64,7 +64,7 @@ export const setupResponseInterceptor = (api: AxiosInstance) => {
                         '/auth/resetPassword',
                         '/auth/refresh-token',
                         '/users/register',
-                        '/users/login-multi',
+                        '/users/login',
                     ];
 
                     if (

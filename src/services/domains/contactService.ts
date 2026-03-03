@@ -110,7 +110,6 @@ const contactService = {
                 API_ROUTES.CONTACTS.DELETE_CONTACT({ contactId }),
             );
 
-            toast.success('Contato removido com sucesso!');
             return response.data;
         } catch (error: any) {
             if (error.response?.status === 404) {

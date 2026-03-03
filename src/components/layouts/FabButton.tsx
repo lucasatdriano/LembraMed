@@ -37,17 +37,18 @@ export default function FloatingActionButton({
                 type="button"
                 onClick={() => setIsModalVisible(true)}
                 className={`
-                    fixed z-40 w-16 h-16 bg-primary text-foreground
+                    fixed z-40 w-14 h-14 sm:w-16 sm:h-16 bg-primary text-foreground
                     rounded-full shadow-lg hover:shadow-xl
                     flex items-center justify-center cursor-pointer
                     transition-all duration-200
                     hover:scale-105 active:scale-95
-                    focus:outline-none focus:ring-2 focus:ring-blue-200 focus:ring-offset-2
-                    md:bottom-6 right-6 bottom-20
+                    focus:outline-none focus:ring-2 focus:ring-blue-200 focus:ring-offset-2 
+                    hover:outline-none hover:ring-2 hover:ring-blue-200 hover:ring-offset-2
+                    right-4 sm:right-6 bottom-20 md:bottom-6
                     ${className}
                 `}
             >
-                <Plus className="w-6 h-6" />
+                <Plus className="w-6 h-6 sm:w-7 sm:h-7" />
             </button>
 
             {screen === 'contactScreen' ? (

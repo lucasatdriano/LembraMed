@@ -41,25 +41,6 @@ export default function CardMedication({
     const interval = medicationData?.doseinterval?.intervalinhours || 0;
     const label = interval === 1 ? 'hora' : 'horas';
 
-    // useEffect(() => {
-    //     if (!medicationData.status || !medicationData.pendingUntil) {
-    //         return;
-    //     }
-
-    //     const pollInterval = setInterval(async () => {
-    //         try {
-    //             const freshData = await medicationService.getMedication(
-    //                 medicationData.id,
-    //             );
-    //             setMedicationData(freshData);
-    //         } catch (error) {
-    //             console.error('Erro ao buscar dados atualizados:', error);
-    //         }
-    //     }, 3000);
-
-    //     return () => clearInterval(pollInterval);
-    // }, [medicationData.id, medicationData.status, medicationData.pendingUntil]);
-
     useEffect(() => {
         setMedicationData(initialMedicationData);
     }, [initialMedicationData]);
@@ -108,7 +89,6 @@ export default function CardMedication({
         medicationData?.doseinterval?.intervalinhours,
     ]);
 
-    // ✅ TIMER DOS 3 MINUTOS (APENAS VISUAL)
     useEffect(() => {
         if (!medicationData.status || !medicationData.pendingUntil) {
             setConfirmationTimer(null);
@@ -219,7 +199,6 @@ export default function CardMedication({
             lastTap.current = now;
             timeoutRef.current = setTimeout(() => {
                 if (!medicationData.status) {
-                    // ✅ SÓ edita se NÃO estiver em confirmação
                     setIsUpdateModalVisible(true);
                 }
             }, DOUBLE_PRESS_DELAY);
@@ -289,13 +268,13 @@ export default function CardMedication({
                 {showConfirmation && (
                     <div className="absolute inset-0 bg-yellow-100 bg-opacity-90 rounded-lg flex flex-col items-center justify-center z-10 p-4">
                         <div className="text-center">
-                            <AlertCircle className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
-                            <h3 className="text-lg font-semibold text-yellow-800 mb-2">
+                            <AlertCircle className="w-10 h-10 text-yellow-600 mx-auto mb-2" />
+                            <h3 className="font-semibold text-yellow-800 mb-2">
                                 {medicationData.status
                                     ? 'Cancelar dose?'
                                     : 'Confirmar ação'}
                             </h3>
-                            <p className="text-yellow-700 mb-4">
+                            <p className=" text-sm text-yellow-700 mb-4">
                                 {medicationData.status
                                     ? 'Deseja marcar como NÃO TOMADO?'
                                     : 'Deseja marcar como TOMADO?'}
@@ -311,7 +290,7 @@ export default function CardMedication({
                                                 e.stopPropagation();
                                                 handleMarkAsNotTaken(e);
                                             }}
-                                            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                            className="cursor-pointer px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
                                         >
                                             Sim, não tomei
                                         </button>
@@ -323,7 +302,7 @@ export default function CardMedication({
                                                 e.stopPropagation();
                                                 setShowConfirmation(false);
                                             }}
-                                            className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                                            className="cursor-pointer px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
                                         >
                                             Não
                                         </button>
@@ -339,7 +318,7 @@ export default function CardMedication({
                                                 handleMarkAsTaken();
                                                 setShowConfirmation(false);
                                             }}
-                                            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                            className="cursor-pointer px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
                                             disabled={isLoading}
                                         >
                                             {isLoading
@@ -354,7 +333,7 @@ export default function CardMedication({
                                                 e.stopPropagation();
                                                 setShowConfirmation(false);
                                             }}
-                                            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                            className="cursor-pointer px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
                                         >
                                             <X className="w-4 h-4" />
                                         </button>

@@ -11,6 +11,7 @@ import Masks from '@/utils/masks';
 import { ContactFormData, contactValidationSchema } from '@/validations';
 import InputTextField from '@/components/forms/InputTextField';
 import { Contact } from '@/interfaces/contact';
+import { toast } from 'sonner';
 
 interface UpdateContactModalProps {
     visible: boolean;
@@ -117,9 +118,9 @@ export default function UpdateContactModal({
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
-                                <div className="flex justify-between items-center p-6 border-b border-gray-200">
-                                    <Dialog.Title className="text-xl font-bold text-gray-900">
+                            <Dialog.Panel className="w-full max-w-md transform overflow-visible rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
+                                <div className="flex justify-between rounded-t-2xl items-center p-4 border-b border-gray-200">
+                                    <Dialog.Title className="text-lg font-bold text-gray-900">
                                         Atualizar Contato
                                     </Dialog.Title>
                                     <button
@@ -133,67 +134,63 @@ export default function UpdateContactModal({
                                     </button>
                                 </div>
 
-                                <div className="p-6">
-                                    <form
-                                        onSubmit={handleSubmit(
-                                            handleFormSubmit,
-                                        )}
-                                        className="space-y-4"
-                                    >
-                                        <InputTextField
-                                            placeholder="Nome do contato*"
-                                            value={watch('contactName') || ''}
-                                            onChange={(value) =>
-                                                setValue('contactName', value)
-                                            }
-                                            onBlur={() => {}}
-                                            touched={touchedFields.contactName}
-                                            error={errors.contactName?.message}
-                                            icon={User}
+                                <form
+                                    onSubmit={handleSubmit(handleFormSubmit)}
+                                    className="p-6 space-y-4"
+                                >
+                                    <InputTextField
+                                        placeholder="Nome do contato*"
+                                        value={watch('contactName') || ''}
+                                        onChange={(value) =>
+                                            setValue('contactName', value)
+                                        }
+                                        onBlur={() => {}}
+                                        touched={touchedFields.contactName}
+                                        error={errors.contactName?.message}
+                                        icon={User}
+                                    />
+
+                                    <InputTextField
+                                        placeholder="Número de telefone*"
+                                        value={watch('phoneNumber') || ''}
+                                        onChange={(value) => {
+                                            const formattedValue =
+                                                Masks.phone(value);
+                                            setValue(
+                                                'phoneNumber',
+                                                formattedValue,
+                                            );
+                                        }}
+                                        onBlur={() => {}}
+                                        touched={touchedFields.phoneNumber}
+                                        error={errors.phoneNumber?.message}
+                                        icon={Phone}
+                                        maxLength={15}
+                                    />
+
+                                    <div className="flex flex-col gap-3 pt-4">
+                                        <CustomButton
+                                            title="Atualizar Contato"
+                                            aria-label="Atualizar Contato"
+                                            type="submit"
+                                            text="Atualizar Contato"
+                                            loading={isSubmitting}
+                                            disabled={isSubmitting}
+                                            className="w-full bg-blue-200 hover:bg-blue-300 focus:ring-blue-300"
                                         />
 
-                                        <InputTextField
-                                            placeholder="Número de telefone*"
-                                            value={watch('phoneNumber') || ''}
-                                            onChange={(value) => {
-                                                const formattedValue =
-                                                    Masks.phone(value);
-                                                setValue(
-                                                    'phoneNumber',
-                                                    formattedValue,
-                                                );
-                                            }}
-                                            onBlur={() => {}}
-                                            touched={touchedFields.phoneNumber}
-                                            error={errors.phoneNumber?.message}
-                                            icon={Phone}
-                                            maxLength={15}
+                                        <CustomButton
+                                            title="Remover Contato"
+                                            aria-label="Remover Contato"
+                                            type="button"
+                                            text="Remover Contato"
+                                            onClick={handleDeleteContact}
+                                            loading={isSubmitting}
+                                            disabled={isSubmitting}
+                                            className="w-full bg-red-300 hover:bg-red-400 focus:ring-red-400"
                                         />
-
-                                        <div className="flex flex-col gap-3 pt-4">
-                                            <CustomButton
-                                                title="Atualizar Contato"
-                                                aria-label="Atualizar Contato"
-                                                type="submit"
-                                                text="Atualizar Contato"
-                                                loading={isSubmitting}
-                                                disabled={isSubmitting}
-                                                className="w-full bg-blue-200 hover:bg-blue-300 focus:ring-blue-300"
-                                            />
-
-                                            <CustomButton
-                                                title="Remover Contato"
-                                                aria-label="Remover Contato"
-                                                type="button"
-                                                text="Remover Contato"
-                                                onClick={handleDeleteContact}
-                                                loading={isSubmitting}
-                                                disabled={isSubmitting}
-                                                className="w-full bg-red-300 hover:bg-red-400 focus:ring-red-400"
-                                            />
-                                        </div>
-                                    </form>
-                                </div>
+                                    </div>
+                                </form>
                             </Dialog.Panel>
                         </Transition.Child>
                     </div>

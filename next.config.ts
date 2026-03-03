@@ -31,6 +31,15 @@ const pwaConfig = withPWA({
 });
 
 const nextConfig: NextConfig = {
+    async rewrites() {
+        return [
+            {
+                source: '/notifications/:path*',
+                destination: 'http://localhost:3000/notifications/:path*', // Proxy para o backend
+            },
+        ];
+    },
+
     webpack: (config) => {
         config.resolve.alias = {
             ...config.resolve.alias,
