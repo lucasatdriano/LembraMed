@@ -204,6 +204,7 @@ export default function CardMedication({
             }, DOUBLE_PRESS_DELAY);
         }
     };
+
     const getCardStyles = () => {
         const baseStyles =
             'bg-white rounded-lg shadow-md p-4 border-2 hover:shadow-lg transition-all cursor-pointer relative';

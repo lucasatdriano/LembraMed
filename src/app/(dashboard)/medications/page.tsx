@@ -25,6 +25,7 @@ export default function MedicationScheduleScreen() {
             try {
                 const response: MedicationsResponse =
                     await medicationService.searchMedications(search, page, 10);
+
                 setMedications(response.medications);
                 setPagination(response.pagination);
             } catch (error) {

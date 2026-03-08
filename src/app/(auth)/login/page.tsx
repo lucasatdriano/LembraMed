@@ -64,7 +64,7 @@ export default function LoginPage() {
         setIsLoading(true);
         try {
             const response = await userService.loginMulti({
-                username: data.name,
+                username: data.name.toLowerCase(),
                 password: data.password,
                 deviceId: deviceId,
                 deviceName: 'Meu Dispositivo',

@@ -22,7 +22,7 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
             <SidebarNav />
 
             <div className="flex-1 flex flex-col min-h-screen md:ml-64">
-                <Header onSearch={handleSearchChange} hasSidebar={true} />
+                <Header onSearch={handleSearchChange} />
 
                 <main className="flex-1 p-4 pb-20 md:pb-4 md:p-6 overflow-auto">
                     {children}

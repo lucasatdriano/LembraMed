@@ -8,15 +8,10 @@ import { useSearch } from '@/contexts/SearchContext';
 
 interface HeaderProps {
     onSearch?: (search: string) => void;
-    hasSidebar?: boolean;
     showMenu?: boolean;
 }
 
-export default function Header({
-    onSearch,
-    hasSidebar = false,
-    showMenu = true,
-}: HeaderProps) {
+export default function Header({ onSearch, showMenu = true }: HeaderProps) {
     const [mounted, setMounted] = useState(false);
     const [switchAccountModalVisible, setSwitchAccountModalVisible] =
         useState(false);

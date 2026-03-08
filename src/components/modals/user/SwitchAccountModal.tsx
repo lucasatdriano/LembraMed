@@ -79,7 +79,7 @@ export default function UserSwitcherModal({
                 </Transition.Child>
 
                 <div className="fixed bottom-0 w-full overflow-y-auto">
-                    <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:justify-center sm:p-0">
+                    <div className="flex min-h-full items-end justify-center text-center sm:items-center sm:justify-center">
                         <Transition.Child
                             as={Fragment}
                             enter="ease-out duration-500"

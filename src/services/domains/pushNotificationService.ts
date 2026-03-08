@@ -2,11 +2,6 @@ import { api } from '../api';
 import API_ROUTES from '../api/routes';
 import { parseCookies } from 'nookies';
 
-interface PushSubscriptionKeys {
-    p256dh: string;
-    auth: string;
-}
-
 class PushNotificationService {
     private swRegistration: ServiceWorkerRegistration | null = null;
     private vapidPublicKey: string | null = null;
