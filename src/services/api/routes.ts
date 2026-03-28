@@ -7,10 +7,10 @@ type Params = {
 
 const API_ROUTES = {
     AUTH: {
-        REFRESH_TOKEN: '/auth/refreshtoken',
-        TOKEN_STATUS: '/auth/tokenstatus',
-        FORGOT_PASSWORD: '/auth/forgotpassword',
-        RESET_PASSWORD: '/auth/resetpassword',
+        REFRESH_TOKEN: '/auth/refresh-token',
+        TOKEN_STATUS: '/auth/token-status',
+        FORGOT_PASSWORD: '/auth/forgot-password',
+        RESET_PASSWORD: '/auth/reset-password',
     },
     USERS: {
         REGISTER: '/users/register',
@@ -31,7 +31,7 @@ const API_ROUTES = {
             `/medications/${medicationId}`,
         MEDICATION_HISTORY: ({ medicationId }: Params) =>
             `/medications/${medicationId}/history`,
-        CREATE_MEDICATION: `/medications/create`,
+        CREATE_MEDICATION: `/medications/`,
         REGISTER_PENDING_CONFIRMATION: ({ medicationId }: Params) =>
             `/medications/${medicationId}/pending`,
         CANCEL_PENDING_DOSE: ({ medicationId }: Params) =>
@@ -43,7 +43,7 @@ const API_ROUTES = {
     },
     DEVICES: {
         GET_ACCOUNTS: ({ deviceId }: Params) => `/devices/${deviceId}/accounts`,
-        REGISTER_PUSH_SUBSCRIPTION: '/devices/push-subscription',
+        REGISTER_PUSH_SUBSCRIPTION: '/devices/subscription',
         REMOVE_DEVICE: ({ deviceId }: Params) => `/devices/${deviceId}`,
     },
     NOTIFICATIONS: {

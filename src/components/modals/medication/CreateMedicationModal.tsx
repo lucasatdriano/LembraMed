@@ -53,6 +53,13 @@ export default function CreateMedicationModal({
             const formattedPeriodStart = Formatters.formatToISO(periodStart);
             const formattedPeriodEnd = Formatters.formatToISO(periodEnd);
 
+            console.log('Dados do formulário:', {
+                name: data.medicationName,
+                hourfirstdose: data.hour,
+                intervalinhours: Number(data.interval),
+                periodstart: formattedPeriodStart,
+                periodend: formattedPeriodEnd,
+            });
             await medicationService.createMedication({
                 name: data.medicationName,
                 hourfirstdose: data.hour,

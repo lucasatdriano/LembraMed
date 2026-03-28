@@ -4,12 +4,12 @@ export interface Medication {
     id: string;
     name: string;
     hourfirstdose: string;
-    hournextdose: string;
+    hournextdose: string | null;
     periodstart: string | null;
     periodend: string | null;
     status: boolean;
-    pendingConfirmation: boolean;
-    pendingUntil: Date | null;
+    pendingconfirmation: boolean;
+    pendinguntil: Date | null;
     createdat: string;
     doseintervalid: number;
     intervalinhours: number;

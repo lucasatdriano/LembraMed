@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Bell, BellOff, X } from 'lucide-react';
+import { Bell, X } from 'lucide-react';
 import pushNotificationService from '@/services/domains/pushNotificationService';
 import { toast } from 'sonner';
 

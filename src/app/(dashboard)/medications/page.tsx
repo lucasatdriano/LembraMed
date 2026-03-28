@@ -22,6 +22,7 @@ export default function MedicationScheduleScreen() {
     const fetchMedications = useCallback(
         async (search: string = '', page: number = 1) => {
             setLoading(true);
+
             try {
                 const response: MedicationsResponse =
                     await medicationService.searchMedications(search, page, 10);

@@ -11,36 +11,28 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('push', (event) => {
     let data = {};
 
-    try {
-        data = event.data.json();
-    } catch (e) {
-        data = {
-            title: 'Notificação',
-            body: event.data.text(),
-        };
+    if (event.data) {
+        try {
+            data = event.data.json();
+        } catch {
+            data = { body: event.data.text() };
+        }
     }
 
     const options = {
         body: data.body || 'Você tem uma nova notificação',
-        icon: data.icon || '/icons/icon-192x192.png',
-        badge: data.badge || '/icons/icon-192x192.png',
+        icon: '/icons/icon-192x192.png',
+        badge: '/icons/icon-192x192.png',
         tag: data.tag || 'default',
         data: {
             url: data.url || '/',
-            notificationId: data.notificationId,
             ...data,
         },
-        vibrate: data.vibrate || [200, 100, 200, 100, 200],
+        vibrate: [200, 100, 200, 100, 200],
         requireInteraction: true,
         actions: [
-            {
-                action: 'open',
-                title: 'Abrir',
-            },
-            {
-                action: 'close',
-                title: 'Fechar',
-            },
+            { action: 'open', title: 'Abrir' },
+            { action: 'close', title: 'Fechar' },
         ],
     };
 

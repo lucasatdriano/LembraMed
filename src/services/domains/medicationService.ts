@@ -1,8 +1,5 @@
 import { Medication, MedicationsResponse } from '@/interfaces/medication';
-import {
-    MedicationHistory,
-    MedicationHistoryResponse,
-} from '@/interfaces/medicationHistory';
+import { MedicationHistoryResponse } from '@/interfaces/medicationHistory';
 import { api } from '../api';
 import API_ROUTES from '../api/routes';
 import { toast } from 'sonner';
@@ -26,17 +23,14 @@ export interface UpdateMedicationRequest {
 export interface MedicationHistoryFilters {
     startDate?: string;
     endDate?: string;
-    status?: 'taken' | 'missed' | 'all';
+    doseStatus?: 'taken' | 'missed' | 'all';
     page?: number;
     limit?: number;
 }
 
 export interface PendingConfirmationResponse {
     message: string;
-    medication: Medication & {
-        pendingConfirmation: boolean;
-        pendingUntil: string;
-    };
+    medication: Medication;
 }
 
 export interface ConfirmDoseResponse {
@@ -91,8 +85,8 @@ const medicationService = {
 
             if (filters?.startDate) params.startDate = filters.startDate;
             if (filters?.endDate) params.endDate = filters.endDate;
-            if (filters?.status && filters.status !== 'all')
-                params.status = filters.status;
+            if (filters?.doseStatus && filters.doseStatus !== 'all')
+                params.doseStatus = filters.doseStatus;
             if (filters?.page) params.page = filters.page.toString();
             if (filters?.limit) params.limit = filters.limit.toString();
 

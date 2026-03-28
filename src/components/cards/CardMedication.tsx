@@ -10,6 +10,8 @@ import {
     Repeat,
     X,
     Timer,
+    CheckCircle2,
+    InfoIcon,
 } from 'lucide-react';
 import { Medication } from '@/interfaces/medication';
 import medicationService from '@/services/domains/medicationService';
@@ -41,31 +43,40 @@ export default function CardMedication({
     const interval = medicationData?.doseinterval?.intervalinhours || 0;
     const label = interval === 1 ? 'hora' : 'horas';
 
+    const isMedicationFinished = !medicationData?.hournextdose;
+
     useEffect(() => {
         setMedicationData(initialMedicationData);
     }, [initialMedicationData]);
 
     useEffect(() => {
-        if (!medicationData?.hournextdose) return;
+        const hournextdose = medicationData?.hournextdose;
+
+        if (!hournextdose) return;
 
         const updateCountdown = () => {
-            const [hours, minutes] = medicationData.hournextdose
-                .split(':')
-                .map(Number);
+            const [hours, minutes] = hournextdose.split(':').map(Number);
             let nextDose = new Date();
             nextDose.setHours(hours, minutes, 0, 0);
 
-            if (nextDose < new Date()) {
+            const now = new Date();
+
+            if (nextDose < now) {
                 const intervalHours =
                     medicationData?.doseinterval?.intervalinhours || 0;
-                nextDose.setHours(nextDose.getHours() + intervalHours);
+                // Se o horário já passou hoje, adiciona o intervalo
+                if (intervalHours > 0) {
+                    nextDose = new Date(
+                        nextDose.getTime() + intervalHours * 60 * 60 * 1000,
+                    );
+                }
             }
 
             const diffInSeconds = Math.floor(
-                (nextDose.getTime() - Date.now()) / 1000,
+                (nextDose.getTime() - now.getTime()) / 1000,
             );
 
-            if (diffInSeconds < 0) {
+            if (diffInSeconds <= 0) {
                 setNextDoseCountdown('00:00:00');
                 return;
             }
@@ -83,6 +94,7 @@ export default function CardMedication({
 
         updateCountdown();
         const intervalId = setInterval(updateCountdown, 1000);
+
         return () => clearInterval(intervalId);
     }, [
         medicationData?.hournextdose,
@@ -90,15 +102,18 @@ export default function CardMedication({
     ]);
 
     useEffect(() => {
-        if (!medicationData.status || !medicationData.pendingUntil) {
+        if (
+            !medicationData.pendingconfirmation ||
+            !medicationData.pendinguntil
+        ) {
             setConfirmationTimer(null);
             return;
         }
 
         const updateConfirmationTimer = () => {
-            const pendingUntil = new Date(medicationData.pendingUntil!);
+            const pendinguntil = new Date(medicationData.pendinguntil!);
             const diffInSeconds = Math.floor(
-                (pendingUntil.getTime() - Date.now()) / 1000,
+                (pendinguntil.getTime() - Date.now()) / 1000,
             );
 
             if (diffInSeconds <= 0) {
@@ -116,7 +131,7 @@ export default function CardMedication({
         updateConfirmationTimer();
         const intervalId = setInterval(updateConfirmationTimer, 1000);
         return () => clearInterval(intervalId);
-    }, [medicationData.status, medicationData.pendingUntil]);
+    }, [medicationData.pendingconfirmation, medicationData.pendinguntil]);
 
     const handleMarkAsTaken = async () => {
         if (isLoading) return;
@@ -130,9 +145,8 @@ export default function CardMedication({
 
             setMedicationData((prev) => ({
                 ...prev,
-                status: response.medication.status,
-                pendingConfirmation: response.medication.pendingConfirmation,
-                pendingUntil: response.medication.pendingUntil,
+                pendingconfirmation: response.medication.pendingconfirmation,
+                pendinguntil: response.medication.pendinguntil,
                 hournextdose: response.medication.hournextdose,
             }));
 
@@ -155,9 +169,8 @@ export default function CardMedication({
             );
             setMedicationData((prev) => ({
                 ...prev,
-                status: false,
-                pendingConfirmation: false,
-                pendingUntil: null,
+                pendingconfirmation: false,
+                pendinguntil: null,
                 hournextdose: response.medication.hournextdose,
             }));
             setShowConfirmation(false);
@@ -176,9 +189,8 @@ export default function CardMedication({
             );
             setMedicationData((prev) => ({
                 ...prev,
-                status: response.medication.status,
-                pendingConfirmation: false,
-                pendingUntil: null,
+                pendingconfirmation: false,
+                pendinguntil: null,
                 hournextdose: response.medication.hournextdose,
             }));
             setShowConfirmation(false);
@@ -194,13 +206,13 @@ export default function CardMedication({
 
         if (lastTap.current && now - lastTap.current < DOUBLE_PRESS_DELAY) {
             timeoutRef.current && clearTimeout(timeoutRef.current);
-            setShowConfirmation(true);
+            if (!isMedicationFinished) {
+                setShowConfirmation(true);
+            }
         } else {
             lastTap.current = now;
             timeoutRef.current = setTimeout(() => {
-                if (!medicationData.status) {
-                    setIsUpdateModalVisible(true);
-                }
+                setIsUpdateModalVisible(true);
             }, DOUBLE_PRESS_DELAY);
         }
     };
@@ -209,38 +221,34 @@ export default function CardMedication({
         const baseStyles =
             'bg-white rounded-lg shadow-md p-4 border-2 hover:shadow-lg transition-all cursor-pointer relative';
 
+        if (isMedicationFinished) {
+            return `${baseStyles} ring-2 ring-gray-400 border-gray-300`;
+        }
+
         if (showConfirmation) {
             return `${baseStyles} ring-2 ring-yellow-400 border-yellow-300`;
         }
 
-        if (medicationData.status) {
+        if (medicationData.pendingconfirmation) {
             return `${baseStyles} border-green-500 bg-green-50`;
-        }
-
-        if (nextDoseCountdown === '00:00:00') {
-            return `${baseStyles} border-red-300 bg-red-50`;
         }
 
         return `${baseStyles} border-gray-200 hover:border-blue-300`;
     };
 
-    const getStatusIcon = () => {
-        if (medicationData.status) {
-            return <Check className="w-5 h-5 text-green-600 mr-2" />;
+    const getDoseStatusIcon = () => {
+        if (isMedicationFinished) {
+            return <CheckCircle2 className="w-5 h-5 text-green-600 mr-2" />;
         }
 
-        if (nextDoseCountdown === '00:00:00') {
-            return <AlertCircle className="w-5 h-5 text-red-500 mr-2" />;
+        if (medicationData.pendingconfirmation) {
+            return <Check className="w-5 h-5 text-green-600 mr-2" />;
         }
 
         return <AlertCircle className="w-5 h-5 text-orange-500 mr-2" />;
     };
 
     const getCountdownColor = () => {
-        if (nextDoseCountdown === '00:00:00') {
-            return 'text-red-600 font-semibold';
-        }
-
         const [hours] = nextDoseCountdown.split(':').map(Number);
         if (hours < 1) {
             return 'text-orange-600';
@@ -266,22 +274,22 @@ export default function CardMedication({
                     </div>
                 )}
 
-                {showConfirmation && (
+                {showConfirmation && !isMedicationFinished && (
                     <div className="absolute inset-0 bg-yellow-100 bg-opacity-90 rounded-lg flex flex-col items-center justify-center z-10 p-4">
                         <div className="text-center">
                             <AlertCircle className="w-10 h-10 text-yellow-600 mx-auto mb-2" />
                             <h3 className="font-semibold text-yellow-800 mb-2">
-                                {medicationData.status
+                                {medicationData.pendingconfirmation
                                     ? 'Cancelar dose?'
                                     : 'Confirmar ação'}
                             </h3>
                             <p className=" text-sm text-yellow-700 mb-4">
-                                {medicationData.status
+                                {medicationData.pendingconfirmation
                                     ? 'Deseja marcar como NÃO TOMADO?'
                                     : 'Deseja marcar como TOMADO?'}
                             </p>
                             <div className="flex gap-3 justify-center">
-                                {medicationData.status ? (
+                                {medicationData.pendingconfirmation ? (
                                     <>
                                         <button
                                             title="Cancelar dose"
@@ -347,32 +355,56 @@ export default function CardMedication({
 
                 <div className="h-full flex items-start justify-between">
                     <div className="h-full flex flex-col justify-between">
-                        <div className="flex items-center mb-3">
-                            {getStatusIcon()}
-                            <Pill className="w-4 h-4 text-gray-500 mr-2" />
-                            <h3 className="font-semibold text-gray-900 text-lg">
-                                {Formatters.formatName(medicationData.name)}
-                            </h3>
-                        </div>
+                        {isMedicationFinished ? (
+                            <div className="flex items-center mb-3">
+                                <InfoIcon className="w-6 h-6 text-green-600 mr-2" />
+                                <span className="text-gray-600">
+                                    <strong>Status:</strong> Medicamento
+                                    finalizado
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center mb-3">
+                                {getDoseStatusIcon()}
+                                <Pill className="w-4 h-4 text-gray-500 mr-2" />
+                                <h3 className="font-semibold text-gray-900 text-lg">
+                                    {Formatters.formatName(medicationData.name)}
+                                </h3>
+                            </div>
+                        )}
 
                         <div className="h-full space-y-2 ml-5">
-                            <div className="flex items-center text-sm">
-                                <Clock className="w-4 h-4 text-gray-500 mr-2" />
-                                <span className="text-gray-600">
-                                    <strong>Próxima dose:</strong>{' '}
-                                    {medicationData.hournextdose}
-                                </span>
-                            </div>
+                            {isMedicationFinished ? (
+                                <div className="flex items-center text-sm">
+                                    <Pill className="w-4 h-4 text-gray-500 mr-2" />
+                                    <h3 className="text-gray-600">
+                                        <strong>Nome:</strong>{' '}
+                                        {Formatters.formatName(
+                                            medicationData.name,
+                                        )}
+                                    </h3>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="flex items-center text-sm">
+                                        <Clock className="w-4 h-4 text-gray-500 mr-2" />
+                                        <span className="text-gray-600">
+                                            <strong>Próxima dose:</strong>{' '}
+                                            {medicationData.hournextdose}
+                                        </span>
+                                    </div>
 
-                            <div className="flex items-center text-sm">
-                                <Clock className="w-4 h-4 text-gray-500 mr-2" />
-                                <span
-                                    className={`text-sm font-medium ${getCountdownColor()}`}
-                                >
-                                    <strong>Próxima dose em:</strong>{' '}
-                                    {nextDoseCountdown}
-                                </span>
-                            </div>
+                                    <div className="flex items-center text-sm">
+                                        <Clock className="w-4 h-4 text-gray-500 mr-2" />
+                                        <span
+                                            className={`text-sm font-medium ${getCountdownColor()}`}
+                                        >
+                                            <strong>Próxima dose em:</strong>{' '}
+                                            {nextDoseCountdown}
+                                        </span>
+                                    </div>
+                                </>
+                            )}
 
                             <div className="flex items-center text-sm">
                                 <Repeat className="w-4 h-4 text-gray-500 mr-2" />
@@ -381,6 +413,7 @@ export default function CardMedication({
                                     {label}
                                 </span>
                             </div>
+
                             {medicationData.periodstart && (
                                 <div className="flex items-center text-sm">
                                     <Calendar className="w-4 h-4 text-gray-500 mr-2" />
@@ -394,32 +427,40 @@ export default function CardMedication({
                                 </div>
                             )}
 
-                            {/* ✅ AVISO DOS 3 MINUTOS - ADICIONADO AQUI! */}
-                            {medicationData.status && confirmationTimer && (
-                                <div className="flex items-center text-sm mt-2 bg-blue-50 p-2 rounded-lg">
-                                    <Timer className="w-4 h-4 text-blue-600 mr-2" />
-                                    <span className="text-blue-700 font-medium">
-                                        <strong>Confirmar em:</strong>{' '}
-                                        {confirmationTimer}
-                                    </span>
-                                    <button
-                                        title="Cancelar confirmação de dose"
-                                        aria-label="Cancelar confirmação de dose"
-                                        type="button"
-                                        onClick={handleCancelConfirmation}
-                                        className="ml-2 text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors"
-                                    >
-                                        Cancelar
-                                    </button>
-                                </div>
-                            )}
+                            {medicationData.pendingconfirmation &&
+                                confirmationTimer &&
+                                !isMedicationFinished && (
+                                    <div className="flex items-center text-sm mt-2 bg-blue-50 p-2 rounded-lg">
+                                        <Timer className="w-4 h-4 text-blue-600 mr-2" />
+                                        <span className="text-blue-700 font-medium">
+                                            <strong>Confirmar em:</strong>{' '}
+                                            {confirmationTimer}
+                                        </span>
+                                        <button
+                                            title="Cancelar confirmação de dose"
+                                            aria-label="Cancelar confirmação de dose"
+                                            type="button"
+                                            onClick={handleCancelConfirmation}
+                                            className="ml-2 text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors"
+                                        >
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                )}
                         </div>
 
-                        <div className="mt-3 text-xs text-gray-400">
-                            {medicationData.status
-                                ? 'Clique para editar • Duplo clique para marcar como não tomado'
-                                : 'Clique para editar • Duplo clique para marcar como tomado'}
-                        </div>
+                        {isMedicationFinished ? (
+                            <div className="mt-3 text-xs text-gray-400">
+                                Clique para editar e para abrir o histórico de
+                                doses
+                            </div>
+                        ) : (
+                            <div className="mt-3 text-xs text-gray-400">
+                                {medicationData.pendingconfirmation
+                                    ? 'Clique para editar • Duplo clique para marcar como não tomado'
+                                    : 'Clique para editar • Duplo clique para marcar como tomado'}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

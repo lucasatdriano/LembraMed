@@ -22,6 +22,7 @@ export default function ContactScreen() {
     const fetchContacts = useCallback(
         async (search: string = '', page: number = 1) => {
             setLoading(true);
+
             try {
                 const response: ContactsResponse =
                     await contactService.searchContacts(search, page, 12);

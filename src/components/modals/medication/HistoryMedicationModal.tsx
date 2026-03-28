@@ -24,7 +24,7 @@ export default function MedicationHistoryModal({
     const [history, setHistory] = useState<MedicationHistory[]>([]);
     const [loading, setLoading] = useState(true);
     const [dateFilter, setDateFilter] = useState<string>('all');
-    const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [doseStatusFilter, setDoseStatusFilter] = useState<string>('all');
     const [pagination, setPagination] = useState({
         currentPage: 1,
         totalPages: 1,
@@ -41,7 +41,10 @@ export default function MedicationHistoryModal({
             const response = await medicationService.getMedicationHistory(
                 medicationData.id,
                 {
-                    status: statusFilter !== 'all' ? statusFilter : undefined,
+                    doseStatus:
+                        doseStatusFilter !== 'all'
+                            ? doseStatusFilter
+                            : undefined,
                     page: filters.page || pagination.currentPage,
                     limit: 20,
                     ...filters,
@@ -86,10 +89,10 @@ export default function MedicationHistoryModal({
         fetchMedicationHistory({ startDate, page: 1 });
     };
 
-    const handleStatusFilterChange = (filter: string) => {
-        setStatusFilter(filter);
+    const handleDoseStatusFilterChange = (filter: string) => {
+        setDoseStatusFilter(filter);
         fetchMedicationHistory({
-            status: filter !== 'all' ? filter : undefined,
+            doseStatus: filter !== 'all' ? filter : undefined,
             page: 1,
         });
     };
@@ -104,7 +107,7 @@ export default function MedicationHistoryModal({
         }
     }, [visible, medicationData]);
 
-    const getStatusIcon = (taken: boolean) => {
+    const getDoseStatusIcon = (taken: boolean) => {
         return taken ? (
             <Check className="w-5 h-5 text-green-600" />
         ) : (
@@ -112,11 +115,11 @@ export default function MedicationHistoryModal({
         );
     };
 
-    const getStatusText = (taken: boolean) => {
+    const getDoseStatusText = (taken: boolean) => {
         return taken ? 'Tomado' : 'Não tomado';
     };
 
-    const getStatusColor = (taken: boolean) => {
+    const getDoseStatusColor = (taken: boolean) => {
         return taken
             ? 'text-green-800 bg-green-100 border-green-200'
             : 'text-red-800 bg-red-100 border-red-200';
@@ -124,7 +127,7 @@ export default function MedicationHistoryModal({
 
     const handleClose = () => {
         setDateFilter('all');
-        setStatusFilter('all');
+        setDoseStatusFilter('all');
         setPagination({
             currentPage: 1,
             totalPages: 1,
@@ -255,16 +258,15 @@ export default function MedicationHistoryModal({
                                             />
                                         </div>
 
-                                        {/* Substitua o select de status */}
                                         <div className="flex-1">
                                             <InputDropdownField
                                                 placeholder="Selecione o status"
                                                 icon={
                                                     <Filter className="w-5 h-5" />
                                                 }
-                                                value={statusFilter}
+                                                value={doseStatusFilter}
                                                 onChange={(newValue) =>
-                                                    handleStatusFilterChange(
+                                                    handleDoseStatusFilterChange(
                                                         newValue as string,
                                                     )
                                                 }
@@ -309,7 +311,7 @@ export default function MedicationHistoryModal({
                                                     className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
                                                 >
                                                     <div className="flex items-center space-x-4">
-                                                        {getStatusIcon(
+                                                        {getDoseStatusIcon(
                                                             record.taken,
                                                         )}
                                                         <div>
@@ -319,11 +321,11 @@ export default function MedicationHistoryModal({
                                                                 )}{' '}
                                                             </p>
                                                             <p
-                                                                className={`text-sm px-2 py-1 rounded-full border ${getStatusColor(
+                                                                className={`text-sm px-2 py-1 rounded-full border ${getDoseStatusColor(
                                                                     record.taken,
                                                                 )}`}
                                                             >
-                                                                {getStatusText(
+                                                                {getDoseStatusText(
                                                                     record.taken,
                                                                 )}
                                                             </p>
