@@ -1,9 +1,7 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { Phone, User, Trash2 } from 'lucide-react';
-import { parseCookies } from 'nookies';
-import contactService from '@/services/domains/contactService';
+import React, { useState } from 'react';
+import { Phone, User } from 'lucide-react';
 import Masks from '@/utils/masks';
 import UpdateContactModal from '../modals/contact/UpdateContactModal';
 import { Contact } from '@/interfaces/contact';
@@ -26,7 +24,7 @@ export default function CardContact({
         e.stopPropagation();
         if (contactData?.numberphone) {
             const cleanNumber = contactData.numberphone.replace(/\D/g, '');
-            window.open(`tel:${cleanNumber}`, '_self');
+            window.open(`tel:+55${cleanNumber}`, '_self');
         } else {
             console.error('Número de telefone não disponível.');
         }
