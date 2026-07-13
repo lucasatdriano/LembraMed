@@ -127,7 +127,7 @@ export const setupResponseInterceptor = (api: AxiosInstance) => {
                         originalRequest.headers['Authorization'] =
                             `Bearer ${tokens.accessToken}`;
 
-                        console.log(
+                        console.info(
                             '✅ [Interceptor] Token renovado com sucesso, reenviando requisição...',
                         );
                         console.groupEnd();
@@ -168,7 +168,7 @@ export const setupResponseInterceptor = (api: AxiosInstance) => {
                 if (error.response.status === 401) {
                     const cookies = parseCookies();
                     if (cookies.accessToken) {
-                        console.log(
+                        console.info(
                             'Token inválido, redirecionando para login...',
                         );
                         authService.logout();

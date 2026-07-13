@@ -79,7 +79,7 @@ const authService: AuthService = {
                 throw new Error('Resposta inválida do servidor');
             }
 
-            console.log('✅ [AuthService] Tokens renovados com sucesso:', {
+            console.info('✅ [AuthService] Tokens renovados com sucesso:', {
                 access: response.data.accessToken?.slice(0, 10) + '...',
                 refresh: response.data.refreshToken?.slice(0, 10) + '...',
             });
@@ -170,7 +170,7 @@ const authService: AuthService = {
                 sessionStorage.clear();
             }
 
-            console.log('✅ [AuthService] Logout realizado com sucesso');
+            console.info('✅ [AuthService] Logout realizado com sucesso');
         } catch (error) {
             console.error('❌ [AuthService] Erro durante logout:', error);
         }

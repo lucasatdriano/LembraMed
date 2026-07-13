@@ -1,4 +1,15 @@
+import {
+    extractHourMinuteFromTimestamp,
+    extractTimeFromTimestamp,
+    formatTimestamp,
+    parseTimestamp,
+} from '../helpers/timestamp.helper';
+
 const Formatters = {
+    extractTime: extractTimeFromTimestamp,
+    extractHourMinute: extractHourMinuteFromTimestamp,
+    formatTimestamp: formatTimestamp,
+    parseTimestamp: parseTimestamp,
     splitPeriod: (period: string) => {
         if (
             !period ||
@@ -77,38 +88,23 @@ const Formatters = {
     formatDateTime: (date: Date | string | null) => {
         if (!date) return '';
 
-        if (
-            typeof date === 'string' &&
-            date.includes('T') &&
-            date.includes('Z')
-        ) {
-            const [datePart, timePart] = date.split('T');
-            const [year, month, day] = datePart.split('-');
-            const [hours, minutes] = timePart.split(':');
-
-            return `${day}/${month}/${year} ${hours}:${minutes}`;
+        if (typeof date === 'string' && date.includes('T')) {
+            return formatTimestamp(date);
         }
 
-        if (typeof date === 'string') {
-            const dateObj = new Date(date);
-            return `${dateObj.getDate().toString().padStart(2, '0')}/${(
-                dateObj.getMonth() + 1
-            )
-                .toString()
-                .padStart(2, '0')}/${dateObj.getFullYear()} ${dateObj
-                .getHours()
-                .toString()
-                .padStart(2, '0')}:${dateObj
-                .getMinutes()
-                .toString()
-                .padStart(2, '0')}`;
+        if (typeof date === 'string' && date.includes('-')) {
+            const [year, month, day] = date.split('-');
+            return `${day}/${month}/${year}`;
         }
 
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const day = date.getDate().toString().padStart(2, '0');
-        const hours = date.getHours().toString().padStart(2, '0');
-        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const dateObj = typeof date === 'string' ? new Date(date) : date;
+        if (isNaN(dateObj.getTime())) return '';
+
+        const year = dateObj.getFullYear();
+        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+        const day = dateObj.getDate().toString().padStart(2, '0');
+        const hours = dateObj.getHours().toString().padStart(2, '0');
+        const minutes = dateObj.getMinutes().toString().padStart(2, '0');
 
         return `${day}/${month}/${year} ${hours}:${minutes}`;
     },

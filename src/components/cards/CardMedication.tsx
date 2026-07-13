@@ -16,6 +16,7 @@ import {
 import { Medication } from '@/interfaces/medication';
 import medicationService from '@/services/domains/medicationService';
 import Formatters from '@/utils/formatters';
+import { formatSecondsToTime } from '@/utils/helpers/timestamp.helper';
 import UpdateMedicationModal from '../modals/medication/UpdateMedicationModal';
 
 interface CardMedicationProps {
@@ -55,19 +56,21 @@ export default function CardMedication({
         if (!hournextdose) return;
 
         const updateCountdown = () => {
-            const [hours, minutes] = hournextdose.split(':').map(Number);
-            let nextDose = new Date();
-            nextDose.setHours(hours, minutes, 0, 0);
+            let nextDose = Formatters.parseTimestamp(hournextdose);
+            if (!nextDose) return;
 
             const now = new Date();
 
             if (nextDose < now) {
                 const intervalHours =
                     medicationData?.doseinterval?.intervalinhours || 0;
-                // Se o horário já passou hoje, adiciona o intervalo
+
                 if (intervalHours > 0) {
+                    let diffMs = now.getTime() - nextDose.getTime();
+                    const intervalMs = intervalHours * 60 * 60 * 1000;
+                    const cyclesToAdd = Math.ceil(diffMs / intervalMs);
                     nextDose = new Date(
-                        nextDose.getTime() + intervalHours * 60 * 60 * 1000,
+                        nextDose.getTime() + cyclesToAdd * intervalMs,
                     );
                 }
             }
@@ -81,15 +84,7 @@ export default function CardMedication({
                 return;
             }
 
-            const hoursLeft = Math.floor(diffInSeconds / 3600);
-            const minutesLeft = Math.floor((diffInSeconds % 3600) / 60);
-            const secondsLeft = diffInSeconds % 60;
-
-            setNextDoseCountdown(
-                `${String(hoursLeft).padStart(2, '0')}:${String(
-                    minutesLeft,
-                ).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`,
-            );
+            setNextDoseCountdown(formatSecondsToTime(diffInSeconds));
         };
 
         updateCountdown();
@@ -111,9 +106,18 @@ export default function CardMedication({
         }
 
         const updateConfirmationTimer = () => {
-            const pendinguntil = new Date(medicationData.pendinguntil!);
+            const pendingDate =
+                typeof medicationData.pendinguntil === 'string'
+                    ? new Date(medicationData.pendinguntil)
+                    : medicationData.pendinguntil;
+
+            if (!pendingDate || isNaN(pendingDate.getTime())) {
+                setConfirmationTimer(null);
+                return;
+            }
+
             const diffInSeconds = Math.floor(
-                (pendinguntil.getTime() - Date.now()) / 1000,
+                (pendingDate.getTime() - Date.now()) / 1000,
             );
 
             if (diffInSeconds <= 0) {
@@ -217,6 +221,21 @@ export default function CardMedication({
         }
     };
 
+    const canTakeMedication = (() => {
+        if (
+            isMedicationFinished ||
+            medicationData.pendingconfirmation ||
+            !medicationData.hournextdose
+        ) {
+            return false;
+        }
+
+        const nextDose = Formatters.parseTimestamp(medicationData.hournextdose);
+        if (!nextDose) return false;
+
+        return new Date() >= nextDose;
+    })();
+
     const getCardStyles = () => {
         const baseStyles =
             'bg-white rounded-lg shadow-md p-4 border-2 hover:shadow-lg transition-all cursor-pointer relative';
@@ -243,6 +262,10 @@ export default function CardMedication({
 
         if (medicationData.pendingconfirmation) {
             return <Check className="w-5 h-5 text-green-600 mr-2" />;
+        }
+
+        if (!canTakeMedication) {
+            return <InfoIcon className="w-5 h-5 text-blue-500 mr-2" />;
         }
 
         return <AlertCircle className="w-5 h-5 text-orange-500 mr-2" />;
@@ -390,7 +413,9 @@ export default function CardMedication({
                                         <Clock className="w-4 h-4 text-gray-500 mr-2" />
                                         <span className="text-gray-600">
                                             <strong>Próxima dose:</strong>{' '}
-                                            {medicationData.hournextdose}
+                                            {Formatters.extractTime(
+                                                medicationData.hournextdose,
+                                            )}
                                         </span>
                                     </div>
 

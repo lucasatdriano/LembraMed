@@ -18,7 +18,6 @@ export default function CardContact({
 }: CardContactProps) {
     const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [isFetching, setIsFetching] = useState(true);
 
     const handleCall = (e: React.MouseEvent) => {
         e.stopPropagation();
