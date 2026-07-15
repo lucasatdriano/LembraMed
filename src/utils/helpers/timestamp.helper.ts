@@ -54,7 +54,11 @@ export const formatTimestamp = (timestamp: string | null): string => {
 
 export const parseTimestamp = (timestamp: string | null): Date | null => {
     if (!timestamp) return null;
-    const date = new Date(timestamp);
+
+    const localTimestamp = timestamp.replace('Z', '');
+
+    const date = new Date(localTimestamp);
+
     return isNaN(date.getTime()) ? null : date;
 };
 

@@ -4,9 +4,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Medication, MedicationsResponse } from '@/interfaces/medication';
 import FloatingActionButton from '@/components/layouts/FabButton';
 import medicationService from '@/services/domains/medicationService';
-import CardMedication from '@/components/cards/CardMedication';
 import { useSearch } from '@/contexts/SearchContext';
 import Pagination from '@/components/layouts/Pagination';
+import CardMedication from '@/components/cards/cardMedication/CardMedication';
 
 export default function MedicationScheduleScreen() {
     const [medications, setMedications] = useState<Medication[]>([]);
