@@ -278,6 +278,7 @@ export default function UpdateMedicationModal({
                         </Transition.Child>
                     </div>
                 </div>
+
                 <MedicationHistoryModal
                     visible={isHistoryModalVisible}
                     onClose={() => setIsHistoryModalVisible(false)}

@@ -60,8 +60,8 @@ export default function ContactScreen() {
         return (
             <div className="min-h-full bg-gray-50">
                 <div className="mx-auto lg:px-8">
-                    <div className="mb-8">
-                        <h1 className="text-2xl mb-4 font-bold text-gray-900 text-center">
+                    <div className="mb-4">
+                        <h1 className="text-2xl mb-2 font-bold text-gray-900 text-center">
                             Lista de Contatos
                         </h1>
                         <div className="h-px w-full bg-gray-300" />
@@ -91,8 +91,8 @@ export default function ContactScreen() {
     return (
         <div className="min-h-full bg-gray-50">
             <div className="mx-auto lg:px-8">
-                <div className="mb-8">
-                    <h1 className="text-2xl mb-4 font-bold text-gray-900 text-center">
+                <div className="mb-4">
+                    <h1 className="text-2xl mb-2 font-bold text-gray-900 text-center">
                         Lista de Contatos
                     </h1>
                     <div className="h-px w-full bg-gray-300" />

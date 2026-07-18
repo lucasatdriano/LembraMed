@@ -315,8 +315,14 @@ export default function MedicationHistoryModal({
                                                             record.taken,
                                                         )}
                                                         <div>
-                                                            <p className="font-medium text-gray-900">
+                                                            <p className="font-medium text-gray-600">
                                                                 {Formatters.formatDateTime(
+                                                                    record.scheduleddate,
+                                                                )}{' '}
+                                                            </p>
+                                                            <p className="font-medium text-gray-900">
+                                                                Dose tomada às:{' '}
+                                                                {Formatters.extractHourMinute(
                                                                     record.takendate,
                                                                 )}{' '}
                                                             </p>

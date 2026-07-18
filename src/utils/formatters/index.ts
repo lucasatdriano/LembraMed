@@ -117,9 +117,25 @@ const Formatters = {
     formatName: (name: string) => {
         if (!name || name.trim() === '') return '';
 
-        return name
-            .split(' ')
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        const words = name.split(' ');
+
+        return words
+            .map((word, index) => {
+                if (word.length <= 2) {
+                    return word.toLowerCase();
+                }
+
+                if (index === 0) {
+                    return (
+                        word.charAt(0).toUpperCase() +
+                        word.slice(1).toLowerCase()
+                    );
+                }
+
+                return (
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                );
+            })
             .join(' ');
     },
 };

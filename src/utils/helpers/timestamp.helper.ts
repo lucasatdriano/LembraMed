@@ -8,10 +8,16 @@ export const extractTimeFromTimestamp = (timestamp: string | null): string => {
 
     const date = new Date(timestamp);
     if (isNaN(date.getTime())) return '--:--:--';
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    return `${hours}:${minutes}:${seconds}`;
+
+    const formatter = new Intl.DateTimeFormat('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+        timeZone: 'America/Sao_Paulo',
+    });
+
+    return formatter.format(date);
 };
 
 export const extractHourMinuteFromTimestamp = (
@@ -19,16 +25,17 @@ export const extractHourMinuteFromTimestamp = (
 ): string => {
     if (!timestamp) return '--:--';
 
-    const timeMatch = timestamp.match(/(\d{2}):(\d{2}):(\d{2})/);
-    if (timeMatch) {
-        return `${timeMatch[1]}:${timeMatch[2]}`;
-    }
-
     const date = new Date(timestamp);
     if (isNaN(date.getTime())) return '--:--';
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${hours}:${minutes}`;
+
+    const formatter = new Intl.DateTimeFormat('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'America/Sao_Paulo',
+    });
+
+    return formatter.format(date);
 };
 
 export const formatTimestamp = (timestamp: string | null): string => {

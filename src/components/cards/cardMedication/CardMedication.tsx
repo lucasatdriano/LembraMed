@@ -40,7 +40,6 @@ export default function CardMedication({
 
     const intervalHours = medicationData.doseinterval?.intervalinhours ?? 0;
 
-    // Usando a função importada
     const isMedicationFinishedFlag = isMedicationFinished(medicationData);
 
     useEffect(() => {
