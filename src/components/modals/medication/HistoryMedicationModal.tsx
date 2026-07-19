@@ -321,10 +321,22 @@ export default function MedicationHistoryModal({
                                                                 )}{' '}
                                                             </p>
                                                             <p className="font-medium text-gray-900">
-                                                                Dose tomada às:{' '}
-                                                                {Formatters.extractHourMinute(
-                                                                    record.takendate,
-                                                                )}{' '}
+                                                                {record.takendate ? (
+                                                                    <>
+                                                                        Dose
+                                                                        tomada
+                                                                        às:{' '}
+                                                                        {Formatters.extractHourMinute(
+                                                                            record.takendate,
+                                                                        )}
+                                                                    </>
+                                                                ) : (
+                                                                    <span className="text-red-600">
+                                                                        Dose não
+                                                                        foi
+                                                                        tomada
+                                                                    </span>
+                                                                )}
                                                             </p>
                                                             <p
                                                                 className={`text-sm px-2 py-1 rounded-full border ${getDoseStatusColor(

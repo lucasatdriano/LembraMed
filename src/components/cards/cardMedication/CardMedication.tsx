@@ -196,8 +196,13 @@ export default function CardMedication({
 
         if (lastTap.current && now - lastTap.current < DOUBLE_PRESS_DELAY) {
             timeoutRef.current && clearTimeout(timeoutRef.current);
-            if (!isMedicationFinishedFlag) {
+
+            if (medicationData.pendingconfirmation) {
                 setShowConfirmation(true);
+            } else if (!isMedicationFinishedFlag && canTakeMedicationFlag) {
+                setShowConfirmation(true);
+            } else {
+                setIsUpdateModalVisible(true);
             }
         } else {
             lastTap.current = now;
